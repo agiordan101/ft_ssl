@@ -4,7 +4,7 @@
 # include <stdio.h>
 # include <fcntl.h>
 
-# define BUFF_SIZE 420
+# define BUFF_SIZE 42
 
 typedef enum flags {
     P=1, Q=2, R=4, S=8
@@ -17,14 +17,6 @@ typedef struct  s_tohash
     size_t          len;        // Length of content
     struct s_tohash *next;
 }               t_tohash;
-
-// typedef struct  s_flags
-// {
-//     char        p;
-//     char        q;
-//     char        r;
-//     char        s;
-// };
 
 typedef struct  s_ssl
 {
@@ -41,10 +33,11 @@ void    md5();
 void    sha256();
 
 int     ft_atoi(const char *str);
+char	*ft_strnew(char *src);
 int     ft_strcmp(const char *s1, const char *s2);
 void	ft_putstr(char *s);
 int		ft_strlen(char *p);
+void	*ft_memcpy(void *dest, const void *src, size_t n);
 // float   ft_abs(float x);
-// void	*ft_memcpy(void *dest, const void *src, size_t n);
 
 void    print_usage();

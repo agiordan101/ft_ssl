@@ -47,6 +47,18 @@ void	*ft_memcpy(void *dest, const void *src, size_t n)
 	return (castdest);
 }
 
+char	*ft_strnew(char *src)
+{
+	char	*str;
+	int 	len = ft_strlen(src);
+	int 	i;
+
+	if (!(str = (char *)malloc(sizeof(char) * (len + 1))))
+		return (NULL);
+	ft_memcpy(str, src, len);
+	return (str);
+}
+
 int     ft_strcmp(const char *s1, const char *s2)
 {
 	while (*s1 == *s2 && *s1 && *s2)
