@@ -14,6 +14,7 @@ SRC			=	$(NAME).c \
 				md5.c \
 				sha256.c \
 				libft.c \
+				output.c \
 				verbose.c
 
 BIN_PATH	=	./bins/

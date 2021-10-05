@@ -20,19 +20,17 @@ int main(int ac, char **av)
         return ret;
     }
 
-    printf("\n\tMAIN\nflags: %d\n", ssl.flags);
+    // printf("flags: %d\n----------------------------------\n", ssl.flags);
 
     int i = 0;
     t_hash *hash = ssl.hash;
     while (hash)
     {
-        printf("\ntype: %s\n", hash->type);
-        // printf("hash: blablabla\n");
-        printf("hash:\n>%s<\n", hash->msg);
+        ssl.hash_func_addr(hash);
+        print_hash(hash);
         i++;
         hash = hash->next;
     }
-    printf("%d messages to hash\n", i);
-
+    // Free
     return 0;
 }
