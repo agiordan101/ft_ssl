@@ -16,7 +16,7 @@ int main(int ac, char **av)
     if ((ret = parsing(ac, av)))
     {
         // Free
-        ft_putstr("Parsing failed. EXIT\n");
+        // ft_putstr("Parsing failed. EXIT\n");
         return ret;
     }
 

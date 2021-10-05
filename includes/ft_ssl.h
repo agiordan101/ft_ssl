@@ -34,8 +34,8 @@ extern t_ssl    ssl;
 
 int     parsing(int ac, char **av);
 
+void    sha256(t_hash *hash);
 void    md5(t_hash *hash);
-void    sha256();
 
 // int     ft_atoi(const char *str);
 char	*ft_strnew(char *src);

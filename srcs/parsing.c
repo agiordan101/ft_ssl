@@ -137,9 +137,9 @@ int     hash_func_handler(char *str)
     }
     else
     {
-        ft_putstr("ft_ssl: Error: ");
+        ft_putstr("ft_ssl: Error: '");
         ft_putstr(str);
-        ft_putstr(" is an invalid command.\n\n");
+        ft_putstr("' is an invalid command.\n\n");
         return EXIT_FAILURE;
     }
     return 0;
