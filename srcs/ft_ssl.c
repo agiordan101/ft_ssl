@@ -3,8 +3,6 @@
 t_ssl    ssl;
 
 /*
-    changer l'ordre de la liste chaine
-
     Ne pas reverse le stdin avec -r
     MD5 au debut sauf en reverse ou stdin
     -p -q -r alors print STDIN + \n + hash pour la premiere ligne
@@ -25,14 +23,14 @@ int main(int ac, char **av)
     printf("\n\tMAIN\nflags: %d\n", ssl.flags);
 
     int i = 0;
-    t_tohash *tohash = ssl.tohash;
-    while (tohash)
+    t_hash *hash = ssl.hash;
+    while (hash)
     {
-        printf("\ntype: %s\n", tohash->type);
-        // printf("tohash: blablabla\n");
-        printf("tohash:\n>%s<\n", tohash->msg);
+        printf("\ntype: %s\n", hash->type);
+        // printf("hash: blablabla\n");
+        printf("hash:\n>%s<\n", hash->msg);
         i++;
-        tohash = tohash->next;
+        hash = hash->next;
     }
     printf("%d messages to hash\n", i);
 

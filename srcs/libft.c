@@ -88,6 +88,18 @@ int		ft_strlen(char *p)
     return 0;
 }
 
+char    *ft_stradd_quote(char *str, int len)
+{
+    char *newstr;
+
+    if (!(newstr = (char *)malloc(sizeof(char) * (len + 3))))
+        return NULL;
+    newstr[0] = '\"';
+    ft_memcpy(newstr + 1, str, len);
+    ft_memcpy(newstr + len + 1, "\"\0", 2);
+    return newstr;
+}
+
 void	ft_putstr(char *s)
 {
     int ret = write(1, s, ft_strlen(s));
