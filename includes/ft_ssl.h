@@ -57,15 +57,15 @@ void    print_usage();
 
 // MD5 Data --------------------------------
 
-typedef unsigned char Mem_8bits;
-typedef unsigned long Long_64bits;
-typedef unsigned long Word_32bits;
+typedef unsigned char   Mem_8bits;
+typedef unsigned long   Long_64bits;
+typedef int             Word_32bits;
 
 // sizeof(Mem_8bits) = 1
 # define WORD_ByteSz    sizeof(Word_32bits)      // 4 bytes or 32 bits
 # define LONG64_ByteSz  sizeof(Long_64bits)          // 8 bytes or 64 bits
-# define HASH_ByteSz    16 * sizeof(Mem_8bits)     // 16 bytes or 128 bits
-# define CHUNK_ByteSz   64 * sizeof(Mem_8bits)    // 64 bytes or 512 bits
+# define HASH_ByteSz    (16 * sizeof(Mem_8bits))     // 16 bytes or 128 bits
+# define CHUNK_ByteSz   (16 * sizeof(Word_32bits))    // 64 bytes or 512 bits
 
 # define BIGENDIAN      0
 # define LITTLEENDIAN   1

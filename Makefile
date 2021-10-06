@@ -1,8 +1,8 @@
 NAME		=	ft_ssl
 
 CC			=	gcc
-CFLAGS		+=	-Wall -Werror -Wextra -O3
-# CFLAGS		+=	-O3 -lm
+# CFLAGS		+=	-Wall -Werror -Wextra -O3
+CFLAGS		+=	-O3
 
 INC_PATH	=	./includes/
 INCLUDES	=	$(NAME).h

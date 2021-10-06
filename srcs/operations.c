@@ -13,7 +13,7 @@ void        littleEndian(Mem_8bits *mem, Long_64bits byteSz)
 
 Long_64bits  extend_mod_chunkSz(Mem_8bits **data, Long_64bits byteSz)
 {
-    Long_64bits extend_byteSz = byteSz - byteSz % CHUNK_ByteSz + CHUNK_ByteSz;
+    Long_64bits extend_byteSz = byteSz - (byteSz % CHUNK_ByteSz) + CHUNK_ByteSz;
     Mem_8bits *extend;
 
     if (!(extend = (Mem_8bits *)malloc(sizeof(Mem_8bits) * extend_byteSz)))
@@ -30,7 +30,6 @@ void        padding(Mem_8bits **data, Long_64bits *byteSz)
 {
     Long_64bits extend_byteSz = extend_mod_chunkSz(data, *byteSz);
 
-    // printf("extend_byteSz: %lu\nextend_byteSz:\n", extend_byteSz);
     // printHex(*data, extend_byteSz);
     // printBits(*data, extend_byteSz);
 
