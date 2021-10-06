@@ -1,6 +1,11 @@
 #include "ft_ssl.h"
 
-float   ft_abs(float x)
+int   ft_abs(int x)
+{
+	return x < 0 ? -x : x;
+}
+
+float   ft_fabs(float x)
 {
 	return x < 0 ? -x : x;
 }
@@ -28,6 +33,16 @@ int     ft_atoi(const char *str)
 	return ((int)(nb * sign));
 }
 
+void	ft_fill(void *s, size_t n, char c)
+{
+	size_t  i;
+    char    *cast = (char *)s;
+
+	i = 0;
+	while (i < n)
+		cast[i++] = c;
+}
+
 void	ft_bzero(void *s, size_t n)
 {
 	size_t  i;
@@ -35,21 +50,26 @@ void	ft_bzero(void *s, size_t n)
 
 	i = 0;
 	while (i < n)
-		cast[i++] = 'f';
+		cast[i++] = '\0';
 }
 
 void	*ft_memcpy(void *dest, const void *src, size_t n)
 {
 	char	*castsrc;
 	char	*castdest;
-	size_t	len1;
+	// size_t	len1;
 	size_t	i;
 
 	castsrc = (char *)src;
 	castdest = (char *)dest;
-	len1 = ft_strlen(castsrc);
+	// len1 = ft_strlen(castsrc);
+    // printf("castsrc[i]: >%s<\n", castsrc);
+    // printf("castdest: >%s<\n", castdest);
+    // printf("len1=%d\n\n", len1);
+    // printf("n=%d\n\n", n);
 	i = 0;
-	while (i < n && i < len1)
+	// while (i < n && i < len1)
+	while (i < n)
 	{
 		castdest[i] = castsrc[i];
 		i++;
@@ -61,7 +81,6 @@ char	*ft_strnew(char *src)
 {
 	char	*str;
 	int 	len = ft_strlen(src);
-	int 	i;
 
 	if (!(str = (char *)malloc(sizeof(char) * (len + 1))))
 		return (NULL);

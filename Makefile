@@ -1,8 +1,8 @@
 NAME		=	ft_ssl
 
 CC			=	gcc
-# CFLAGS		+=	-Wall -Werror -Wextra -O3
-CFLAGS		+=	-O3
+CFLAGS		+=	-Wall -Werror -Wextra -O3
+# CFLAGS		+=	-O3 -lm
 
 INC_PATH	=	./includes/
 INCLUDES	=	$(NAME).h
@@ -30,7 +30,7 @@ all: $(NAME)
 
 $(NAME): $(BINS)
 
-	@$(CC) $(CFLAGS) -o $@ $^ -I $(INC_PATH)
+	@$(CC) $(CFLAGS) -o $@ $^ -I $(INC_PATH) -lm
 	@echo "[EXECUTABLE \"$(NAME)\" READY]\n"
 
 $(BIN_PATH)%.o: $(SRC_PATH)%.c $(INCS)
