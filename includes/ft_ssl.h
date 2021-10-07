@@ -21,7 +21,9 @@ typedef struct  s_hash
     char            *name;      // stdin / file name / -s string arg // Malloc
     char            *msg;       // Content to hash // Malloc
     int             len;        // Length of content
-    char            *hash;       // hash result // Malloc
+    // char            *hash;       // hash result // Malloc
+    // Word_32bits     hash[4];
+    char            hash[16];
     int             error;
     struct s_hash *next;
 }               t_hash;
@@ -48,7 +50,7 @@ void	ft_fill(void *s, size_t n, char c);
 void	*ft_memcpy(void *dest, const void *src, size_t n);
 char    *ft_stradd_quote(char *str, int len);
 int     ft_abs(int x);
-float   ft_fabs(float x);
+double   ft_fabs(double x);
 
 void    print_hash(t_hash *hash);
 void    print_usage();
@@ -59,7 +61,7 @@ void    print_usage();
 
 typedef unsigned char   Mem_8bits;
 typedef unsigned long   Long_64bits;
-typedef int             Word_32bits;
+typedef unsigned int    Word_32bits;
 
 // sizeof(Mem_8bits) = 1
 # define WORD_ByteSz    sizeof(Word_32bits)      // 4 bytes or 32 bits
@@ -71,17 +73,22 @@ typedef int             Word_32bits;
 # define LITTLEENDIAN   1
 
 # define ENDMSG         0b10000000
+# define UINTMAX       (unsigned int)pow(2, 32)
 
 typedef struct  s_md5
 {
     Mem_8bits   *chunks;
     Long_64bits chunksSz;
     Word_32bits sinus[64];
+    Word_32bits constants[64];
+    Word_32bits hash[4];
 }               t_md5;
 
 void        md5(t_hash *hash);
 void        md5_failure(char *error_msg);
 void        padding(Mem_8bits **data, Long_64bits *byteSz);
+void        littleEndian(Mem_8bits *mem, Long_64bits byteSz);
+void        printHash(Word_32bits hash_p[4]);
 // void        printBits(Mem_8bits *b, Long_64bits size, char endianness);
 // void        printHex(Mem_8bits *b, Long_64bits size);
 // void        printHex(Mem_8bits *b, Long_64bits size, char endianness);

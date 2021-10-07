@@ -39,6 +39,21 @@ void    printHex(void *p, int size)
     puts("");
 }
 
+void    printHash(Word_32bits hash_p[4])
+{
+    Mem_8bits *hash = (Mem_8bits *)hash_p;
+    for (int i = 0; i < 16; i++)
+    {
+        if (i % 4 == 0)
+            printf(" ");
+        printf("%x", hash[i]);
+    }
+    printf("\n ");
+    for (int i = 0; i < 4; i++)
+        printf("%x ", hash_p[i]);
+    printf("\n");
+}
+
 // void    printHex(Mem_8bits *b, Long_64bits size, char endianness)
 // {
 //     printf("%d ? LITTLEENDIAN : BIGENDIAN -> >%s<\n", endianness, b);
