@@ -47,10 +47,11 @@ void    init_md5(t_md5 *md5)
     md5->hash[1] = 0xEFCDAB89;
     md5->hash[2] = 0x98BADCFE;
     md5->hash[3] = 0x10325476;
+    printf("\n\nHASH TIME\n");
     printHash(md5->hash);
-    printHex((Mem_8bits *)md5->hash, 4 * WORD_ByteSz);
-    printBits((Mem_8bits *)md5->hash, 4 * WORD_ByteSz);
-    exit(0);
+    // printHex((Mem_8bits *)md5->hash, 4 * WORD_ByteSz);
+    // printBits((Mem_8bits *)md5->hash, 4 * WORD_ByteSz);
+    // exit(0);
 }
 
 void    hash_chunk()
@@ -71,7 +72,6 @@ void    md5(t_hash *hash)
     printf("sizeof(float): %ld bytes\n", sizeof(float));
     printf("sizeof(double): %ld bytes\n", sizeof(double));
     printf("sizeof(Word_32bits): %ld bytes\n", sizeof(Word_32bits));
-    printf("CHUNK_ByteSz: %ld bytes\n", CHUNK_ByteSz);
 
     printBits(md5.chunks, md5.chunksSz);
     padding(&md5.chunks, &md5.chunksSz);
@@ -79,6 +79,7 @@ void    md5(t_hash *hash)
 
     init_md5(&md5);
 
+    printf("CHUNK_ByteSz: %ld bytes\n", CHUNK_ByteSz);
     Mem_8bits *chunk = md5.chunks;
     while (chunk < md5.chunks + md5.chunksSz)
     {
@@ -92,20 +93,20 @@ void    md5(t_hash *hash)
         chunk = chunk + CHUNK_ByteSz;
     }
 
-    for (int i = 0; i < 4; i++)
-    {
-        // printf("md5.hash + i * WORD_ByteSz: 0x%x\n", md5.hash + i * WORD_ByteSz);
-        // // printf("md5.hash[i]: 0x%x\n", md5.hash[i]);
-        // printf("md5.hash[i] before: %x\n", md5.hash[i]);
-        // printBits((Mem_8bits *)&md5.hash[i], WORD_ByteSz);
-        printHex((Mem_8bits *)&md5.hash[i], WORD_ByteSz);
-        // printf("md5.hash[i] *: %p\n", (Mem_8bits *)(md5.hash) + i * WORD_ByteSz);
-        littleEndian((Mem_8bits *)&md5.hash[i], WORD_ByteSz);
-        // printBits((Mem_8bits *)&md5.hash[i], WORD_ByteSz);
-        printHex((Mem_8bits *)&md5.hash[i], WORD_ByteSz);
-        printf("\n");
-        // printf("md5.hash[i] after: %x\n", md5.hash[i]);
-    }
+    // for (int i = 0; i < 4; i++)
+    // {
+    //     // printf("md5.hash + i * WORD_ByteSz: 0x%x\n", md5.hash + i * WORD_ByteSz);
+    //     // // printf("md5.hash[i]: 0x%x\n", md5.hash[i]);
+    //     printf("md5.hash[%d] before: %x\n", i, md5.hash[i]);
+    //     // printBits((Mem_8bits *)&md5.hash[i], WORD_ByteSz);
+    //     printHex((Mem_8bits *)&md5.hash[i], WORD_ByteSz);
+    //     // printf("md5.hash[i] *: %p\n", (Mem_8bits *)(md5.hash) + i * WORD_ByteSz);
+    //     littleEndian((Mem_8bits *)&md5.hash[i], WORD_ByteSz);
+    //     // printBits((Mem_8bits *)&md5.hash[i], WORD_ByteSz);
+    //     printHex((Mem_8bits *)&md5.hash[i], WORD_ByteSz);
+    //     printf("\n");
+    //     // printf("md5.hash[i] after: %x\n", md5.hash[i]);
+    // }
     printHash(md5.hash);
 
     ft_memcpy(hash->hash, md5.hash, 4 * WORD_ByteSz);

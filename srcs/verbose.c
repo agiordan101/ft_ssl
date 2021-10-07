@@ -32,23 +32,26 @@ void    printHex(void *p, int size)
 
     printf("Print memory hex >%s<\n", mem);
     for (int i = 0; i < size; i++)
-        if (mem[i])
-            printf("%x ", mem[i]);
+        if (mem[i] < 0x10)
+            printf("0%x ", mem[i]);
         else
-            printf("00 ");
+            printf("%x ", mem[i]);
     puts("");
 }
 
 void    printHash(Word_32bits hash_p[4])
 {
-    Mem_8bits *hash = (Mem_8bits *)hash_p;
-    for (int i = 0; i < 16; i++)
-    {
-        if (i % 4 == 0)
-            printf(" ");
-        printf("%x", hash[i]);
-    }
-    printf("\n ");
+    // La lecture 32 bits est en little indian alors que la 8 bits en big indian ?
+
+    // printf("\nHash Mem_8bits  \t");
+    // Mem_8bits *hash = (Mem_8bits *)hash_p;
+    // for (int i = 0; i < 16; i++)
+    // {
+    //     if (i && i % 4 == 0)
+    //         printf("  ");
+    //     printf("%x ", hash[i]);
+    // }
+    printf("\nHash Word_32bits\t");
     for (int i = 0; i < 4; i++)
         printf("%x ", hash_p[i]);
     printf("\n");
