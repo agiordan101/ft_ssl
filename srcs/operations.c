@@ -1,6 +1,11 @@
 #include "ft_ssl.h"
 
-void        littleEndian(Mem_8bits *mem, Long_64bits byteSz)
+Word_32bits leftRotate(Word_32bits x, Word_32bits r)
+{
+    return (x << r | x >> (32 - r));
+}
+
+void        endianReverse(Mem_8bits *mem, Long_64bits byteSz)
 {
     Mem_8bits   tmp[byteSz];
     ft_bzero(tmp, byteSz);
@@ -40,7 +45,7 @@ void        padding(Mem_8bits **data, Long_64bits *byteSz)
     // printHex(byteSz_mem, LONG64_ByteSz);
     // printBits(byteSz_mem, LONG64_ByteSz);
 
-    littleEndian((Mem_8bits *)byteSz_mem, LONG64_ByteSz);
+    endianReverse((Mem_8bits *)byteSz_mem, LONG64_ByteSz);
 
     // printf("LONG64_ByteSz: %lu\nbyteSz_mem:\n", LONG64_ByteSz);
     // printHex(byteSz_mem, LONG64_ByteSz);

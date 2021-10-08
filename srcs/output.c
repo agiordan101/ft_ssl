@@ -2,13 +2,14 @@
 
 // Be carefull printf !
 
-void ft_printHex(Word_32bits n)
+void    ft_printHex(Word_32bits n)
 {
     unsigned char hex[16] = "0123456789abcdef";
     unsigned char *word = (unsigned char *)&n;
 
     // printf("word: %s\n", word);
     // printBits(&n, WORD_ByteSz);
+    // printHex(&n, WORD_ByteSz);
     for (int i = 0; i < 4; i++)
     {
         // printf("word[i]: %d\n", word[i]);
@@ -17,35 +18,19 @@ void ft_printHex(Word_32bits n)
         c = hex[word[i] % 16];
         write(1, &c, 1);
     }
-
 }
-
-// void ft_printHex(Word_32bits n)
-// {
-//     char hex[16] = "0123456789abcdef";
-
-//     // printf("printHex= %x\n", n);
-//     printBits(&n, WORD_ByteSz);
-//     littleEndian((Mem_8bits *)&n, WORD_ByteSz);
-//     printBits(&n, WORD_ByteSz);
-
-//     Mem_8bits *carac = (Mem_8bits *)n;
-//     for (int i = 0; i < 4; i++)
-//     {
-//         char c = hex[carac[i]];
-//         write(1, &c, 1);
-//     }
-
-//     // printf("printHex= %x\n", n);
-// }
 
 void    hash_output(t_hash *p)
 {
     Word_32bits *hash = (Word_32bits *)p->hash;
 
+    ft_printHex(hash);
     for (int i = 0; i < 4; i++)
+    {
         // printf("%x", hash[i]);
+        endianReverse((Mem_8bits *)&hash[i], WORD_ByteSz);
         ft_printHex(hash[i]);
+    }
 }
 
 void    file_not_found(t_hash *hash)
