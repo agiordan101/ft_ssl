@@ -61,25 +61,9 @@ void        padding(Mem_8bits **data, Long_64bits *byteSz)
     // for (int i = 0; i < LONG64_ByteSz; i++)
     //     byteSz_mem[i] = endianReverseByte(byteSz_mem[i]);
 
-    // printHex(byteSz_mem, LONG64_ByteSz);
-
-    // printf("LONG64_ByteSz: %lu\nbyteSz_mem:\n", LONG64_ByteSz);
-    // printHex(byteSz_mem, LONG64_ByteSz);
-    // printBits(byteSz_mem, LONG64_ByteSz);
-
     Mem_8bits endmsg = ENDMSG;
     ft_memcpy(*data + *byteSz, &endmsg, sizeof(Mem_8bits));
 
-    // Mem_8bits   *msgSz_addr = *data + extend_byteSz - LONG64_ByteSz;
-    // printHex(msgSz_addr, LONG64_ByteSz);
-    // printf("msgSz_addr:\n");
-    // printBits(msgSz_addr, LONG64_ByteSz);
-
     ft_memcpy(*data + extend_byteSz - LONG64_ByteSz, byteSz_mem, LONG64_ByteSz);
     *byteSz = extend_byteSz;
-    // ft_memcpy(msgSz_addr, byteSz_mem, LONG64_ByteSz);
-
-    // printf("extend_byteSz: %lu\n", extend_byteSz);
-    // printHex(*data, extend_byteSz);
-    // printBits(*data, extend_byteSz);
 }

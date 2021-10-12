@@ -134,12 +134,12 @@ int     hash_func_handler(char *str)
     // printf("Handle hash func: %s\n", str);
     if (!ft_strcmp(str, "md5"))
     {
-        ssl.hash_func = "md5";
+        ssl.hash_func = "MD5";
         ssl.hash_func_addr = md5;
     }
     else if (!ft_strcmp(str, "sha256"))
     {
-        ssl.hash_func = "sha256";
+        ssl.hash_func = "SHA256";
         ssl.hash_func_addr = sha256;
     }
     else
