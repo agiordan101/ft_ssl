@@ -85,6 +85,7 @@ char	*ft_strnew(char *src)
 	if (!(str = (char *)malloc(sizeof(char) * (len + 1))))
 		return (NULL);
 	ft_memcpy(str, src, len);
+	str[len] = '\0';
 	return (str);
 }
 

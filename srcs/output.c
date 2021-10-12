@@ -13,24 +13,26 @@ void    ft_printHex(Word_32bits n)
     for (int i = 0; i < 4; i++)
     {
         // printf("word[i]: %d\n", word[i]);
-        unsigned char c = hex[word[i] / 16];
-        write(1, &c, 1);
-        c = hex[word[i] % 16];
-        write(1, &c, 1);
+        unsigned char c_16e0 = hex[word[i] % 16];
+        unsigned char c_16e1 = hex[word[i] / 16];
+        if (write(1, &c_16e1, 1) == -1 ||\
+            write(1, &c_16e0, 1) == -1)
+            freexit(EXIT_FAILURE);
     }
 }
 
 void    hash_output(t_hash *p)
 {
-    Word_32bits *hash = (Word_32bits *)p->hash;
+    // Word_32bits *hash = (Word_32bits *)p->hash;
 
-    ft_printHex(hash);
     for (int i = 0; i < 4; i++)
-    {
-        // printf("%x", hash[i]);
-        endianReverse((Mem_8bits *)&hash[i], WORD_ByteSz);
-        ft_printHex(hash[i]);
-    }
+        ft_printHex(p->hash[i]);
+    // for (int i = 0; i < 4; i++)
+    // {
+    //     // printf("%x", hash[i]);
+    //     endianReverse((Mem_8bits *)&hash[i], WORD_ByteSz);
+    //     ft_printHex(hash[i]);
+    // }
 }
 
 void    file_not_found(t_hash *hash)
@@ -79,7 +81,7 @@ void    classic_output(t_hash *hash)
     hash_output(hash);
 }
 
-void    print_hash(t_hash *hash)
+void    output(t_hash *hash)
 {
     if (hash->error == FILENOTFOUND)
         file_not_found(hash);
@@ -105,5 +107,3 @@ void    print_hash(t_hash *hash)
 
     ft_putstr("\n");
 }
-
-// void    print

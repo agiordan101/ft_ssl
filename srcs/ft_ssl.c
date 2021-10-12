@@ -9,7 +9,14 @@ t_ssl    ssl;
     -q -r = -q car -r s'annule en présence de -q
 */
 
-int main(int ac, char **av)
+void    freexit(int failure)
+{
+    // Free
+    if (failure == EXIT_FAILURE)
+        exit(EXIT_FAILURE);
+}
+
+int     main(int ac, char **av)
 {
     int     ret;
 
@@ -26,11 +33,19 @@ int main(int ac, char **av)
     t_hash *hash = ssl.hash;
     while (hash)
     {
+        // for (int i = 0; i < 20; i++)
+        // {
+        // printf("\nNEW HASH TEST %d\n", i);
+        // hash->msg = ft_strnew("42 is nice ");
+        // hash->msg[10] = i;
+        // ssl.hash_func_addr(hash);
+        // }
+
         ssl.hash_func_addr(hash);
-        print_hash(hash);
+        output(hash);
         i++;
         hash = hash->next;
     }
-    // Free
+    freexit(EXIT_SUCCESS);
     return 0;
 }

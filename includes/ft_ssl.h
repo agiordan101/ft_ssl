@@ -23,7 +23,7 @@ typedef struct  s_hash
     int             len;        // Length of content
     // char            *hash;       // hash result // Malloc
     // Word_32bits     hash[4];
-    char            hash[16];
+    unsigned int    hash[4];    // Hash result, made by algorithm
     int             error;
     struct s_hash *next;
 }               t_hash;
@@ -38,6 +38,7 @@ typedef struct  s_ssl
 
 extern t_ssl    ssl;
 
+void    freexit(int failure);
 int     parsing(int ac, char **av);
 
 // int     ft_atoi(const char *str);
@@ -52,7 +53,7 @@ char    *ft_stradd_quote(char *str, int len);
 int     ft_abs(int x);
 double   ft_fabs(double x);
 
-void    print_hash(t_hash *hash);
+void    output(t_hash *hash);
 void    print_usage();
 
 
@@ -64,6 +65,7 @@ typedef unsigned long   Long_64bits;
 typedef unsigned int    Word_32bits;
 
 // sizeof(Mem_8bits) = 1
+
 # define WORD_ByteSz    sizeof(Word_32bits)      // 4 bytes or 32 bits
 # define LONG64_ByteSz  sizeof(Long_64bits)          // 8 bytes or 64 bits
 # define HASH_ByteSz    (16 * sizeof(Mem_8bits))     // 16 bytes or 128 bits
@@ -92,6 +94,7 @@ void        md5(t_hash *hash);
 void        md5_failure(char *error_msg);
 
 void        padding(Mem_8bits **data, Long_64bits *byteSz);
+Mem_8bits   endianReverseByte(Mem_8bits byte);
 void        endianReverse(Mem_8bits *mem, Long_64bits byteSz);
 Word_32bits leftRotate(Word_32bits x, Word_32bits r);
 
@@ -99,6 +102,7 @@ void        printHash(Word_32bits hash_p[4]);
 // void        printBits(Mem_8bits *b, Long_64bits size, char endianness);
 // void        printHex(Mem_8bits *b, Long_64bits size);
 // void        printHex(Mem_8bits *b, Long_64bits size, char endianness);
+void    printByte(char byte);
 void    printBits(void *p, int size);
 void    printHex(void *p, int size);
 void    ft_printHex(Word_32bits n);

@@ -19,7 +19,11 @@ void    printBits(void *p, int size)
     //         printByte(mem[i]);
     // else if (endianness == BIGENDIAN)
     for (int i = 0; i < size; i++)
+    {
+        if (i && i % 8 == 0)
+            puts("");
         printByte(mem[i]);
+    }
 
     // else
         // ft_putstr("endianness unknow.");

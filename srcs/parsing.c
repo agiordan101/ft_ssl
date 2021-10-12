@@ -1,5 +1,10 @@
 #include "ft_ssl.h"
 
+void        init_hash(t_hash *hash)
+{
+    *hash = (t_hash){0, 0, 0, 0, {0}, 0, NULL};
+}
+
 t_hash *     addmsg_front()
 {
     t_hash *tmp;
@@ -7,6 +12,7 @@ t_hash *     addmsg_front()
     tmp = ssl.hash;
     if (!(ssl.hash = (t_hash *)malloc(sizeof(t_hash))))
         return NULL;
+    init_hash(ssl.hash);
     ssl.hash->next = tmp;
     // printf("add msg front: %p\n", ssl.hash);
     return ssl.hash;
@@ -19,6 +25,7 @@ t_hash *     addmsg_back()
 
     if (!(node = (t_hash *)malloc(sizeof(t_hash))))
         return NULL;
+    init_hash(node);
     if (ssl.hash)
     {
         tmp = ssl.hash;
@@ -127,12 +134,12 @@ int     hash_func_handler(char *str)
     // printf("Handle hash func: %s\n", str);
     if (!ft_strcmp(str, "md5"))
     {
-        ssl.hash_func = "MD5";
+        ssl.hash_func = "md5";
         ssl.hash_func_addr = md5;
     }
     else if (!ft_strcmp(str, "sha256"))
     {
-        ssl.hash_func = "SHA256";
+        ssl.hash_func = "sha256";
         ssl.hash_func_addr = sha256;
     }
     else
@@ -167,16 +174,24 @@ int     stdin_handler()
         node->msg[node->len + ret] = '\0';
         ft_memcpy(node->msg, tmp, node->len);
         ft_memcpy(node->msg + node->len, buff, ret);
-        free(tmp);
+        if (tmp)
+            free(tmp);
         node->len += ret;
     }
-    node->len--;
-    node->msg[node->len] = '\0'; //Remove \n
+
+    // printf("node->msg: %s\n", node->msg);
+    // printHex(tmp, node->len);
+
     node->stdin = 1;
     if (ssl.flags & P)
+    {
+        tmp = ft_strnew(node->msg);
+        tmp[node->len - 1] = '\0'; //To remove \n, it's like 'echo -n <node->msg> | ./ft_ssl ...'
+
         node->name = ssl.flags & Q ?\
-            ft_strnew(node->msg) :\
-            ft_stradd_quote(node->msg, node->len);
+            tmp :\
+            ft_stradd_quote(tmp, node->len - 1);
+    }
     else
         node->name = ft_strnew("stdin");
     // printf("node->name: %s\n", node->name);
