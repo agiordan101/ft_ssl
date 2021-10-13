@@ -11,7 +11,9 @@ Long_64bits extend_mod_chunkSz(Mem_8bits **data, Long_64bits byteSz)
     // ft_fill(extend, extend_byteSz, ' '); //Padding with zeros
     ft_memcpy(extend, *data, byteSz);
     free(*data);
+    printf("node->msg = *data = %p\n", *data);
     *data = extend;
+    printf("node->msg = *data = %p\n", *data);
     return extend_byteSz;
 }
 
@@ -19,6 +21,7 @@ void        padding(Mem_8bits **data, Long_64bits *byteSz, char reverseByteSz)
 {
     Long_64bits extend_byteSz = extend_mod_chunkSz(data, *byteSz);
 
+    printf("node->msg = *data = %p\n", *data);
     // printHex(*data, extend_byteSz);
     // printBits(*data, extend_byteSz);
 

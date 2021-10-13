@@ -19,12 +19,19 @@ void    ssl_free()
     while (hash)
     {
         // if (hash->name)
+        // {
+        //     printf("hash->name: >%p<\n", hash->name);
+        //     printf("hash->name: >%s<\n", hash->name);
         //     free(hash->name);
-        // if (hash->msg)
-        //     free(hash->msg);
+        // }
+        printf("hash->msg: >%s<\n", hash->msg);
+        printf("hash->msg: >%p<\n", hash->msg);
+        if (hash->msg)
+            free(hash->msg);
         tmp = hash;
         hash = hash->next;
-        // free(tmp);
+        free(tmp);
+        // printf("tmp=%p\n", tmp);
     }
 }
 
