@@ -23,7 +23,7 @@ typedef struct  s_hash
     int             len;        // Length of content
     // char            *hash;       // hash result // Malloc
     // Word_32bits     hash[4];
-    unsigned int    hash[4];    // Hash result, made by algorithm
+    unsigned int    hash[8];    // Hash result, made by algorithm
     int             error;
     struct s_hash *next;
 }               t_hash;
@@ -51,7 +51,7 @@ void	ft_fill(void *s, size_t n, char c);
 void	*ft_memcpy(void *dest, const void *src, size_t n);
 char    *ft_stradd_quote(char *str, int len);
 int     ft_abs(int x);
-double   ft_fabs(double x);
+double  ft_fabs(double x);
 
 void    output(t_hash *hash);
 void    print_usage();
@@ -75,7 +75,7 @@ typedef unsigned int    Word_32bits;
 # define LITTLEENDIAN   1
 
 # define ENDMSG         0b10000000
-# define UINTMAX       (unsigned int)pow(2, 32)
+# define INTMAXLESS1    (Word_32bits)pow(2, 32) - 1
 
 typedef struct  s_md5
 {
@@ -84,31 +84,40 @@ typedef struct  s_md5
     Word_32bits sinus[64];
     Word_32bits constants[64];
     Word_32bits hash[4];
-    Word_32bits h0;
-    Word_32bits h1;
-    Word_32bits h2;
-    Word_32bits h3;
 }               t_md5;
 
 void        md5(t_hash *hash);
 void        md5_failure(char *error_msg);
 
-void        padding(Mem_8bits **data, Long_64bits *byteSz);
-Mem_8bits   endianReverseByte(Mem_8bits byte);
-void        endianReverse(Mem_8bits *mem, Long_64bits byteSz);
-Word_32bits leftRotate(Word_32bits x, Word_32bits r);
+void        padding(Mem_8bits **data, Long_64bits *byteSz, char reverseByteSz);
 
 void        printHash(Word_32bits hash_p[4]);
-// void        printBits(Mem_8bits *b, Long_64bits size, char endianness);
-// void        printHex(Mem_8bits *b, Long_64bits size);
-// void        printHex(Mem_8bits *b, Long_64bits size, char endianness);
-void    printByte(char byte);
-void    printBits(void *p, int size);
-void    printHex(void *p, int size);
-void    ft_printHex(Word_32bits n);
+void        printByte(char byte);
+void        printBits(void *p, int size);
+void        printHex(void *p, int size);
+void        ft_printHex(Word_32bits n);
 
 
 
 // SHA256 Data -----------------------------
 
-void    sha256(t_hash *hash);
+void        sha256(t_hash *hash);
+
+typedef struct  s_sha
+{
+    Mem_8bits   *chunks;
+    Long_64bits chunksSz;
+    Word_32bits k[64];
+    Word_32bits constants[64];
+    Word_32bits hash[8];
+}               t_sha;
+
+
+
+// Bitwise operations ----------------------
+
+Mem_8bits   endianReverseByte(Mem_8bits byte);
+void        endianReverse(Mem_8bits *mem, Long_64bits byteSz);
+Word_32bits rotL(Word_32bits x, Word_32bits r);
+Word_32bits rotR(Word_32bits x, Word_32bits r);
+// Word_32bits addMod32(Word_32bits a, Word_32bits b);

@@ -1,34 +1,19 @@
 #include "ft_ssl.h"
 
-void    md5_failure(char *error_msg)
+void        md5_failure(char *error_msg)
 {
     ft_putstr(error_msg);
     exit(EXIT_FAILURE);
 }
 
-// void    md5_load_sinus(t_md5 *md5)
-// {
-//     Word_32bits *k = md5->sinus;
-
-//     // printf("UINT_MAX: %ld\n", UINTMAX);
-//     for (int i = 0; i < 64; i++)
-//     {
-//         k[i] = (Word_32bits)(ft_fabs(sin(i + 1)) * UINTMAX);
-//         // printf("floor(abs(sin(%d + 1) * UINTMAX)) = %ld / k[%d]=%x\n", i, (Word_32bits)ft_fabs(sin(i + 1) * UINTMAX), i, k[i]);
-//     }
-// }
-
-void    init_md5(t_md5 *md5)
+void        init_md5(t_md5 *md5, Mem_8bits *chunks, Long_64bits chunksSz)
 {
-    // printf("\n\nHASH TIME\n");
-
+    md5->chunks = chunks;
+    md5->chunksSz = chunksSz;
     md5->hash[0] = 0x67452301;
     md5->hash[1] = 0xEFCDAB89;
     md5->hash[2] = 0x98BADCFE;
     md5->hash[3] = 0x10325476;
-    // printHash(md5->hash);
-    // printHex((Mem_8bits *)md5->hash, 4 * WORD_ByteSz);
-    // printBits((Mem_8bits *)md5->hash, 4 * WORD_ByteSz);
 
     Word_32bits sinus[64] = {
         0xd76aa478,	0xe8c7b756,	0x242070db,	0xc1bdceee,	0xf57c0faf,	0x4787c62a,	0xa8304613,	0xfd469501,
@@ -41,8 +26,6 @@ void    init_md5(t_md5 *md5)
         0x6fa87e4f,	0xfe2ce6e0,	0xa3014314,	0x4e0811a1,	0xf7537e82,	0xbd3af235,	0x2ad7d2bb,	0xeb86d391
     };
     ft_memcpy(md5->sinus, sinus, 64 * WORD_ByteSz);
-    // for (int i = 0; i < 64; i++)
-    //     printf("md5->sinus[%d] = 0x%x\n", i, md5->sinus[i]);
 
     Word_32bits constants[64] = {
         7, 12, 17, 22,  7, 12, 17, 22,  7, 12, 17, 22,  7, 12, 17, 22,
@@ -51,12 +34,9 @@ void    init_md5(t_md5 *md5)
         6, 10, 15, 21,  6, 10, 15, 21,  6, 10, 15, 21,  6, 10, 15, 21
     };
     ft_memcpy(md5->constants, constants, 64 * WORD_ByteSz);
-    // for (int i = 0; i < 64; i++)
-    //     printf("md5->constants[%d] = %d\n", i, md5->constants[i]);
 }
 
-// void    hash_chunk(t_md5 *md5, Mem_8bits *chunk)
-void    hash_chunk(t_md5 *md5, Word_32bits *chunk)
+static void hash_chunk(t_md5 *md5, Word_32bits *chunk)
 {
     // Hash values
     Word_32bits a = md5->hash[0];
@@ -69,17 +49,7 @@ void    hash_chunk(t_md5 *md5, Word_32bits *chunk)
     Word_32bits words[16];  // Chunk msg
     int         g;          // Word's index in chunk msg
 
-    // printBits(&a, WORD_ByteSz);
-    // printBits(chunk, CHUNK_ByteSz);
-
     ft_memcpy(words, chunk, CHUNK_ByteSz);
-    // printBits(&words[0], WORD_ByteSz);
-    // printf("words[0]=%x\n", words[0]);
-    // printBits(&words[0], WORD_ByteSz);
-    // printf("words[0]=%x\n", words[0]);
-
-    // for (int i = 0; i < 16; i++)
-    //     printf("words[%d] = 0x%x\n", i, words[i]);
     for (int i = 0; i < 64; i++)
     {
         // printf("hash %d =\t%x%x%x%x\n", i, a, b, c, d);
@@ -108,7 +78,7 @@ void    hash_chunk(t_md5 *md5, Word_32bits *chunk)
         tmp = d;
         d = c;
         c = b;
-        b += leftRotate((a + ft + md5->sinus[i] + words[g]), md5->constants[i]);
+        b += rotL((a + ft + md5->sinus[i] + words[g]), md5->constants[i]);
         a = tmp;
     }
     md5->hash[0] += a;
@@ -117,38 +87,18 @@ void    hash_chunk(t_md5 *md5, Word_32bits *chunk)
     md5->hash[3] += d;
 }
 
-void    md5(t_hash *hash)
+void        md5(t_hash *hash)
 {
     t_md5   md5;
+    init_md5(&md5, (Mem_8bits *)hash->msg, (Long_64bits)hash->len);
 
-    md5.chunks = (Mem_8bits *)hash->msg;
-    md5.chunksSz = (Long_64bits)hash->len;
-
-    // printf("sizeof(int): %ld bytes\n", sizeof(int));
-    // printf("sizeof(u_int8_t): %ld bytes\n", sizeof(u_int8_t));
-    // printf("sizeof(Mem_8bits): %ld bytes\n", sizeof(Mem_8bits));
-    // printf("sizeof(Long_64bits): %ld bytes\n", sizeof(Long_64bits));
-    // printf("sizeof(float): %ld bytes\n", sizeof(float));
-    // printf("sizeof(double): %ld bytes\n", sizeof(double));
-    // printf("sizeof(Word_32bits): %ld bytes\n", sizeof(Word_32bits));
-
-    // printHex(md5.chunks, md5.chunksSz);
     // printBits(md5.chunks, md5.chunksSz);
-    padding(&md5.chunks, &md5.chunksSz);
+    padding(&md5.chunks, &md5.chunksSz, 0);
     // printBits(md5.chunks, md5.chunksSz);
-    // printBits(md5.chunks + 64, md5.chunksSz - 64);
-
-    init_md5(&md5);
 
     // printf("CHUNK_ByteSz: %ld bytes\n", CHUNK_ByteSz);
     Word_32bits *chunks = (Word_32bits *)md5.chunks;
     // printBits(chunks, CHUNK_ByteSz);
-    
-    //Convert to little endian each 32 bits words of 512 bits chunks
-    //Because convert Mem_8bits to Word_32bits
-    //Because convert char to unsigned int
-    // for (int offset = 0; offset < md5.chunksSz / WORD_ByteSz; offset += WORD_ByteSz)
-    //     endianReverse((Mem_8bits *)(chunks + offset), WORD_ByteSz);
 
     Word_32bits *chunk = chunks;
     while (chunk < chunks + md5.chunksSz / WORD_ByteSz)
@@ -156,29 +106,5 @@ void    md5(t_hash *hash)
         hash_chunk(&md5, chunk);
         chunk += CHUNK_ByteSz / WORD_ByteSz;
     }
-
-    // printHex((Mem_8bits *)&md5.hash[0], WORD_ByteSz);
-    // ft_printHex(md5.hash[0]);
-    // ft_printHex(md5.hash[1]);
-    // ft_printHex(md5.hash[2]);
-    // ft_printHex(md5.hash[3]);
-    // printf("\n");
-    // for (int i = 0; i < 4; i++)
-    // {
-    //     // printf("md5.hash + i * WORD_ByteSz: 0x%x\n", md5.hash + i * WORD_ByteSz);
-    //     // // printf("md5.hash[i]: 0x%x\n", md5.hash[i]);
-    //     printf("md5.hash[%d] before: %x\n", i, md5.hash[i]);
-    //     // printBits((Mem_8bits *)&md5.hash[i], WORD_ByteSz);
-    //     // printf("md5.hash[i] *: %p\n", (Mem_8bits *)(md5.hash) + i * WORD_ByteSz);
-    //     endianReverse((Mem_8bits *)&md5.hash[i], WORD_ByteSz);
-    //     // printBits((Mem_8bits *)&md5.hash[i], WORD_ByteSz);
-    //     printHex((Mem_8bits *)&md5.hash[i], WORD_ByteSz);
-    //     printf("\n");
-    //     // printf("md5.hash[i] after: %x\n", md5.hash[i]);
-    // }
-    // printHash(md5.hash);
-
     ft_memcpy(hash->hash, md5.hash, 4 * WORD_ByteSz);
-    // hash->msg = (char *)md5.chunks;
-    // hash->len = (int)md5.chunksSz;
 }

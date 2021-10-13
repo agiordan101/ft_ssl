@@ -13,6 +13,7 @@ SRC			=	$(NAME).c \
 				parsing.c \
 				md5.c \
 				sha256.c \
+				bitwise.c \
 				operations.c \
 				libft.c \
 				output.c \

@@ -6,15 +6,13 @@ void    ft_printHex(Word_32bits n)
 {
     unsigned char hex[16] = "0123456789abcdef";
     unsigned char *word = (unsigned char *)&n;
+    unsigned char c_16e0;
+    unsigned char c_16e1;
 
-    // printf("word: %s\n", word);
-    // printBits(&n, WORD_ByteSz);
-    // printHex(&n, WORD_ByteSz);
     for (int i = 0; i < 4; i++)
     {
-        // printf("word[i]: %d\n", word[i]);
-        unsigned char c_16e0 = hex[word[i] % 16];
-        unsigned char c_16e1 = hex[word[i] / 16];
+        c_16e0 = hex[word[i] % 16];
+        c_16e1 = hex[word[i] / 16];
         if (write(1, &c_16e1, 1) == -1 ||\
             write(1, &c_16e0, 1) == -1)
             freexit(EXIT_FAILURE);
@@ -23,16 +21,8 @@ void    ft_printHex(Word_32bits n)
 
 void    hash_output(t_hash *p)
 {
-    // Word_32bits *hash = (Word_32bits *)p->hash;
-
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < (ssl.hash_func == "MD5" ? 4 : 8); i++)
         ft_printHex(p->hash[i]);
-    // for (int i = 0; i < 4; i++)
-    // {
-    //     // printf("%x", hash[i]);
-    //     endianReverse((Mem_8bits *)&hash[i], WORD_ByteSz);
-    //     ft_printHex(hash[i]);
-    // }
 }
 
 void    file_not_found(t_hash *hash)

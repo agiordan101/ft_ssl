@@ -1,6 +1,6 @@
 #include "ft_ssl.h"
 
-void        init_hash(t_hash *hash)
+inline void  init_hash(t_hash *hash)
 {
     *hash = (t_hash){0, 0, 0, 0, {0}, 0, NULL};
 }
@@ -179,18 +179,25 @@ int     stdin_handler()
         node->len += ret;
     }
 
-    // printf("node->msg: %s\n", node->msg);
     // printHex(tmp, node->len);
 
     node->stdin = 1;
     if (ssl.flags & P)
     {
+        // printf("tmp: %s\n", tmp);
+        // printf("node->name: %s\n", node->name);
         tmp = ft_strnew(node->msg);
-        tmp[node->len - 1] = '\0'; //To remove \n, it's like 'echo -n <node->msg> | ./ft_ssl ...'
+        if (tmp[node->len - 1] == '\n')
+            tmp[node->len - 1] = '\0'; //To remove \n, it's like 'echo -n <node->msg> | ./ft_ssl ...'
 
-        node->name = ssl.flags & Q ?\
-            tmp :\
-            ft_stradd_quote(tmp, node->len - 1);
+        // Q will not print name, but when Q, R and P are True, stdin content without quote is required
+        if (ssl.flags & Q)
+            node->name = tmp;
+        else
+        {
+            node->name = ft_stradd_quote(tmp, node->len - (tmp[node->len - 1] == '\0' ? 1 : 0));
+            free(tmp);
+        }
     }
     else
         node->name = ft_strnew("stdin");

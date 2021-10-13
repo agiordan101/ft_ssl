@@ -11,22 +11,13 @@ void    printBits(void *p, int size)
 {
     char *mem = (char *)p;
 
-    // printf("%d ? LITTLEENDIAN : BIGENDIAN (len=%lu) -> >%s<\n", endianness, size, mem);
     printf("len=%d -> >%s<\n", size, mem);
-
-    // if (endianness == LITTLEENDIAN)
-    //     for (int i = size - 1; i >= 0; i--)
-    //         printByte(mem[i]);
-    // else if (endianness == BIGENDIAN)
     for (int i = 0; i < size; i++)
     {
         if (i && i % 8 == 0)
             puts("");
         printByte(mem[i]);
     }
-
-    // else
-        // ft_putstr("endianness unknow.");
     puts("");
 }
 
