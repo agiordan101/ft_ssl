@@ -2,7 +2,7 @@
 
 inline void  init_hash(t_hash *hash)
 {
-    *hash = (t_hash){0, 0, 0, 0, {0}, 0, NULL};
+    *hash = (t_hash){0, NULL, NULL, 0, NULL, 0, 0, NULL};
 }
 
 t_hash *     addmsg_front()
@@ -58,7 +58,7 @@ int     get_file_len(char *file)
 
 int     file_handler(t_hash *node, char *file)
 {
-    int         fd;
+    int fd;
 
     if (!node && !(node = addmsg_back()))
         return EXIT_FAILURE;
@@ -76,13 +76,16 @@ int     file_handler(t_hash *node, char *file)
 
         if (read(fd, node->msg, node->len) == -1)
             return EXIT_FAILURE;
+        close(fd);
     }
-    close(fd);
     return 0;
 }
 
 int     string_handler(t_hash *node, char *av_next)
 {
+    if (!node && !(node = addmsg_back()))
+        return EXIT_FAILURE;
+
     if (!(node->msg = ft_strnew(av_next)))
         return EXIT_FAILURE;
     node->len = ft_strlen(av_next);
@@ -91,33 +94,73 @@ int     string_handler(t_hash *node, char *av_next)
     return 0;
 }
 
-int     s_handler(char *av_next, int *i)
+int     s_handler(char *av_next)
 {
-    t_hash    *node;
-
-    if (!(node = addmsg_back()))
-        return EXIT_FAILURE;
-
-    if (ssl.flags & S)
-        return file_handler(node, "-s");
+    if (ssl.flags & S_md)
+        return file_handler(NULL, "-s");
     else
-    {
-        ssl.flags += S;
-        (*i)++;
-        return string_handler(node, av_next);
-    }
+        return string_handler(NULL, av_next);
 }
 
-int     flags_handler(char *flag, char *av_next, int *i)
+int     param_handler(e_flags flag, char *av_next, int *i)
 {
-    if (!ft_strcmp(flag, "-p"))
-        ssl.flags += P;
-    if (!ft_strcmp(flag, "-q"))
-        ssl.flags += Q;
-    if (!ft_strcmp(flag, "-r"))
-        ssl.flags += R;
-    if (!ft_strcmp(flag, "-s"))
-        s_handler(av_next, i);
+    // printf("V flag condition %d\n", flag & V);
+    // printf("I flag condition %d\n", flag & I);
+    if (flag & S_md)
+    {
+        if (s_handler(av_next))
+            return EXIT_FAILURE;
+    }
+    else if (flag & I)
+    {
+        if (file_handler(NULL, av_next))
+            return EXIT_FAILURE;
+    }
+    else if (flag & O)
+        ssl.output_file = av_next;
+    else if (flag & K)
+        ssl.cipher.key = av_next;
+    else if (flag & P_cipher)
+        ssl.cipher.password = av_next;
+    else if (flag & S_cipher)
+        ssl.cipher.salt = av_next;
+    else if (flag & V)
+        ssl.cipher.vector = av_next;
+    (*i)++;
+    return 0;
+}
+
+e_flags strToFlag(char *str)
+{
+    if (!ft_strcmp(str, "-p"))
+        if (ssl.command & MD)
+            return P_md;
+        else if (ssl.command & CIPHER)
+            return P_cipher;
+    if (!ft_strcmp(str, "-q"))
+        return Q;
+    if (!ft_strcmp(str, "-r"))
+        return R;
+    if (!ft_strcmp(str, "-s"))
+        if (ssl.command & MD)
+            return S_md;
+        else if (ssl.command & CIPHER)
+            return S_cipher;
+
+    if (!ft_strcmp(str, "-d"))
+        return D;
+    if (!ft_strcmp(str, "-e"))
+        return E;
+    if (!ft_strcmp(str, "-i"))
+        return I;
+    if (!ft_strcmp(str, "-o"))
+        return O;
+    if (!ft_strcmp(str, "-a"))
+        return A;
+    if (!ft_strcmp(str, "-k"))
+        return K;
+    if (!ft_strcmp(str, "-v"))
+        return V;
     return 0;
 }
 
@@ -127,11 +170,19 @@ int     hash_func_handler(char *str)
     {
         ssl.hash_func = "MD5";
         ssl.hash_func_addr = md5;
+        ssl.command = MD;
     }
     else if (!ft_strcmp(str, "sha256"))
     {
         ssl.hash_func = "SHA256";
         ssl.hash_func_addr = sha256;
+        ssl.command = MD;
+    }
+    else if (!ft_strcmp(str, "base64"))
+    {
+        ssl.hash_func = "BASE64";
+        ssl.hash_func_addr = base64;
+        ssl.command = CIPHER;
     }
     else
     {
@@ -171,13 +222,13 @@ int     stdin_handler()
 
     // Pre-computing for output part
     node->stdin = 1;
-    if (ssl.flags & P)
+    if (ssl.flags & P_md)
     {
         tmp = ft_strnew(node->msg);
         if (tmp[node->len - 1] == '\n')
             tmp[node->len - 1] = '\0'; //To remove \n, it's like 'echo -n <node->msg> | ./ft_ssl ...'
 
-        // Q will not print name, but when Q, R and P are True, stdin content without quote is required
+        // Q will not print name, but when Q, R and P_md are True, stdin content without quote is required
         if (ssl.flags & Q)
             node->name = tmp;
         else
@@ -193,9 +244,10 @@ int     stdin_handler()
 
 int     parsing(int ac, char **av)
 {
-    int ret;
+    e_flags flag;
+    int     ret = 0;
 
-    if (ac == 1 || hash_func_handler(av[1]))
+    if (ac == 1 || hash_func_handler(ft_lower(av[1])))
     {
         print_usage();
         return EXIT_FAILURE;
@@ -205,14 +257,20 @@ int     parsing(int ac, char **av)
         for (int i = 2; i < ac; i++)
         {
             if (av[i][0] == '-')
-                ret = flags_handler(av[i], i + 1 < ac ? av[i + 1] : NULL, &i);
+            {
+                flag = strToFlag(av[i]);
+                // printf("Flag %d\n", flag);
+                if (flag & AVPARAM)
+                    ret = param_handler(flag, i + 1 < ac ? av[i + 1] : NULL, &i);
+                ssl.flags += ssl.flags & flag ? 0 : flag;
+            }
             else
                 ret = file_handler(NULL, av[i]);
             if (ret)
                 return EXIT_FAILURE;
         }
 
-    if (ssl.flags & P || !ssl.hash)
+    if (ssl.flags & P_md || !ssl.hash)
         if (stdin_handler())
             return EXIT_FAILURE;
     return 0;

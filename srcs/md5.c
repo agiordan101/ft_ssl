@@ -92,5 +92,20 @@ void        md5(t_hash *hash)
         hash_chunk(&md5, chunk);
         chunk += CHUNK_ByteSz / WORD_ByteSz;
     }
-    ft_memcpy(hash->hash, md5.hash, 4 * WORD_ByteSz);
+    // ft_memcpy(hash->hash, md5.hash, 4 * WORD_ByteSz);
+    hash->hash = md5.hash;
+    hash->hashlen = 4;
+
+    printf("p->hash: %p\n", hash->hash);
+    printf("md5 hash:\n");
+    for (int i = 0; i < hash->hashlen; i++)
+        ft_printHex(md5.hash[i]);
+
+    printf("\nhash hash:\n");
+    for (int i = 0; i < hash->hashlen; i++)
+    {
+        printf("(Word_32bits *)hash->hash: %p :\n", (Word_32bits *)&(hash->hash[i]));
+        ft_printHex(((Word_32bits *)hash->hash)[i]);
+    }
+    printf("\n");
 }

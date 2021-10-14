@@ -39,16 +39,6 @@ inline char	*ft_strnew(char *src)
 	return (str);
 }
 
-inline int	ft_strcmp(const char *s1, const char *s2)
-{
-	while (*s1 == *s2 && *s1 && *s2)
-	{
-		s1++;
-		s2++;
-	}
-	return ((unsigned char)(*s1) - (unsigned char)(*s2));
-}
-
 inline int	ft_strlen(char *p)
 {
     unsigned long long *str = (unsigned long long *)p;
@@ -68,6 +58,16 @@ inline int	ft_strlen(char *p)
     return 0;
 }
 
+inline int	ft_strcmp(const char *s1, const char *s2)
+{
+	while (*s1 == *s2 && *s1 && *s2)
+	{
+		s1++;
+		s2++;
+	}
+	return ((unsigned char)(*s1) - (unsigned char)(*s2));
+}
+
 inline char	*ft_stradd_quote(char *str, int len)
 {
     char *newstr;
@@ -78,6 +78,13 @@ inline char	*ft_stradd_quote(char *str, int len)
     ft_memcpy(newstr + 1, str, len);
     ft_memcpy(newstr + len + 1, "\"\0", 2);
     return newstr;
+}
+
+inline char	*ft_lower(char *str)
+{
+	for (int i = 0; i < ft_strlen(str); i++)
+		str[i] = ('A' <= str[i] && str[i] <= 'Z') ? str[i] + ('a' - 'A') : str[i];
+	return str;
 }
 
 inline void	ft_putstr(char *s)

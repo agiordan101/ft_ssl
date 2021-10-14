@@ -107,9 +107,9 @@ void        sha256(t_hash *hash)
 
     padding((Mem_8bits **)&hash->msg, (Long_64bits *)&hash->len, 1);
     init_sha(&sha, (Mem_8bits *)hash->msg, (Long_64bits)hash->len);
-    // printBits(chunks, CHUNK_ByteSz);
 
     Word_32bits *chunks = (Word_32bits *)sha.chunks;
+    printBits(chunks, CHUNK_ByteSz);
     Word_32bits *chunk = chunks;
     while (chunk < chunks + sha.chunksSz / WORD_ByteSz)
     {
@@ -117,7 +117,13 @@ void        sha256(t_hash *hash)
         chunk += CHUNK_ByteSz / WORD_ByteSz;
     }
 
-    ft_memcpy(hash->hash, sha.hash, 8 * WORD_ByteSz);
+    // ft_memcpy(hash->hash, sha.hash, 8 * WORD_ByteSz);
+    // for (int i = 0; i < 8; i++) // little endian to big endian
+    //     endianReverse((Mem_8bits *)&hash->hash[i], WORD_ByteSz);
+
+    hash->hash = sha.hash;
+    hash->hashlen = 8;
+    // hash->hashUnitByteSz = WORD_ByteSz;
     for (int i = 0; i < 8; i++) // little endian to big endian
-        endianReverse((Mem_8bits *)&hash->hash[i], WORD_ByteSz);
+        endianReverse((Mem_8bits *)&sha.hash[i], WORD_ByteSz);
 }

@@ -40,6 +40,11 @@ int     main(int ac, char **av)
     if ((ret = parsing(ac, av)))
         freexit(ret);
 
+    // printf("ssl.cipher.key: %s\n", ssl.cipher.key);
+    // printf("ssl.cipher.password: %s\n", ssl.cipher.password);
+    // printf("ssl.cipher.salt: %s\n", ssl.cipher.salt);
+    // printf("ssl.cipher.vector: %s\n", ssl.cipher.vector);
+
     t_hash *hash = ssl.hash;
     while (hash)
     {

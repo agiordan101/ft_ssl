@@ -31,8 +31,8 @@ void    printHex(void *p, int size)
     printf("Print memory hex >%s<\n", mem);
     for (int i = 0; i < size; i++)
         if (mem[i] < 0x10)
-            printf("0%x ", mem[i]);
+            printf("0%x ", (unsigned int)mem[i]);
         else
-            printf("%x ", mem[i]);
+            printf("%x ", (unsigned int)mem[i]);
     puts("");
 }
