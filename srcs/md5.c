@@ -90,12 +90,14 @@ static void hash_chunk(t_md5 *md5, Word_32bits *chunk)
 void        md5(t_hash *hash)
 {
     t_md5   md5;
+
+    padding((Mem_8bits **)&hash->msg, (Long_64bits *)&hash->len, 0);
     init_md5(&md5, (Mem_8bits *)hash->msg, (Long_64bits)hash->len);
 
     // printBits(md5.chunks, md5.chunksSz);
-    padding(&md5.chunks, &md5.chunksSz, 0);
-    // printBits(md5.chunks, md5.chunksSz);
 
+    // printf("hash->msg = %p\n", hash->msg);
+    // printf("md5.chunks = %p\n", md5.chunks);
     // printf("CHUNK_ByteSz: %ld bytes\n", CHUNK_ByteSz);
     Word_32bits *chunks = (Word_32bits *)md5.chunks;
     // printBits(chunks, CHUNK_ByteSz);

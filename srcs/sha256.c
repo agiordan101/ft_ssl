@@ -121,10 +121,9 @@ static void    hash_chunk(t_sha *sha, Word_32bits *chunk)
 void    sha256(t_hash *hash)
 {
     t_sha   sha;
-    init_sha(&sha, (Mem_8bits *)hash->msg, (Long_64bits)hash->len);
 
-    // printBits(sha.chunks, sha.chunksSz);
-    padding(&sha.chunks, &sha.chunksSz, 1);
+    padding((Mem_8bits **)&hash->msg, (Long_64bits *)&hash->len, 1);
+    init_sha(&sha, (Mem_8bits *)hash->msg, (Long_64bits)hash->len);
 
     // printf("CHUNK_ByteSz: %ld bytes\n", CHUNK_ByteSz);
     Word_32bits *chunks = (Word_32bits *)sha.chunks;
