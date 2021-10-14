@@ -3,7 +3,9 @@
 void    print_usage()
 {
     ft_putstr("usage: ft_ssl <algorithm> [flags] [file | string]\n\n");
-    ft_putstr("Algorithms:\n\tmd5\n\tsha256\n\n");
+    ft_putstr("Standard commands:\n\n");
+    ft_putstr("Message Digest commands:\n\tmd5\n\tsha256\n\n");
+    ft_putstr("Cipher commands:\n\tbase64\n\tdes\n\tdes-ecb\n\tdes-cbc\n\n");
     ft_putstr("Flags:\n");
     ft_putstr("\t-p: echo STDIN to STDOUT and append the checksum to STDOUT\n");
     ft_putstr("\t-q: quiet mode\n");
