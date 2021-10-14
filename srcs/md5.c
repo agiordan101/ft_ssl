@@ -1,12 +1,6 @@
 #include "ft_ssl.h"
 
-void        md5_failure(char *error_msg)
-{
-    ft_putstr(error_msg);
-    exit(EXIT_FAILURE);
-}
-
-void        init_md5(t_md5 *md5, Mem_8bits *chunks, Long_64bits chunksSz)
+static void init_md5(t_md5 *md5, Mem_8bits *chunks, Long_64bits chunksSz)
 {
     md5->chunks = chunks;
     md5->chunksSz = chunksSz;
@@ -38,7 +32,6 @@ void        init_md5(t_md5 *md5, Mem_8bits *chunks, Long_64bits chunksSz)
 
 static void hash_chunk(t_md5 *md5, Word_32bits *chunk)
 {
-    // Hash values
     Word_32bits a = md5->hash[0];
     Word_32bits b = md5->hash[1];
     Word_32bits c = md5->hash[2];
@@ -52,7 +45,6 @@ static void hash_chunk(t_md5 *md5, Word_32bits *chunk)
     ft_memcpy(words, chunk, CHUNK_ByteSz);
     for (int i = 0; i < 64; i++)
     {
-        // printf("hash %d =\t%x%x%x%x\n", i, a, b, c, d);
         if (i < 16)
         {
             ft = (b & c) | ((~b) & d);
@@ -73,8 +65,6 @@ static void hash_chunk(t_md5 *md5, Word_32bits *chunk)
             ft = c ^ (b | (~d));
             g = (7 * i) % 16;
         }
-        // printf("[%d] ft= %x\tg=%d\twords[g]= %d\n", i, ft, g, words[g]);
-        // printf("[%d] ft= %x\tg=%d\twords[g]= %d\tmd5->sinus[i]= %d\tmd5->constants[i]= %d\n", i, ft, g, words[g], md5->sinus[i], md5->constants[i]);
         tmp = d;
         d = c;
         c = b;
@@ -93,15 +83,9 @@ void        md5(t_hash *hash)
 
     padding((Mem_8bits **)&hash->msg, (Long_64bits *)&hash->len, 0);
     init_md5(&md5, (Mem_8bits *)hash->msg, (Long_64bits)hash->len);
-
     // printBits(md5.chunks, md5.chunksSz);
 
-    // printf("hash->msg = %p\n", hash->msg);
-    // printf("md5.chunks = %p\n", md5.chunks);
-    // printf("CHUNK_ByteSz: %ld bytes\n", CHUNK_ByteSz);
     Word_32bits *chunks = (Word_32bits *)md5.chunks;
-    // printBits(chunks, CHUNK_ByteSz);
-
     Word_32bits *chunk = chunks;
     while (chunk < chunks + md5.chunksSz / WORD_ByteSz)
     {

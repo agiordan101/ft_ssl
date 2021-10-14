@@ -1,22 +1,14 @@
 #include "ft_ssl.h"
 
-// Be carefull printf !
-
-void    ft_printHex(Word_32bits n)
+void    print_usage()
 {
-    unsigned char hex[16] = "0123456789abcdef";
-    unsigned char *word = (unsigned char *)&n;
-    unsigned char c_16e0;
-    unsigned char c_16e1;
-
-    for (int i = 0; i < 4; i++)
-    {
-        c_16e0 = hex[word[i] % 16];
-        c_16e1 = hex[word[i] / 16];
-        if (write(1, &c_16e1, 1) == -1 ||\
-            write(1, &c_16e0, 1) == -1)
-            freexit(EXIT_FAILURE);
-    }
+    ft_putstr("usage: ft_ssl <algorithm> [flags] [file | string]\n\n");
+    ft_putstr("Algorithms:\n\tmd5\n\tsha256\n\n");
+    ft_putstr("Flags:\n");
+    ft_putstr("\t-p: echo STDIN to STDOUT and append the checksum to STDOUT\n");
+    ft_putstr("\t-q: quiet mode\n");
+    ft_putstr("\t-r: reverse the format of the output\n");
+    ft_putstr("\t-s: print the sum of the given string\n");
 }
 
 void    hash_output(t_hash *p)
@@ -63,7 +55,6 @@ void    reversed_output(t_hash *hash)
 
 void    classic_output(t_hash *hash)
 {
-    // printf("?????%s?%s??\n", hash->hash, hash->name);
     ft_putstr(ssl.hash_func);
     ft_putstr(" (");
     ft_putstr(hash->name);

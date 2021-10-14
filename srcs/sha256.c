@@ -1,6 +1,6 @@
 #include "ft_ssl.h"
 
-void    init_sha(t_sha *sha, Mem_8bits *chunks, Long_64bits chunksSz)
+static void init_sha(t_sha *sha, Mem_8bits *chunks, Long_64bits chunksSz)
 {
     sha->chunks = chunks;
     sha->chunksSz = chunksSz;    
@@ -24,47 +24,39 @@ void    init_sha(t_sha *sha, Mem_8bits *chunks, Long_64bits chunksSz)
         0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
     };
     ft_memcpy(sha->k, k, 64 * WORD_ByteSz);
-
-    // Word_32bits constants[64] = {
-    //     7, 12, 17, 22,  7, 12, 17, 22,  7, 12, 17, 22,  7, 12, 17, 22,
-    //     5,  9, 14, 20,  5,  9, 14, 20,  5,  9, 14, 20,  5,  9, 14, 20,
-    //     4, 11, 16, 23,  4, 11, 16, 23,  4, 11, 16, 23,  4, 11, 16, 23,
-    //     6, 10, 15, 21,  6, 10, 15, 21,  6, 10, 15, 21,  6, 10, 15, 21
-    // };
-    // ft_memcpy(sha->constants, constants, 64 * WORD_ByteSz);
 }
 
-inline Word_32bits Ch(Word_32bits x, Word_32bits y, Word_32bits z)
+static inline Word_32bits   Ch(Word_32bits x, Word_32bits y, Word_32bits z)
 {
     return (x & y) ^ (~x & z);
 }
 
-inline Word_32bits Maj(Word_32bits x, Word_32bits y, Word_32bits z)
+static inline Word_32bits   Maj(Word_32bits x, Word_32bits y, Word_32bits z)
 {
     return (x & y) ^ (x & z) ^ (y & z);
 }
 
-inline Word_32bits Sum0(Word_32bits x)
+static inline Word_32bits   Sum0(Word_32bits x)
 {
     return rotR(x, 2) ^ rotR(x, 13) ^ rotR(x, 22);
 }
 
-inline Word_32bits Sum1(Word_32bits x)
+static inline Word_32bits   Sum1(Word_32bits x)
 {
     return rotR(x, 6) ^ rotR(x, 11) ^ rotR(x, 25);
 }
 
-inline Word_32bits Sigma0(Word_32bits x)
+static inline Word_32bits   Sigma0(Word_32bits x)
 {
     return rotR(x, 7) ^ rotR(x, 18) ^ (x >> 3);
 }
 
-inline Word_32bits Sigma1(Word_32bits x)
+static inline Word_32bits   Sigma1(Word_32bits x)
 {
     return rotR(x, 17) ^ rotR(x, 19) ^ (x >> 10);
 }
 
-static void    hash_chunk(t_sha *sha, Word_32bits *chunk)
+static void hash_chunk(t_sha *sha, Word_32bits *chunk)
 {
     Word_32bits words[64];  // Chunk msg
     Word_32bits t1;
@@ -86,16 +78,7 @@ static void    hash_chunk(t_sha *sha, Word_32bits *chunk)
         if (i < 16)
             endianReverse((Mem_8bits *)&words[i], WORD_ByteSz); // Big endian to little endian
         else
-        {
             words[i] = Sigma1(words[i - 2]) + words[i - 7] + Sigma0(words[i - 15]) + words[i - 16];
-            // printf("words[%d - 2]: %x\n", i, words[i - 2]);
-            // printf("words[%d - 7]: %x\n", i, words[i - 7]);
-            // printf("words[%d - 15]: %x\n", i, words[i - 15]);
-            // printf("words[%d - 16]: %x\n", i, words[i - 16]);
-            // printf("Sigma1(words[%d - 2]): %x\n", i, Sigma1(words[i - 2]));
-            // printf("Sigma0(words[%d - 15]): %x\n", i, Sigma0(words[i - 15]));
-        }
-        // printf("word[%d]: %x\n", i, words[i]);
 
         t1 = h + Sum1(e) + Ch(e, f, g) + sha->k[i] + words[i];
         t2 = Sum0(a) + Maj(a, b, c);
@@ -118,17 +101,15 @@ static void    hash_chunk(t_sha *sha, Word_32bits *chunk)
     sha->hash[7] += h;
 }
 
-void    sha256(t_hash *hash)
+void        sha256(t_hash *hash)
 {
     t_sha   sha;
 
     padding((Mem_8bits **)&hash->msg, (Long_64bits *)&hash->len, 1);
     init_sha(&sha, (Mem_8bits *)hash->msg, (Long_64bits)hash->len);
-
-    // printf("CHUNK_ByteSz: %ld bytes\n", CHUNK_ByteSz);
-    Word_32bits *chunks = (Word_32bits *)sha.chunks;
     // printBits(chunks, CHUNK_ByteSz);
 
+    Word_32bits *chunks = (Word_32bits *)sha.chunks;
     Word_32bits *chunk = chunks;
     while (chunk < chunks + sha.chunksSz / WORD_ByteSz)
     {
@@ -139,6 +120,4 @@ void    sha256(t_hash *hash)
     ft_memcpy(hash->hash, sha.hash, 8 * WORD_ByteSz);
     for (int i = 0; i < 8; i++) // little endian to big endian
         endianReverse((Mem_8bits *)&hash->hash[i], WORD_ByteSz);
-
-    // printBits(sha.chunks, sha.chunksSz);
 }

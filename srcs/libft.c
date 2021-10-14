@@ -1,49 +1,6 @@
 #include "ft_ssl.h"
 
-int   ft_abs(int x)
-{
-	return x < 0 ? -x : x;
-}
-
-double   ft_fabs(double x)
-{
-	return x < 0 ? -x : x;
-}
-
-int     ft_atoi(const char *str)
-{
-	long	nb;
-	int		sign;
-	int		i;
-
-	i = 0;
-	nb = 0;
-	sign = 1;
-	while ((str[i] >= 9 && str[i] <= 13) || str[i] == ' ')
-		i++;
-	if (str[i] == '+')
-		i++;
-	else if (str[i] == '-')
-	{
-		sign = -1;
-		i++;
-	}
-	while (str[i] >= '0' && str[i] <= '9')
-		nb = nb * 10 + str[i++] - '0';
-	return ((int)(nb * sign));
-}
-
-void	ft_fill(void *s, size_t n, char c)
-{
-	size_t  i;
-    char    *cast = (char *)s;
-
-	i = 0;
-	while (i < n)
-		cast[i++] = c;
-}
-
-void	ft_bzero(void *s, size_t n)
+inline void	ft_bzero(void *s, size_t n)
 {
 	size_t  i;
     char    *cast = (char *)s;
@@ -53,22 +10,15 @@ void	ft_bzero(void *s, size_t n)
 		cast[i++] = '\0';
 }
 
-void	*ft_memcpy(void *dest, const void *src, size_t n)
+inline void	*ft_memcpy(void *dest, const void *src, size_t n)
 {
 	char	*castsrc;
 	char	*castdest;
-	// size_t	len1;
 	size_t	i;
 
 	castsrc = (char *)src;
 	castdest = (char *)dest;
-	// len1 = ft_strlen(castsrc);
-    // printf("castsrc[i]: >%s<\n", castsrc);
-    // printf("castdest: >%s<\n", castdest);
-    // printf("len1=%d\n\n", len1);
-    // printf("n=%d\n\n", n);
 	i = 0;
-	// while (i < n && i < len1)
 	while (i < n)
 	{
 		castdest[i] = castsrc[i];
@@ -77,7 +27,7 @@ void	*ft_memcpy(void *dest, const void *src, size_t n)
 	return (castdest);
 }
 
-char	*ft_strnew(char *src)
+inline char	*ft_strnew(char *src)
 {
 	char	*str;
 	int 	len = ft_strlen(src);
@@ -89,7 +39,7 @@ char	*ft_strnew(char *src)
 	return (str);
 }
 
-int     ft_strcmp(const char *s1, const char *s2)
+inline int	ft_strcmp(const char *s1, const char *s2)
 {
 	while (*s1 == *s2 && *s1 && *s2)
 	{
@@ -99,7 +49,7 @@ int     ft_strcmp(const char *s1, const char *s2)
 	return ((unsigned char)(*s1) - (unsigned char)(*s2));
 }
 
-int		ft_strlen(char *p)
+inline int	ft_strlen(char *p)
 {
     unsigned long long *str = (unsigned long long *)p;
 	int	count = 0;
@@ -118,7 +68,7 @@ int		ft_strlen(char *p)
     return 0;
 }
 
-char    *ft_stradd_quote(char *str, int len)
+inline char	*ft_stradd_quote(char *str, int len)
 {
     char *newstr;
 
@@ -130,12 +80,29 @@ char    *ft_stradd_quote(char *str, int len)
     return newstr;
 }
 
-void	ft_putstr(char *s)
+inline void	ft_putstr(char *s)
 {
     int ret = write(1, s, ft_strlen(s));
     if (ret < 0)
     {
         ret = write(1, "write() failed.", 16);
         exit(EXIT_FAILURE);
+    }
+}
+
+void    	ft_printHex(Word_32bits n)
+{
+    unsigned char hex[16] = "0123456789abcdef";
+    unsigned char *word = (unsigned char *)&n;
+    unsigned char c_16e0;
+    unsigned char c_16e1;
+
+    for (int i = 0; i < 4; i++)
+    {
+        c_16e0 = hex[word[i] % 16];
+        c_16e1 = hex[word[i] / 16];
+        if (write(1, &c_16e1, 1) == -1 ||\
+            write(1, &c_16e0, 1) == -1)
+            freexit(EXIT_FAILURE);
     }
 }

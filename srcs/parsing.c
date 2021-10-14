@@ -14,7 +14,6 @@ t_hash *     addmsg_front()
         return NULL;
     init_hash(ssl.hash);
     ssl.hash->next = tmp;
-    // printf("add msg front: %p\n", ssl.hash);
     return ssl.hash;
 }
 
@@ -35,7 +34,6 @@ t_hash *     addmsg_back()
     }
     else
         ssl.hash = node;
-    // printf("add msg back: %p\n", node);
     return node;
 }
 
@@ -52,11 +50,9 @@ int     get_file_len(char *file)
     {
         if ((ret = read(fd, buff, BUFF_SIZE)) == -1)
             return EXIT_FAILURE;
-        // // printf("Read %d from %s: %s\n", ret, file, buff);
         len += ret;
     }
     close(fd);
-    // printf("file len: %d\n", len);
     return len;
 }
 
@@ -64,7 +60,6 @@ int     file_handler(t_hash *node, char *file)
 {
     int         fd;
 
-    // printf("File handler: %s / Node: %p\n", file, node);
     if (!node && !(node = addmsg_back()))
         return EXIT_FAILURE;
 
@@ -93,7 +88,6 @@ int     string_handler(t_hash *node, char *av_next)
     node->len = ft_strlen(av_next);
     if (!(node->name = ft_stradd_quote(av_next, node->len)))
         return EXIT_FAILURE;
-    // printf("String handler: %s\n", av_next);
     return 0;
 }
 
@@ -101,7 +95,6 @@ int     s_handler(char *av_next, int *i)
 {
     t_hash    *node;
 
-    // printf("s handler: %s\n", av_next);
     if (!(node = addmsg_back()))
         return EXIT_FAILURE;
 
@@ -117,7 +110,6 @@ int     s_handler(char *av_next, int *i)
 
 int     flags_handler(char *flag, char *av_next, int *i)
 {
-    // printf("Handle flag: %s\n", flag);
     if (!ft_strcmp(flag, "-p"))
         ssl.flags += P;
     if (!ft_strcmp(flag, "-q"))
@@ -131,7 +123,6 @@ int     flags_handler(char *flag, char *av_next, int *i)
 
 int     hash_func_handler(char *str)
 {
-    // printf("Handle hash func: %s\n", str);
     if (!ft_strcmp(str, "md5"))
     {
         ssl.hash_func = "MD5";
@@ -166,7 +157,6 @@ int     stdin_handler()
     {
         if ((ret = read(0, buff, BUFF_SIZE)) == -1)
             return EXIT_FAILURE;
-        // printf("Read %d from stdin: %s\n", ret, buff);
 
         tmp = node->msg;
         if (!(node->msg = (char *)malloc(sizeof(char) * (node->len + ret + 1))))
@@ -179,13 +169,10 @@ int     stdin_handler()
         node->len += ret;
     }
 
-    // printHex(tmp, node->len);
-
+    // Pre-computing for output part
     node->stdin = 1;
     if (ssl.flags & P)
     {
-        // printf("tmp: %s\n", tmp);
-        // printf("node->name: %s\n", node->name);
         tmp = ft_strnew(node->msg);
         if (tmp[node->len - 1] == '\n')
             tmp[node->len - 1] = '\0'; //To remove \n, it's like 'echo -n <node->msg> | ./ft_ssl ...'
@@ -201,7 +188,6 @@ int     stdin_handler()
     }
     else
         node->name = ft_strnew("stdin");
-    // printf("node->name: %s\n", node->name);
     return node->name ? 0 : EXIT_FAILURE;
 }
 
@@ -218,7 +204,6 @@ int     parsing(int ac, char **av)
     if (ac > 2)
         for (int i = 2; i < ac; i++)
         {
-            // printf("\nparam %d: %s\n", i, av[i]);
             if (av[i][0] == '-')
                 ret = flags_handler(av[i], i + 1 < ac ? av[i + 1] : NULL, &i);
             else
@@ -228,10 +213,7 @@ int     parsing(int ac, char **av)
         }
 
     if (ssl.flags & P || !ssl.hash)
-    {
-        // printf("\nSTDIN ??\n");
         if (stdin_handler())
             return EXIT_FAILURE;
-    }
     return 0;
 }
