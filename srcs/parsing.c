@@ -94,10 +94,13 @@ int     string_handler(t_hash *node, char *av_next)
     return 0;
 }
 
-int     s_handler(char *av_next)
+int     s_handler(char *av_next, int *i)
 {
     if (ssl.flags & S_md)
+    {
+        (*i)--; // Cancel -s as a flag parameter
         return file_handler(NULL, "-s");
+    }
     else
         return string_handler(NULL, av_next);
 }
@@ -108,7 +111,7 @@ int     param_handler(e_flags flag, char *av_next, int *i)
     // printf("I flag condition %d\n", flag & I);
     if (flag & S_md)
     {
-        if (s_handler(av_next))
+        if (s_handler(av_next, i))
             return EXIT_FAILURE;
     }
     else if (flag & I)

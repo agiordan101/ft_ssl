@@ -50,7 +50,8 @@ typedef struct  s_hash
     char            *msg;       // Content to hash // Malloc
     int             len;        // Length of content
     // unsigned int    hash[8];    // Hash result, made by commands
-    void           *hash;
+    // void           *hash;
+    Word_32bits     *hash;
     int             hashlen;
     int             error;      // FILENOTFOUND or 0
     struct s_hash *next;

@@ -61,16 +61,8 @@ void    hash_output(t_hash *p)
         ft_putstr((char *)p->hash);
     }
     else
-    {
-        // Word_32bits *hash = (Word_32bits *)p->hash;
-        printf("p->hash: %p\n", p->hash);
-        printf("p->hashlen: %d\n", p->hashlen);
-        for (int i = 0; i < p->hashlen; i++)
-        {
-            ft_printHex(((Word_32bits *)p->hash)[i]);
-            printf("(Word_32bits *)p->hash: %p\n", (Word_32bits *)&(p->hash[i]));
-        }
-    }
+        for (Word_32bits *tmp = p->hash; tmp < p->hash + p->hashlen; tmp += 1)
+            ft_printHex(*tmp);
 }
 
 void    stdin_quiet_output(t_hash *hash)
