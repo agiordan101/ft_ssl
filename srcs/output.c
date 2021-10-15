@@ -53,23 +53,17 @@ void    file_not_found(t_hash *hash)
     ft_putstr(": No such file or directory");
 }
 
-void    hash_output(t_hash *p)
+void    md_hash_output(t_hash *p)
 {
-    if (ssl.command == CIPHER)
-    {
-        // printf("hash output: \n");
-        ft_putstr((char *)p->hash);
-    }
-    else
-        for (Word_32bits *tmp = p->hash; tmp < p->hash + p->hashlen; tmp += 1)
-            ft_printHex(*tmp);
+    for (Word_32bits *tmp = p->hash; tmp < p->hash + p->hashlen; tmp += 1)
+        ft_printHex(*tmp);
 }
 
 void    stdin_quiet_output(t_hash *hash)
 {
     ft_putstr(hash->name);
     ft_putstr("\n");
-    hash_output(hash);
+    md_hash_output(hash);
 }
 
 void    stdin_output(t_hash *hash)
@@ -77,17 +71,17 @@ void    stdin_output(t_hash *hash)
     ft_putstr("(");
     ft_putstr(hash->name);
     ft_putstr(")= ");
-    hash_output(hash);
+    md_hash_output(hash);
 }
 
 void    quiet_output(t_hash *hash)
 {
-    hash_output(hash);
+    md_hash_output(hash);
 }
 
 void    reversed_output(t_hash *hash)
 {
-    hash_output(hash);
+    md_hash_output(hash);
     ft_putstr(" ");
     ft_putstr(hash->name);
 }
@@ -98,10 +92,10 @@ void    classic_output(t_hash *hash)
     ft_putstr(" (");
     ft_putstr(hash->name);
     ft_putstr(") = ");
-    hash_output(hash);
+    md_hash_output(hash);
 }
 
-void    output(t_hash *hash)
+void    md_output(t_hash *hash)
 {
     if (hash->error == FILENOTFOUND)
         file_not_found(hash);
@@ -124,6 +118,22 @@ void    output(t_hash *hash)
     
     else
         classic_output(hash);
+}
 
+void    cipher_output(t_hash *hash)
+{
+    if (((char *)hash->hash)[hash->hashlen - 1] == '\n')
+        ((char *)hash->hash)[hash->hashlen - 1] = '\0'; //To remove \n, it's like 'echo -n <node->msg> | ./ft_ssl ...'
+    ft_putstr((char *)hash->hash);
+}
+
+void    output(t_hash *hash)
+{
+    if (ssl.command & MD)
+        md_output(hash);
+    else if (ssl.command & CIPHER)
+        cipher_output(hash);
+    else
+        ;
     ft_putstr("\n");
 }
