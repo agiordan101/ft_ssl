@@ -11,7 +11,10 @@ void    printByte(char byte)
 // Debug function, not used in this project
 void    printBits(void *p, int size)
 {
-    char *mem = (char *)p;
+    // char *mem = (char *)p;
+    char mem[size + 1];
+    ft_memcpy(mem, (char *)p, size);
+    mem[size] = '\0';
 
     printf("len=%d -> >%s<\n", size, mem);
     for (int i = 0; i < size; i++)

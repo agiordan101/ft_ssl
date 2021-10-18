@@ -89,10 +89,10 @@ inline char	*ft_lower(char *str)
 
 inline void	ft_putstr(char *s)
 {
-    int ret = write(1, s, ft_strlen(s));
+    int ret = write(ssl.fd_out, s, ft_strlen(s));
     if (ret < 0)
     {
-        ret = write(1, "write() failed.", 16);
+        ret = write(1, "write() failed.\n", 17);
         exit(EXIT_FAILURE);
     }
 }
@@ -108,8 +108,12 @@ void    	ft_printHex(Word_32bits n)
     {
         c_16e0 = hex[word[i] % 16];
         c_16e1 = hex[word[i] / 16];
-        if (write(1, &c_16e1, 1) == -1 ||\
-            write(1, &c_16e0, 1) == -1)
+        if (write(ssl.fd_out, &c_16e1, 1) == -1 ||\
+            write(ssl.fd_out, &c_16e0, 1) == -1)
+        {
+            int ret = write(1, "ft_printHex() has failed.\n", 27);
+            (void)ret;
             freexit(EXIT_FAILURE);
+        }
     }
 }

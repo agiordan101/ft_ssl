@@ -172,6 +172,7 @@ typedef struct  s_ssl
     t_hash      *hash;
 
     char        *output_file;
+    int         fd_out;
 }               t_ssl;
 
 extern t_ssl    ssl;

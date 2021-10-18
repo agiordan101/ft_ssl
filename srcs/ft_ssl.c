@@ -20,10 +20,14 @@ void    ssl_free()
             free(hash->name);
         if (hash->msg)
             free(hash->msg);
+        if (hash->hash)
+            free(hash->hash);
         tmp = hash;
         hash = hash->next;
         free(tmp);
     }
+    if (ssl.flags & O)
+        close(ssl.fd_out);
 }
 
 void    freexit(int failure)
@@ -40,6 +44,9 @@ int     main(int ac, char **av)
     if ((ret = parsing(ac, av)))
         freexit(ret);
 
+    // Set output file descriptor (STDOUT as default)
+    ssl.fd_out = ssl.flags & O ? open(ssl.output_file, O_CREAT | O_WRONLY | O_TRUNC, 777) : 1;
+
     // printf("ssl.cipher.key: %s\n", ssl.cipher.key);
     // printf("ssl.cipher.password: %s\n", ssl.cipher.password);
     // printf("ssl.cipher.salt: %s\n", ssl.cipher.salt);
@@ -48,6 +55,7 @@ int     main(int ac, char **av)
     t_hash *hash = ssl.hash;
     while (hash)
     {
+        // printf("hash->msg: >%s<\n", hash->msg);
         ssl.hash_func_addr(hash);
         output(hash);
         hash = hash->next;

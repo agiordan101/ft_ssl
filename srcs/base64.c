@@ -43,7 +43,7 @@ static inline int   base64ToInt(char num)
 
 static inline int   get_len_encoded(int len)
 {
-    return (int)(len / 3) * 4 + 4;
+    return (int)(len / 3) * 4 + (len % 3 ? 4 : 0);
 }
 
 static inline int   get_len_decoded(Mem_8bits *msg, int len)
@@ -70,13 +70,16 @@ static void         encode(t_hash *hash)
         freexit(EXIT_FAILURE);
     char *hash_p = (char *)hash->hash;
 
-    // printf("hash->hashlen: %d\n", hash->hashlen);
-    // printf("hash->len: %d\n", hash->len);
-    char *msg_24bits_blocks_end = hash->msg + (hash->len - hash->len % 3) + 3;
+    // Padding to the next 24bits block of memory
+    char *msg_24bits_blocks_end = hash->msg + hash->len + (hash->len % 3 ? 3 - hash->len % 3 : 0);
     for (Mem_8bits *tmp = hash->msg; (char *)tmp < msg_24bits_blocks_end; tmp += 3)
     {
         b2 = (char *)(tmp + 1) < msg_24bits_blocks_end ? *(tmp + 1) : 0b0;
         b3 = (char *)(tmp + 2) < msg_24bits_blocks_end ? *(tmp + 2) : 0b0;
+        // printf("\nBits begin loop:\n");
+        // printBits(tmp, 1);
+        // printBits(&b2, 1);
+        // printBits(&b3, 1);
         // 00101011 11000101  10101000
         // 001010 111100 010110 101000
         group[0] = *tmp >> 2;
@@ -84,20 +87,21 @@ static void         encode(t_hash *hash)
         group[2] = (b2 & 0b00001111) << 2 | b3 >> 6;
         group[3] = b3 & 0b00111111;
 
-        // printf("\nBits of group[4]:\n");
-        // for (int i = 0; i < 4; i++)
-        //     printBits(&group[i], 1);
-
         for (int i = 0; i < 4; i++)
-            group[i] = base[group[i]];
+            group[i] = (Mem_8bits)base[group[i]];
         
         if (!b2)
             group[2] = '=';
         if (!b3)
             group[3] = '=';
 
+        // printf("Bits of group[4] end loop:\n");
+        // for (int i = 0; i < 4; i++)
+        //     printBits((Mem_8bits *)&group[i], 1);
+
         ft_memcpy(hash_p, (char *)group, 4);
         hash_p += 4;
+        // printf("tmp: %p\n", tmp);
         // printf("tmp: %p\n", tmp);
         // printf("msg_24bits_blocks_end: %p\n", msg_24bits_blocks_end);
     }
