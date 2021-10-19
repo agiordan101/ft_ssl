@@ -33,7 +33,7 @@ inline char	*ft_strnew(char *src)
 	int 	len = ft_strlen(src);
 
 	if (!(str = (char *)malloc(sizeof(char) * (len + 1))))
-		return (NULL);
+		malloc_failed("Unable to malloc string in ft_strnew() function\n");
 	ft_memcpy(str, src, len);
 	str[len] = '\0';
 	return (str);
@@ -73,7 +73,7 @@ inline char	*ft_stradd_quote(char *str, int len)
     char *newstr;
 
     if (!(newstr = (char *)malloc(sizeof(char) * (len + 3))))
-        return NULL;
+		malloc_failed("Unable to malloc string in ft_stradd_quote() function\n");
     newstr[0] = '\"';
     ft_memcpy(newstr + 1, str, len);
     ft_memcpy(newstr + len + 1, "\"\0", 2);
@@ -92,9 +92,60 @@ inline void	ft_putstr(char *s)
     int ret = write(ssl.fd_out, s, ft_strlen(s));
     if (ret < 0)
     {
-        ret = write(1, "write() failed.\n", 17);
-        exit(EXIT_FAILURE);
+        char c = '\n';
+        ret = write(1, "write() failed in ft_putstr(), fd=", 35);
+        ft_putnbr(1, ssl.fd_out);
+        ret = write(1, &c, 1);
+        freexit(EXIT_FAILURE);
     }
+}
+
+void    	ft_putnbr(int fd, int n)
+{
+	if (n > 9)
+	{
+		ft_putnbr(fd, n / 10);
+		ft_putnbr(fd, n % 10);
+	}
+	if (n >= 0 && n <= 9)
+    {
+        char c = n + '0';
+        c = write(fd, &c, 1);
+    }
+}
+
+inline Long_64bits ft_strtoHex(char *str)
+{
+	Long_64bits nbr = 0;
+
+    str = ft_lower(str);
+	for (int i = 0; i < ft_strlen(str); i++)
+        if ('0' <= str[i] && str[i] <= '9')
+		    nbr = nbr * 16 + (str[i] - '0');
+        else if ('a' <= str[i] && str[i] <= 'e')
+		    nbr = nbr * 16 + 10 + (str[i] - 'a');
+	return nbr;
+}
+
+char    *ft_hexToBin(Long_64bits n, int byteSz)
+{
+    char          *bin;
+    unsigned char hex[16] = "0123456789abcdef";
+    unsigned char *num = (unsigned char *)&n;
+    unsigned char c_16e0;
+    unsigned char c_16e1;
+
+    if (!(bin = (char *)malloc(sizeof(char) * (byteSz * 2 + 1))))
+        malloc_failed("Unable to malloc string in libft ft_hexToBin function\n");
+    bin[byteSz * 2] = '\0';
+    // for (int i = byteSz; i >= 0; i--)
+    for (int i = 0; i < byteSz; i++)
+    {
+        bin[byteSz - i * 2] = hex[num[i] / 16];
+        if (i + 1 < byteSz)
+            bin[byteSz - i * 2 + 1] = hex[num[i] % 16];
+    }
+    return bin;
 }
 
 void    	ft_printHex(Word_32bits n)
@@ -104,7 +155,7 @@ void    	ft_printHex(Word_32bits n)
     unsigned char c_16e0;
     unsigned char c_16e1;
 
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < WORD_ByteSz; i++)
     {
         c_16e0 = hex[word[i] % 16];
         c_16e1 = hex[word[i] / 16];

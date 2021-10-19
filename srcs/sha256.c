@@ -118,12 +118,36 @@ void        sha256(t_hash *hash)
     }
 
     // Cpy SHA256 result
-    hash->hashlen = 8;
-    if (!(hash->hash = malloc(hash->hashlen * WORD_ByteSz)))
-        freexit(EXIT_FAILURE);
-    ft_memcpy(hash->hash, sha.hash, hash->hashlen * WORD_ByteSz);
+    hash->hashWordSz = SHA256_WordSz;
+    if (!(hash->hash = malloc(hash->hashWordSz * WORD_ByteSz)))
+        malloc_failed("Unable to malloc msg in sha256() function\n");
+    ft_memcpy(hash->hash, sha.hash, hash->hashWordSz * WORD_ByteSz);
 
     // little endian to big endian
-    for (Word_32bits *tmp = hash->hash; tmp < hash->hash + hash->hashlen; tmp += 1)
+    for (Word_32bits *tmp = hash->hash; tmp < hash->hash + hash->hashWordSz; tmp += 1)
         endianReverse((Mem_8bits *)tmp, WORD_ByteSz);
+}
+
+
+void        sha256_msg(Mem_8bits **msg, int *byteSz)
+{
+    t_hash hash = (t_hash){0, NULL, *msg, *byteSz, NULL, 0, 0, NULL};
+
+    sha256(&hash);
+    md_hash_output(&hash);
+    *msg = (Mem_8bits *)hash.hash;
+    *byteSz = hash.hashWordSz * WORD_ByteSz;
+}
+
+
+inline void sha256_xor_32bits(Word_32bits *sha1, Word_32bits *sha2, Word_32bits **result)
+{
+    for (int i = 0; i < SHA256_WordSz; i++)
+        (*result)[i] = sha1[i] ^ sha2[i];
+}
+
+inline void sha256_xor_8bits(Mem_8bits *sha1, Mem_8bits *sha2, Mem_8bits **result)
+{
+    for (int i = 0; i < SHA256_byteSz; i++)
+        (*result)[i] = sha1[i] ^ sha2[i];
 }

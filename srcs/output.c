@@ -10,7 +10,7 @@ void    print_usage()
     ft_putstr("\t-p: echo STDIN to STDOUT and append the checksum to STDOUT\n");
     ft_putstr("\t-q: quiet mode\n");
     ft_putstr("\t-r: reverse the format of the output\n");
-    ft_putstr("\t-s: print the sum of the given string\n\n");
+    ft_putstr("\t-s: print the sum of the given string\n");
     ft_putstr("\t-i: input file for message\n");
     ft_putstr("\t-o: output file for hash\n");
 
@@ -41,30 +41,9 @@ void    file_not_found(t_hash *hash)
     ft_putstr(": No such file or directory");
 }
 
-// void    file_output(char *hash, int hashlen)
-// {
-//     int fd;
-
-//     fd = open(ssl.output_file, O_CREAT | O_WRONLY, 777);
-//     // if ((fd = open(ssl.output_file, O_CREAT | O_WRONLY, 777)) == -1)
-//     // {
-//     //     file_not_found(hash);
-//     //     return ;
-//     // }
-//     printf("write to fd %d: >%s<\n", fd, hash);
-//     if (write(fd, hash, hashlen) == -1)
-//     {
-//         ft_putstr("[file output error] write() in '");
-//         ft_putstr(ssl.output_file);
-//         ft_putstr("' has failed\n");
-//         freexit(EXIT_FAILURE);
-//     }
-//     close(fd);
-// }
-
 void    md_hash_output(t_hash *p)
 {
-    for (Word_32bits *tmp = p->hash; tmp < p->hash + p->hashlen; tmp += 1)
+    for (Word_32bits *tmp = p->hash; tmp < p->hash + p->hashWordSz; tmp += 1)
         ft_printHex(*tmp);
 }
 
@@ -127,25 +106,8 @@ void    md_output(t_hash *hash)
 
 void    cipher_output(t_hash *hash)
 {
-    // if (ssl.flags & O)
-    // {
-    //     // file_output((char *)hash->hash, hash->hashlen);
-    //     if (write(ssl.fd_out, (char *)hash->hash, hash->hashlen) == -1)
-    //     {
-    //         ft_putstr("[file output error] write() in '");
-    //         ft_putstr(ssl.output_file);
-    //         ft_putstr("' has failed\n");
-    //         freexit(EXIT_FAILURE);
-    //     }
-    // }
-    // else
-    // {
-    //     if (((char *)hash->hash)[hash->hashlen - 1] == '\n')
-    //         ((char *)hash->hash)[hash->hashlen - 1] = '\0'; //To remove \n, it's like 'echo -n <node->msg> | ./ft_ssl ...'
-    //     ft_putstr((char *)hash->hash);
-    // }
-    if (((char *)hash->hash)[hash->hashlen - 1] == '\n')
-        ((char *)hash->hash)[hash->hashlen - 1] = '\0'; //To remove \n, it's like 'echo -n <node->msg> | ./ft_ssl ...'
+    if (((char *)hash->hash)[hash->hashWordSz - 1] == '\n')
+        ((char *)hash->hash)[hash->hashWordSz - 1] = '\0'; //To remove \n, it's like 'echo -n <node->msg> | ./ft_ssl ...'
     ft_putstr((char *)hash->hash);
 }
 

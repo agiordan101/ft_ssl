@@ -11,7 +11,7 @@ t_hash *     addmsg_front()
 
     tmp = ssl.hash;
     if (!(ssl.hash = (t_hash *)malloc(sizeof(t_hash))))
-        return NULL;
+		malloc_failed("Unable to malloc new t_hash in parsing addmsg_front() function\n");
     init_hash(ssl.hash);
     ssl.hash->next = tmp;
     return ssl.hash;
@@ -23,7 +23,7 @@ t_hash *     addmsg_back()
     t_hash *node;
 
     if (!(node = (t_hash *)malloc(sizeof(t_hash))))
-        return NULL;
+		malloc_failed("Unable to malloc new t_hash in parsing addmsg_back() function\n");
     init_hash(node);
     if (ssl.hash)
     {
@@ -45,7 +45,7 @@ int     get_file_len(char *file)
     int     fd;
 
     if ((fd = open(file, O_RDONLY)) == -1)
-        return EXIT_FAILURE;
+        open_failed(" in parsing get_file_len() function\n", file);
     while (ret == BUFF_SIZE)
     {
         if ((ret = read(fd, buff, BUFF_SIZE)) == -1)
@@ -71,7 +71,7 @@ int     file_handler(t_hash *node, char *file)
     {
         node->len = get_file_len(file);
         if (!(node->msg = (char *)malloc(sizeof(char) * (node->len + 1))))
-            return EXIT_FAILURE;
+		    malloc_failed("Unable to malloc msg in parsing file_handler() function\n");
         node->msg[node->len] = '\0';
 
         if (read(fd, node->msg, node->len) == -1)
@@ -122,13 +122,13 @@ int     param_handler(e_flags flag, char *av_next, int *i)
     else if (flag & O)
         ssl.output_file = av_next;
     else if (flag & K)
-        ssl.cipher.key = av_next;
+        ssl.cipher.key = ft_strnew(av_next);
     else if (flag & P_cipher)
-        ssl.cipher.password = av_next;
+        ssl.cipher.password = ft_strnew(av_next);
     else if (flag & S_cipher)
-        ssl.cipher.salt = av_next;
+        ssl.cipher.salt = (Mem_8bits *)av_next;
     else if (flag & V)
-        ssl.cipher.vector = av_next;
+        ssl.cipher.vector = ft_strnew(av_next);
     (*i)++;
     return 0;
 }
@@ -187,6 +187,12 @@ int     hash_func_handler(char *str)
         ssl.hash_func_addr = base64;
         ssl.command = CIPHER;
     }
+    else if (!ft_strcmp(str, "des"))
+    {
+        ssl.hash_func = "DES";
+        ssl.hash_func_addr = des;
+        ssl.command = CIPHER;
+    }
     else
     {
         ft_putstr("ft_ssl: Error: '");
@@ -214,7 +220,7 @@ int     stdin_handler()
 
         tmp = node->msg;
         if (!(node->msg = (char *)malloc(sizeof(char) * (node->len + ret + 1))))
-            return EXIT_FAILURE;
+		    malloc_failed("Unable to malloc msg in parsing stdin_handler() function\n");
         node->msg[node->len + ret] = '\0';
         ft_memcpy(node->msg, tmp, node->len);
         ft_memcpy(node->msg + node->len, buff, ret);

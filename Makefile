@@ -14,6 +14,8 @@ SRC			=	$(NAME).c \
 				md5.c \
 				sha256.c \
 				base64.c \
+				pbkdf2.c \
+				des.c \
 				bitwise.c \
 				operations.c \
 				libft.c \

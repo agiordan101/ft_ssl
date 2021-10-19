@@ -37,20 +37,33 @@ void    freexit(int failure)
         exit(EXIT_FAILURE);
 }
 
+void    malloc_failed(char *errormsg)
+{
+    ft_putstr("[MALLOC FAILED] ");
+    ft_putstr(errormsg);
+    freexit(EXIT_FAILURE);
+}
+
+void    open_failed(char *errormsg, char *file)
+{
+    ft_putstr("[OPEN FAILED] Unable to open file=");
+    ft_putstr(file);
+    ft_putstr(errormsg);
+    freexit(EXIT_FAILURE);
+}
+
 int     main(int ac, char **av)
 {
     int     ret;
 
+    ssl.fd_out = 1;
     if ((ret = parsing(ac, av)))
         freexit(ret);
 
     // Set output file descriptor (STDOUT as default)
-    ssl.fd_out = ssl.flags & O ? open(ssl.output_file, O_CREAT | O_WRONLY | O_TRUNC, 777) : 1;
-
-    // printf("ssl.cipher.key: %s\n", ssl.cipher.key);
-    // printf("ssl.cipher.password: %s\n", ssl.cipher.password);
-    // printf("ssl.cipher.salt: %s\n", ssl.cipher.salt);
-    // printf("ssl.cipher.vector: %s\n", ssl.cipher.vector);
+    if (ssl.flags & O)
+        if ((ssl.fd_out = open(ssl.output_file, O_CREAT | O_WRONLY | O_TRUNC, 777)) == -1)
+            open_failed(" in ft_ssl main() function\n", ssl.output_file);
 
     t_hash *hash = ssl.hash;
     while (hash)

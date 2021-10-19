@@ -16,8 +16,6 @@ typedef unsigned int    Word_32bits;
 
 # define WORD_ByteSz    sizeof(Word_32bits)      // 4 bytes or 32 bits
 # define LONG64_ByteSz  sizeof(Long_64bits)          // 8 bytes or 64 bits
-# define HASH_ByteSz    (16 * sizeof(Mem_8bits))     // 16 bytes or 128 bits
-# define CHUNK_ByteSz   (16 * sizeof(Word_32bits))    // 64 bytes or 512 bits
 
 # define BUFF_SIZE      42
 # define FILENOTFOUND   1
@@ -49,36 +47,42 @@ typedef struct  s_hash
     char            *name;      // stdin / file name / -s string arg // Malloc
     char            *msg;       // Content to hash // Malloc
     int             len;        // Length of content
-    // unsigned int    hash[8];    // Hash result, made by commands
-    // void           *hash;
     Word_32bits     *hash;
-    int             hashlen;
+    int             hashWordSz;
     int             error;      // FILENOTFOUND or 0
     struct s_hash *next;
 }               t_hash;
 
-int     parsing(int ac, char **av);
-void    padding(Mem_8bits **data, Long_64bits *byteSz, char reverseByteSz);
-void    freexit(int failure);
+int         parsing(int ac, char **av);
+void        freexit(int failure);
+void        malloc_failed(char *errormsg);
+void        open_failed(char *errormsg, char *file);
 
-void	ft_bzero(void *s, size_t n);
-void	*ft_memcpy(void *dest, const void *src, size_t n);
-char	*ft_strnew(char *src);
-int		ft_strlen(char *p);
-int     ft_strcmp(const char *s1, const char *s2);
-char    *ft_stradd_quote(char *str, int len);
-char	*ft_lower(char *str);
-void	ft_putstr(char *s);
-void    ft_printHex(Word_32bits n);
+void	    ft_bzero(void *s, size_t n);
+void	    *ft_memcpy(void *dest, const void *src, size_t n);
+char	    *ft_strnew(char *src);
+int		    ft_strlen(char *p);
+int         ft_strcmp(const char *s1, const char *s2);
+char        *ft_stradd_quote(char *str, int len);
+char	    *ft_lower(char *str);
+Long_64bits ft_strtoHex(char *str);
+char        *ft_hexToBin(Long_64bits n, int byteSz);
+void	    ft_putstr(char *s);
+void    	ft_putnbr(int fd, int n);
+void        ft_printHex(Word_32bits n);
 
-void    output(t_hash *hash);
-void    print_usage();
+void        output(t_hash *hash);
+void        print_usage();
 
+void        md_hash_output(t_hash *p);      // Temporally
 
 
 /*
     Bitwise operations --------------------------------
 */
+
+Mem_8bits   *padXbits(Mem_8bits **mem, int *byteSz, int newSz);
+void        padding(Mem_8bits **data, Long_64bits *byteSz, char reverseByteSz);
 
 Mem_8bits   endianReverseByte(Mem_8bits byte);
 void        endianReverse(Mem_8bits *mem, Long_64bits byteSz);
@@ -93,8 +97,19 @@ void        printHex(void *p, int size);
 
 
 /*
+    ----------------------------------------------------
+    MD
+    ----------------------------------------------------
+*/
+
+# define CHUNK_ByteSz   (16 * sizeof(Word_32bits))    // 64 bytes or 512 bits
+
+/*
     MD5 Data -----------------------------------------
 */
+
+# define    MD5_WordSz  4
+# define    MD5_byteSz  MD5_WordSz * WORD_ByteSz     // 16 bytes / 128 bits  
 
 typedef struct  s_md5
 {
@@ -102,26 +117,33 @@ typedef struct  s_md5
     Long_64bits chunksSz;
     Word_32bits sinus[64];
     Word_32bits constants[64];
-    Word_32bits hash[4];
+    Word_32bits hash[MD5_WordSz];
 }               t_md5;
 
 void    md5(t_hash *hash);
-
 
 
 /*
     SHA256 Data --------------------------------------
 */
 
+# define    SHA256_WordSz  8
+# define    SHA256_byteSz  SHA256_WordSz * WORD_ByteSz     // 32 bytes / 256 bits  
+
 typedef struct  s_sha
 {
     Mem_8bits   *chunks;
     Long_64bits chunksSz;
     Word_32bits k[64];
-    Word_32bits hash[8];
+    Word_32bits hash[SHA256_WordSz];
 }               t_sha;
 
-void    sha256(t_hash *hash);
+void        sha256(t_hash *hash);
+void        sha256_mod256(Mem_8bits **msg, int *len);
+void        sha256_xor_32bits(Word_32bits *sha1, Word_32bits *sha2, Word_32bits **result);
+void        sha256_xor_8bits(Mem_8bits *sha1, Mem_8bits *sha2, Mem_8bits **result);
+
+
 
 /*
     ----------------------------------------------------
@@ -131,11 +153,19 @@ void    sha256(t_hash *hash);
 
 typedef struct  s_cipher
 {
-    char        *key;    // No malloc
-    char        *password;  // No malloc
-    char        *salt;      // No malloc
-    char        *vector;    // No malloc
+    Mem_8bits   *key;       // malloc
+    Mem_8bits   *password;  // malloc
+    Mem_8bits   *salt;      // malloc
+    int         saltSz;
+    Mem_8bits   *vector;    // malloc
 }               t_cipher;
+
+Long_64bits     pbkdf2_sha256(Mem_8bits *pwd, Mem_8bits *s, int c);
+
+// typedef struct  s_pbkdf2
+// {
+
+// }               t_pbkdf2;
 
 /*
     BASE64 Data --------------------------------------
@@ -149,11 +179,13 @@ void        base64(t_hash *hash);
     DES Data --------------------------------------
 */
 
+# define KEY_byteSz     sizeof(Mem_8bits) * 8
+
 // typedef struct  s_des
 // {
 // }               t_des;
 
-// void        des(t_hash *hash);
+void        des(t_hash *hash);
 
 
 

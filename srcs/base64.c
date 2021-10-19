@@ -65,9 +65,9 @@ static void         encode(t_hash *hash)
     Mem_8bits   b3;
 
     // printBits(hash->msg, hash->len);
-    hash->hashlen = get_len_encoded(hash->len);
-    if (!(hash->hash = malloc(hash->hashlen * WORD_ByteSz)))
-        freexit(EXIT_FAILURE);
+    hash->hashWordSz = get_len_encoded(hash->len);
+    if (!(hash->hash = malloc(hash->hashWordSz * WORD_ByteSz)))
+        malloc_failed("Unable to malloc hash in base64 encode() function.\n");
     char *hash_p = (char *)hash->hash;
 
     // Padding to the next 24bits block of memory
@@ -105,7 +105,7 @@ static void         encode(t_hash *hash)
         // printf("tmp: %p\n", tmp);
         // printf("msg_24bits_blocks_end: %p\n", msg_24bits_blocks_end);
     }
-    // printBits(hash->hash, hash->hashlen);
+    // printBits(hash->hash, hash->hashWordSz);
 }
 
 static void         clean_base64(Mem_8bits **msg, int *len)
@@ -122,6 +122,7 @@ static void         clean_base64(Mem_8bits **msg, int *len)
 
     free(*msg);
     if (!(*msg = (char *)malloc(sizeof(char) * (newlen + 1))))
+        malloc_failed("Unable to malloc msg in base64 clean_base64() function\n");
     (*msg)[newlen] = '\0';
     ft_memcpy(*msg, newmsg, newlen);
     *len = newlen;
@@ -137,9 +138,9 @@ static void         decode(t_hash *hash)
 
     // printBits(hash->msg, hash->len);
     // printf("get_len_decoded: %d\n", get_len_decoded(hash->msg, hash->len));
-    hash->hashlen = get_len_decoded(hash->msg, hash->len);
-    if (!(hash->hash = malloc(hash->hashlen * WORD_ByteSz)))
-        freexit(EXIT_FAILURE);
+    hash->hashWordSz = get_len_decoded(hash->msg, hash->len);
+    if (!(hash->hash = malloc(hash->hashWordSz * WORD_ByteSz)))
+        malloc_failed("Unable to malloc hash in base64 decode() function\n");
     char *hash_p = (char *)hash->hash;
    
     for (Mem_8bits *tmp = hash->msg; (char *)tmp < hash->msg + hash->len; tmp += 4)
@@ -164,7 +165,7 @@ static void         decode(t_hash *hash)
         ft_memcpy(hash_p, (char *)decoded, 3);
         hash_p += 3;
     }
-    // printBits(hash->hash, hash->hashlen);
+    // printBits(hash->hash, hash->hashWordSz);
 }
 
 void        base64(t_hash *hash)
