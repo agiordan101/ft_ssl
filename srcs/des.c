@@ -8,20 +8,19 @@ static void init_vars(t_cipher *cipher)
     printf("ssl.cipher.salt: %s\n", ssl.cipher.salt);
     printf("ssl.cipher.vector: %s\n", ssl.cipher.vector);
     
-    Long_64bits tmp = ft_strtoHex(cipher->salt);
-    printBits(&tmp, LONG64_ByteSz);
-    ft_printHex(tmp);
-    printf("tmp: %lx\n", tmp);
+    ssl.cipher.salt = ft_strHexToBin(ssl.cipher.salt, ssl.cipher.saltSz);
+    ssl.cipher.saltSz = ft_strlen(ssl.cipher.salt);
 
-    cipher->salt = ft_hexToBin(tmp, LONG64_ByteSz);
-    cipher->saltSz = ft_strlen(cipher->salt);
-    printBits(cipher->salt, cipher->saltSz);
-
+    padXbits(&ssl.cipher.salt, ssl.cipher.saltSz, KEY_byteSz);
+    ssl.cipher.saltSz = KEY_byteSz;
+    // printf("salt key: \n");
+    printBits(ssl.cipher.salt, KEY_byteSz);
     exit(0);
 
     if (cipher->salt)
     {
-        padXbits(&cipher->salt, &cipher->saltSz, KEY_byteSz); // To move in des algorithm
+        padXbits(&cipher->salt, cipher->saltSz, KEY_byteSz);
+        cipher->saltSz = KEY_byteSz;
         printBits(cipher->salt, cipher->saltSz);
         
         printf("ssl.cipher.salt: %s\n", ssl.cipher.salt);

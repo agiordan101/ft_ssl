@@ -11,8 +11,8 @@
 */
 
 typedef unsigned char   Mem_8bits;
-typedef unsigned long   Long_64bits;
 typedef unsigned int    Word_32bits;
+typedef unsigned long   Long_64bits;
 
 # define WORD_ByteSz    sizeof(Word_32bits)      // 4 bytes or 32 bits
 # define LONG64_ByteSz  sizeof(Long_64bits)          // 8 bytes or 64 bits
@@ -70,6 +70,7 @@ char        *ft_hexToBin(Long_64bits n, int byteSz);
 void	    ft_putstr(char *s);
 void    	ft_putnbr(int fd, int n);
 void        ft_printHex(Word_32bits n);
+Mem_8bits   *ft_strHexToBin(Mem_8bits *str, int byteSz);
 
 void        output(t_hash *hash);
 void        print_usage();
@@ -81,7 +82,7 @@ void        md_hash_output(t_hash *p);      // Temporally
     Bitwise operations --------------------------------
 */
 
-Mem_8bits   *padXbits(Mem_8bits **mem, int *byteSz, int newSz);
+Mem_8bits   *padXbits(Mem_8bits **mem, int byteSz, int newSz);
 void        padding(Mem_8bits **data, Long_64bits *byteSz, char reverseByteSz);
 
 Mem_8bits   endianReverseByte(Mem_8bits byte);
@@ -151,6 +152,7 @@ void        sha256_xor_8bits(Mem_8bits *sha1, Mem_8bits *sha2, Mem_8bits **resul
     ----------------------------------------------------
 */
 
+
 typedef struct  s_cipher
 {
     Mem_8bits   *key;       // malloc
@@ -179,7 +181,9 @@ void        base64(t_hash *hash);
     DES Data --------------------------------------
 */
 
-# define KEY_byteSz     sizeof(Mem_8bits) * 8
+typedef unsigned long   Key_64bits;
+
+# define KEY_byteSz     sizeof(Key_64bits)
 
 // typedef struct  s_des
 // {

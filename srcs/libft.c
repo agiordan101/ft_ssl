@@ -132,8 +132,6 @@ char    *ft_hexToBin(Long_64bits n, int byteSz)
     char          *bin;
     unsigned char hex[16] = "0123456789abcdef";
     unsigned char *num = (unsigned char *)&n;
-    unsigned char c_16e0;
-    unsigned char c_16e1;
 
     if (!(bin = (char *)malloc(sizeof(char) * (byteSz * 2 + 1))))
         malloc_failed("Unable to malloc string in libft ft_hexToBin function\n");
@@ -145,6 +143,67 @@ char    *ft_hexToBin(Long_64bits n, int byteSz)
         if (i + 1 < byteSz)
             bin[byteSz - i * 2 + 1] = hex[num[i] % 16];
     }
+    return bin;
+}
+
+Mem_8bits        *ft_strHexToBin(Mem_8bits *str, int byteSz)
+{
+    Key_64bits tmp = ft_strtoHex(str);
+    // printBits(&tmp, KEY_byteSz);
+    // ft_printHex(tmp);
+    // printf("tmp: %lx\n", tmp);
+
+    int         bin_i = 0;
+    Mem_8bits   *bin = (Mem_8bits *)&tmp;
+    endianReverse(bin, KEY_byteSz);
+    // printBits(bin, KEY_byteSz);
+
+    int         out_i = 0;
+    Mem_8bits   out[KEY_byteSz];
+    ft_bzero(out, KEY_byteSz);
+
+    // Skip zero bytes at the beginning
+    while (!bin[bin_i] && bin_i < KEY_byteSz) bin_i++;
+    // printf("After zero bytes skipped, bin_i=%d\n", bin_i);
+
+    // Is first non-null byte upper than 0x0f ? (To remove zero of byte left-side)
+    if (bin[bin_i] & 0b11110000)
+    {
+        while (bin_i < KEY_byteSz)
+        {
+            out[out_i++] = bin[bin_i++];
+            // printf("out[out_i++]=%x\n", out[out_i - 1]);
+        }
+    }
+    else
+    {
+        out[out_i++] = bin[bin_i++] << 4;
+        // printf("out[0]=%x\n", out[0]);
+        // printf("out_i=%d\n", out_i-1);
+        // printf("bin_i=%d\n\n", bin_i);
+        while (bin_i < KEY_byteSz)
+        {
+            out[(int)(out_i / 2)] += out_i % 2 ? bin[bin_i] >> 4 : bin[bin_i] & 0b00001111;
+            // printf("out[%d]=%x\n", (int)(out_i / 2), out[(int)(out_i / 2)]);
+            // printf("out_i=%d\n", out_i);
+            // printf("bin_i=%d\n\n", bin_i);
+            out_i++;
+
+            out[(int)(out_i / 2)] += out_i % 2 ? bin[bin_i++] & 0b11110000 : bin[bin_i++] << 4;
+            // printf("out[%d]=%x\n", (int)(out_i / 2), out[(int)(out_i / 2)]);
+            // printf("out_i=%d\n", out_i);
+            // printf("bin_i=%d\n\n", bin_i);
+            out_i++;
+        }
+        out_i = out_i % 2 ? (out_i - out_i % 2) / 2 + 1 : out_i / 2;
+    }
+    // printBits(out, out_i);
+    // exit(0);
+
+    if (!(bin = (Mem_8bits *)malloc(sizeof(Mem_8bits) * (out_i + 1))))
+        malloc_failed("Unable to malloc string in libft ft_hexToBin function\n");
+    ft_bzero(bin, out_i + 1);
+    ft_memcpy(bin, out, out_i);
     return bin;
 }
 
