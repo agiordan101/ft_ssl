@@ -41,6 +41,13 @@ void    file_not_found(t_hash *hash)
     ft_putstr(": No such file or directory");
 }
 
+void    key_output(Mem_8bits *p)
+{
+    Word_32bits *key = (Word_32bits *)p;
+    for (Word_32bits *tmp = key; tmp < key + KEY_byteSz / WORD_ByteSz; tmp += 1)
+        ft_printHex(*tmp);
+}
+
 void    md_hash_output(t_hash *p)
 {
     for (Word_32bits *tmp = p->hash; tmp < p->hash + p->hashWordSz; tmp += 1)

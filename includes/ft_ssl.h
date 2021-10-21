@@ -5,6 +5,7 @@
 # include <fcntl.h>
 # include <limits.h>
 # include <math.h>
+# include <time.h>
 
 /*
     ft_ssl Data --------------------------------------
@@ -25,6 +26,7 @@ typedef unsigned long   Long_64bits;
 
 # define ENDMSG         0b10000000
 # define INTMAXLESS1    (Word_32bits)pow(2, 32) - 1
+# define HEXABASE       "0123456789abcdef"
 
 typedef enum flags {
     // Message Digest
@@ -61,6 +63,7 @@ void        open_failed(char *errormsg, char *file);
 void	    ft_bzero(void *s, size_t n);
 void	    *ft_memcpy(void *dest, const void *src, size_t n);
 char	    *ft_strnew(char *src);
+char    	*ft_strinsert(char *str1, char *toinsert, char *str2);
 int		    ft_strlen(char *p);
 int         ft_strcmp(const char *s1, const char *s2);
 char        *ft_stradd_quote(char *str, int len);
@@ -73,9 +76,9 @@ void        ft_printHex(Word_32bits n);
 Mem_8bits   *ft_strHexToBin(Mem_8bits *str, int byteSz);
 
 void        output(t_hash *hash);
-void        print_usage();
-
+void        key_output(Mem_8bits *p);
 void        md_hash_output(t_hash *p);      // Temporally
+void        print_usage();
 
 
 /*
@@ -152,6 +155,9 @@ void        sha256_xor_8bits(Mem_8bits *sha1, Mem_8bits *sha2, Mem_8bits **resul
     ----------------------------------------------------
 */
 
+typedef unsigned long   Key_64bits;
+
+# define KEY_byteSz     sizeof(Key_64bits)
 
 typedef struct  s_cipher
 {
@@ -162,7 +168,7 @@ typedef struct  s_cipher
     Mem_8bits   *vector;    // malloc
 }               t_cipher;
 
-Long_64bits     pbkdf2_sha256(Mem_8bits *pwd, Mem_8bits *s, int c);
+Mem_8bits     *pbkdf2_sha256(Mem_8bits *pwd, Mem_8bits *s, int c);
 
 // typedef struct  s_pbkdf2
 // {
@@ -181,15 +187,11 @@ void        base64(t_hash *hash);
     DES Data --------------------------------------
 */
 
-typedef unsigned long   Key_64bits;
-
-# define KEY_byteSz     sizeof(Key_64bits)
-
 // typedef struct  s_des
 // {
 // }               t_des;
 
-void        des(t_hash *hash);
+void        descbc(t_hash *hash);
 
 
 

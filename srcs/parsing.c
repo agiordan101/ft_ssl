@@ -105,6 +105,14 @@ int     s_handler(char *av_next, int *i)
         return string_handler(NULL, av_next);
 }
 
+Mem_8bits *parse_key(char *str)
+{
+    str = ft_strHexToBin(str, ft_strlen(str));
+    padXbits((Mem_8bits **)&str, ft_strlen(str), KEY_byteSz);
+    printBits(str, KEY_byteSz);
+    return str;
+}
+
 int     param_handler(e_flags flag, char *av_next, int *i)
 {
     // printf("V flag condition %d\n", flag & V);
@@ -122,13 +130,13 @@ int     param_handler(e_flags flag, char *av_next, int *i)
     else if (flag & O)
         ssl.output_file = av_next;
     else if (flag & K)
-        ssl.cipher.key = ft_strnew(av_next);
+        ssl.cipher.key = parse_key(av_next);
     else if (flag & P_cipher)
         ssl.cipher.password = ft_strnew(av_next);
     else if (flag & S_cipher)
-        ssl.cipher.salt = (Mem_8bits *)av_next;
+        ssl.cipher.salt = parse_key(av_next);
     else if (flag & V)
-        ssl.cipher.vector = ft_strnew(av_next);
+        ssl.cipher.vector = parse_key(av_next);
     (*i)++;
     return 0;
 }
@@ -187,10 +195,16 @@ int     hash_func_handler(char *str)
         ssl.hash_func_addr = base64;
         ssl.command = CIPHER;
     }
-    else if (!ft_strcmp(str, "des"))
+    else if (!ft_strcmp(str, "des-ecb"))
     {
-        ssl.hash_func = "DES";
-        ssl.hash_func_addr = des;
+        ssl.hash_func = "DES-ECB";
+        ssl.hash_func_addr = descbc;
+        ssl.command = CIPHER;
+    }
+    else if (!ft_strcmp(str, "des") || !ft_strcmp(str, "des-cbc"))
+    {
+        ssl.hash_func = "DES-CBC";
+        ssl.hash_func_addr = descbc;
         ssl.command = CIPHER;
     }
     else

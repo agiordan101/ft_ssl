@@ -6,7 +6,7 @@
 //     // return ;
 // }
 
-Long_64bits     pbkdf2_sha256(Mem_8bits *pwd, Mem_8bits *s, int c)
+Mem_8bits     *pbkdf2_sha256(Mem_8bits *pwd, Mem_8bits *s, int c)
 {
     Word_32bits *dkn = NULL;
     // Word_32bits *dkn1;
@@ -17,9 +17,9 @@ Long_64bits     pbkdf2_sha256(Mem_8bits *pwd, Mem_8bits *s, int c)
     // Mem_8bits opad[CHUNK_ByteSz];
 
     printf("salt: %s\n", s);
-    printBits(&s, LONG64_ByteSz);
+    printBits(&s, KEY_byteSz);
 
-    ft_memcpy(salt, &s, LONG64_ByteSz);
+    ft_memcpy(salt, &s, KEY_byteSz);
     printBits(salt, KEY_byteSz);
 
     endianReverse(salt, KEY_byteSz);

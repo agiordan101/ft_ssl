@@ -39,6 +39,21 @@ inline char	*ft_strnew(char *src)
 	return (str);
 }
 
+inline char	*ft_strinsert(char *str1, char *toinsert, char *str2)
+{
+    int     str1len = ft_strlen(str1);
+    int     toinsertlen = ft_strlen(toinsert);
+    int     str2len = ft_strlen(str2);
+    char    concat[str1len + toinsertlen + str2len + 1];
+    ft_bzero(concat, str1len + toinsertlen + str2len + 1);
+
+    printf("lengths: %d / %d / %d\n", str1len, toinsertlen, str2len);
+    ft_memcpy(concat, str1, str1len);
+    ft_memcpy(concat + str1len, toinsert, toinsertlen);
+    ft_memcpy(concat + str1len + toinsertlen, str2, str2len);
+    return ft_strnew((char *)&concat);
+}
+
 inline int	ft_strlen(char *p)
 {
     unsigned long long *str = (unsigned long long *)p;
@@ -114,23 +129,23 @@ void    	ft_putnbr(int fd, int n)
     }
 }
 
-inline Long_64bits ft_strtoHex(char *str)
+inline Long_64bits  ft_strtoHex(char *str)
 {
 	Long_64bits nbr = 0;
 
     str = ft_lower(str);
-	for (int i = 0; i < ft_strlen(str); i++)
+	for (int i = 0; i < ft_strlen(str) && i < KEY_byteSz * 2; i++)
         if ('0' <= str[i] && str[i] <= '9')
 		    nbr = nbr * 16 + (str[i] - '0');
-        else if ('a' <= str[i] && str[i] <= 'e')
+        else if ('a' <= str[i] && str[i] <= 'f')
 		    nbr = nbr * 16 + 10 + (str[i] - 'a');
 	return nbr;
 }
 
-char    *ft_hexToBin(Long_64bits n, int byteSz)
+char                *ft_hexToBin(Long_64bits n, int byteSz)
 {
     char          *bin;
-    unsigned char hex[16] = "0123456789abcdef";
+    unsigned char hex[16] = HEXABASE;
     unsigned char *num = (unsigned char *)&n;
 
     if (!(bin = (char *)malloc(sizeof(char) * (byteSz * 2 + 1))))
@@ -146,17 +161,17 @@ char    *ft_hexToBin(Long_64bits n, int byteSz)
     return bin;
 }
 
-Mem_8bits        *ft_strHexToBin(Mem_8bits *str, int byteSz)
+Mem_8bits           *ft_strHexToBin(Mem_8bits *str, int byteSz)
 {
     Key_64bits tmp = ft_strtoHex(str);
-    // printBits(&tmp, KEY_byteSz);
+    printBits(&tmp, KEY_byteSz);
     // ft_printHex(tmp);
     // printf("tmp: %lx\n", tmp);
 
     int         bin_i = 0;
     Mem_8bits   *bin = (Mem_8bits *)&tmp;
     endianReverse(bin, KEY_byteSz);
-    // printBits(bin, KEY_byteSz);
+    printBits(bin, KEY_byteSz);
 
     int         out_i = 0;
     Mem_8bits   out[KEY_byteSz];
@@ -164,7 +179,7 @@ Mem_8bits        *ft_strHexToBin(Mem_8bits *str, int byteSz)
 
     // Skip zero bytes at the beginning
     while (!bin[bin_i] && bin_i < KEY_byteSz) bin_i++;
-    // printf("After zero bytes skipped, bin_i=%d\n", bin_i);
+    printf("After zero bytes skipped, bin_i=%d\n", bin_i);
 
     // Is first non-null byte upper than 0x0f ? (To remove zero of byte left-side)
     if (bin[bin_i] & 0b11110000)
@@ -172,7 +187,7 @@ Mem_8bits        *ft_strHexToBin(Mem_8bits *str, int byteSz)
         while (bin_i < KEY_byteSz)
         {
             out[out_i++] = bin[bin_i++];
-            // printf("out[out_i++]=%x\n", out[out_i - 1]);
+            printf("out[%d]=%x\n", out_i - 1, out[out_i - 1]);
         }
     }
     else
@@ -199,17 +214,13 @@ Mem_8bits        *ft_strHexToBin(Mem_8bits *str, int byteSz)
     }
     // printBits(out, out_i);
     // exit(0);
-
-    if (!(bin = (Mem_8bits *)malloc(sizeof(Mem_8bits) * (out_i + 1))))
-        malloc_failed("Unable to malloc string in libft ft_hexToBin function\n");
-    ft_bzero(bin, out_i + 1);
-    ft_memcpy(bin, out, out_i);
+    bin = ft_strnew(out);
     return bin;
 }
 
-void    	ft_printHex(Word_32bits n)
+void    	        ft_printHex(Word_32bits n)
 {
-    unsigned char hex[16] = "0123456789abcdef";
+    unsigned char hex[16] = HEXABASE;
     unsigned char *word = (unsigned char *)&n;
     unsigned char c_16e0;
     unsigned char c_16e1;

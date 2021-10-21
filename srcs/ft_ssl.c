@@ -14,6 +14,14 @@ void    ssl_free()
     t_hash *hash = ssl.hash;
     t_hash *tmp;
 
+    if (ssl.cipher.key)
+        free(ssl.cipher.key);
+    if (ssl.cipher.password)
+        free(ssl.cipher.password);
+    if (ssl.cipher.salt)
+        free(ssl.cipher.salt);
+    if (ssl.cipher.vector)
+        free(ssl.cipher.vector);
     while (hash)
     {
         if (hash->name)
@@ -30,11 +38,10 @@ void    ssl_free()
         close(ssl.fd_out);
 }
 
-void    freexit(int failure)
+void    freexit(int exit_state)
 {
     ssl_free();
-    if (failure == EXIT_FAILURE)
-        exit(EXIT_FAILURE);
+    exit(exit_state);
 }
 
 void    malloc_failed(char *errormsg)
