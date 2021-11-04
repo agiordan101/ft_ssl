@@ -11,17 +11,19 @@ t_ssl    ssl;
 
 void    ssl_free()
 {
-    t_hash *hash = ssl.hash;
-    t_hash *tmp;
+    t_hash      *tmp;
+    t_hash      *hash = ssl.hash;
+    t_cipher    *cipher = &ssl.cipher;
 
-    if (ssl.cipher.key)
-        free(ssl.cipher.key);
-    if (ssl.cipher.password)
-        free(ssl.cipher.password);
-    if (ssl.cipher.salt)
-        free(ssl.cipher.salt);
-    if (ssl.cipher.vector)
-        free(ssl.cipher.vector);
+    if (cipher->key)
+        free(cipher->key);
+    if (cipher->password)
+        free(cipher->password);
+    if (cipher->salt)
+        free(cipher->salt);
+    if (cipher->vector)
+        free(cipher->vector);
+
     while (hash)
     {
         if (hash->name)
@@ -34,6 +36,7 @@ void    ssl_free()
         hash = hash->next;
         free(tmp);
     }
+
     if (ssl.flags & O)
         close(ssl.fd_out);
 }

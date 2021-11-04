@@ -14,7 +14,7 @@ Mem_8bits     *pbkdf2_sha256(Mem_8bits *pwd, Mem_8bits *salt, int c)
     Uc = sha256(pwd, Uc-1)
 */
 {
-    printf("\nPBKDF2 START\n");
+    // printf("\nPBKDF2 START\n");
 
     int         pwdlen = ft_strlen(pwd);
     int         concatlen = pwdlen + SHA256_byteSz;
@@ -50,6 +50,6 @@ Mem_8bits     *pbkdf2_sha256(Mem_8bits *pwd, Mem_8bits *salt, int c)
 
     free(concat);
     ft_bzero(key + KEY_byteSz, SHA256_byteSz - KEY_byteSz);
-    printBits(key, KEY_byteSz);
+    // printBits(key, KEY_byteSz);
     return key;
 }

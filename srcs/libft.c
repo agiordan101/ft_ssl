@@ -40,6 +40,7 @@ inline Mem_8bits *ft_memnew(int byteSz)
 inline Mem_8bits *ft_memdup(Mem_8bits *mem, int byteSz)
 {
     Mem_8bits   *dup = ft_memnew(byteSz);
+
     ft_memcpy(dup, mem, byteSz);
     return dup;
 }
@@ -52,7 +53,6 @@ inline char     *ft_strnew(int len)
 inline char     *ft_strdup(char *src)
 {
     return ft_memdup(src, ft_strlen(src));
-    // return ft_memdup((Mem_8bits *)src, ft_strlen(src));
 }
 
 inline char     *ft_strinsert(char *str1, char *toinsert, char *str2)
@@ -180,14 +180,14 @@ char                *ft_hexToBin(Long_64bits n, int byteSz)
 Mem_8bits           *ft_strHexToBin(Mem_8bits *str, int byteSz)
 {
     Key_64bits tmp = ft_strtoHex(str);
-    printBits(&tmp, KEY_byteSz);
+    // printBits(&tmp, KEY_byteSz);
     // ft_printHex(tmp);
     // printf("tmp: %lx\n", tmp);
 
     int         bin_i = 0;
     Mem_8bits   *bin = (Mem_8bits *)&tmp;
     endianReverse(bin, KEY_byteSz);
-    printBits(bin, KEY_byteSz);
+    // printBits(bin, KEY_byteSz);
 
     int         out_i = 0;
     Mem_8bits   out[KEY_byteSz];
@@ -196,7 +196,7 @@ Mem_8bits           *ft_strHexToBin(Mem_8bits *str, int byteSz)
     // Skip zero bytes at the beginning
     while (!bin[bin_i] && bin_i < KEY_byteSz)
         bin_i++;
-    printf("After zero bytes skipped, bin_i=%d\n", bin_i);
+    // printf("After zero bytes skipped, bin_i=%d\n", bin_i);
 
     // Is first non-null byte upper than 0x0f ? (To remove zero of byte left-side)
     if (bin[bin_i] & 0b11110000)
@@ -204,7 +204,7 @@ Mem_8bits           *ft_strHexToBin(Mem_8bits *str, int byteSz)
         while (bin_i < KEY_byteSz)
         {
             out[out_i++] = bin[bin_i++];
-            printf("out[%d]=%x\n", out_i - 1, out[out_i - 1]);
+            // printf("out[%d]=%x\n", out_i - 1, out[out_i - 1]);
         }
     }
     else

@@ -157,6 +157,8 @@ void        sha256_msg(Mem_8bits **msg, int byteSz, Mem_8bits *dest)
     // *msg = (Mem_8bits *)hash.hash;
     // *byteSz = hash.hashWordSz * WORD_ByteSz;
     ft_memcpy(dest, (Mem_8bits *)hash.hash, SHA256_byteSz);
+    free(hash.msg);
+    free(hash.hash);
 }
 
 inline void sha256_xor_32bits(Word_32bits *sha1, Word_32bits *sha2, Word_32bits **result)
@@ -168,9 +170,5 @@ inline void sha256_xor_32bits(Word_32bits *sha1, Word_32bits *sha2, Word_32bits 
 inline void sha256_xor_8bits(Mem_8bits *sha1, Mem_8bits *sha2, Mem_8bits **result)
 {
     for (int i = 0; i < SHA256_byteSz; i++)
-    {
-        // printf("sha256_xor_8bits index %d\n", i);
-        // printf("sha256_xor_8bits index %d: %c\n", i, (*result)[i]);
         (*result)[i] = sha1[i] ^ sha2[i];
-    }
 }

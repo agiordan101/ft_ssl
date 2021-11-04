@@ -110,7 +110,7 @@ Mem_8bits *parse_key(char *str)
 {
     str = ft_strHexToBin(str, ft_strlen(str));
     padXbits((Mem_8bits **)&str, ft_strlen(str), KEY_byteSz);
-    printBits(str, KEY_byteSz);
+    // printBits(str, KEY_byteSz);
     return str;
 }
 
