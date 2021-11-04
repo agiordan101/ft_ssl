@@ -1,29 +1,5 @@
 #include "ft_ssl.h"
 
-// void        split_3bytes(Mem_8bits **group, Mem_8bits *tmp)
-// {
-//     Mem_8bits b1 = *tmp;
-//     Mem_8bits b2 = *(tmp + 1);
-//     Mem_8bits b3 = *(tmp + 2);
-//     // 00101011 11000101  10101000
-//     // 001010 111100 010110 101000
-
-//     printBits(tmp, 3);
-//     *group[0] = b1 >> 2;
-//     *group[1] = (b1 & 0b00000011) << 4 | b2 >> 4;
-//     *group[2] = (b2 & 0b00001111) << 2 | b3 >> 6;
-//     *group[3] = b3 & 0b00111111;
-//     printBits(*group, 4);
-// }
-
-// void        split_3bytes(Mem_8bits **group, Mem_8bits b1, Mem_8bits b2, Mem_8bits b3)
-// {
-// }
-
-// char        handle_last_block(Mem_8bits *tmp)
-// {
-// }
-
 static inline int   base64ToInt(char num)
 {
     if ('A' <= num && num <= 'Z')
@@ -66,8 +42,9 @@ static void         encode(t_hash *hash)
 
     // printBits(hash->msg, hash->len);
     hash->hashWordSz = get_len_encoded(hash->len);
-    if (!(hash->hash = malloc(hash->hashWordSz * WORD_ByteSz)))
-        malloc_failed("Unable to malloc hash in base64 encode() function.\n");
+    // if (!(hash->hash = malloc(hash->hashWordSz * WORD_ByteSz)))
+    //     malloc_failed("Unable to malloc hash in base64 encode() function.\n");
+    hash->hash = (Word_32bits *)ft_memnew(hash->hashWordSz * WORD_ByteSz);
     char *hash_p = (char *)hash->hash;
 
     // Padding to the next 24bits block of memory
@@ -110,9 +87,10 @@ static void         encode(t_hash *hash)
 
 static void         clean_base64(Mem_8bits **msg, int *len)
 {
-    char        base[65] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    char        base[65] = BASE64;
     char        newmsg[*len];
 
+    // printf("msg: %s\n", *msg);
     int newlen = 0;
     for (int i = 0; i < *len; i++)
     {
@@ -121,11 +99,13 @@ static void         clean_base64(Mem_8bits **msg, int *len)
     }
 
     free(*msg);
-    if (!(*msg = (char *)malloc(sizeof(char) * (newlen + 1))))
-        malloc_failed("Unable to malloc msg in base64 clean_base64() function\n");
-    (*msg)[newlen] = '\0';
-    ft_memcpy(*msg, newmsg, newlen);
+    // if (!(*msg = (char *)malloc(sizeof(char) * (newlen + 1))))
+    //     malloc_failed("Unable to malloc msg in base64 clean_base64() function\n");
+    // (*msg)[newlen] = '\0';
+    // ft_memcpy(*msg, newmsg, newlen);
+    *msg = ft_memdup(newmsg, newlen);
     *len = newlen;
+    // printf("msg clean: %s\n", *msg);
 }
 
 static void         decode(t_hash *hash)
@@ -139,20 +119,16 @@ static void         decode(t_hash *hash)
     // printBits(hash->msg, hash->len);
     // printf("get_len_decoded: %d\n", get_len_decoded(hash->msg, hash->len));
     hash->hashWordSz = get_len_decoded(hash->msg, hash->len);
-    if (!(hash->hash = malloc(hash->hashWordSz * WORD_ByteSz)))
-        malloc_failed("Unable to malloc hash in base64 decode() function\n");
+    // if (!(hash->hash = malloc(hash->hashWordSz * WORD_ByteSz)))
+    //     malloc_failed("Unable to malloc hash in base64 decode() function\n");
+    hash->hash = (Word_32bits *)ft_memnew(hash->hashWordSz * WORD_ByteSz);
     char *hash_p = (char *)hash->hash;
    
     for (Mem_8bits *tmp = hash->msg; (char *)tmp < hash->msg + hash->len; tmp += 4)
     {
         // 001010 111100 010110 101000
         // 00101011 11000101  10101000
-        
-        // group[0] = base64ToInt(tmp[0]);
-        // group[1] = base64ToInt(tmp[1]);
-        // group[2] = tmp[2] == '=' ? 0b0 : base64ToInt(tmp[2]);
-        // group[3] = tmp[3] == '=' ? 0b0 : base64ToInt(tmp[3]);
-        
+
         for (int i = 0; i < 4; i++)
             group[i] = tmp[i] == '=' ? 0b0 : base64ToInt(tmp[i]);
 
@@ -168,8 +144,9 @@ static void         decode(t_hash *hash)
     // printBits(hash->hash, hash->hashWordSz);
 }
 
-void        base64(t_hash *hash)
+void                base64(t_hash *hash)
 {
+    // printf("hash->msg: %s\n", hash->msg);
     if (ssl.flags & D)
         decode(hash);
     else

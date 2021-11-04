@@ -1,6 +1,6 @@
 #include "ft_ssl.h"
 
-static void   ask_password(t_cipher *cipher)
+static void         ask_password(t_cipher *cipher)
 {
     char *firstmsg_1 = "enter ";
     char *secondmsg_1 = "Verifying - enter ";
@@ -10,8 +10,8 @@ static void   ask_password(t_cipher *cipher)
 
     // printf("firstmsg: >%s<\n", firstmsg);
     // printf("secondmsg: >%s<\n", secondmsg);
-    char *password = ft_strnew(getpass(firstmsg));
-    cipher->password = ft_strnew(getpass(secondmsg));
+    char *password = ft_strdup(getpass(firstmsg));
+    cipher->password = ft_strdup(getpass(secondmsg));
 
     // printf("password: >%s<\n", password);
     // printf("cipher->password: >%s<\n", cipher->password);
@@ -35,7 +35,7 @@ inline static Mem_8bits    *generate_key()
 
     for (int i = 0; i < KEY_byteSz; i++)
         key[i] = rand() % 0xFF;
-    return ft_strnew(key);
+    return ft_strdup(key);
 }
 
 static void         init_vars(t_cipher *cipher)
@@ -69,13 +69,14 @@ static void         init_vars(t_cipher *cipher)
 
     // A key is generated with pbkdf2 if it's not provided
     if (!cipher->key)
-        cipher->key = generate_key();
-        // cipher->key = pbkdf2_sha256(cipher->password, cipher->salt, 0);
+        cipher->key = pbkdf2_sha256(cipher->password, cipher->salt, 3);
+        if (!cipher->key)
+            cipher->key = generate_key();
     printf("\ncipher->key: \n");
     key_output(cipher->key);
 }
 
-void    descbc(t_hash *hash)
+void                descbc(t_hash *hash)
 {
     init_vars(&ssl.cipher);
     exit(0);

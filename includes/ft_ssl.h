@@ -33,7 +33,7 @@ typedef enum flags {
     P_md=1, Q=2, R=4, S_md=8,
     // Cypher
     D=16, E=32, I=64, O=128,
-    //   Only des
+    // Only des
     A=256, K=512, P_cipher=1024, S_cipher=2048, V=4096
 }            e_flags;
 # define AVFLAGS        (P_md + Q + R + D + E + A)
@@ -62,13 +62,18 @@ void        open_failed(char *errormsg, char *file);
 
 void	    ft_bzero(void *s, size_t n);
 void	    *ft_memcpy(void *dest, const void *src, size_t n);
-char	    *ft_strnew(char *src);
+Mem_8bits   *ft_memnew(int byteSz);
+Mem_8bits   *ft_memdup(Mem_8bits *mem, int byteSz);
+
+char        *ft_strnew(int len);
+char	    *ft_strdup(char *src);
 char    	*ft_strinsert(char *str1, char *toinsert, char *str2);
 int		    ft_strlen(char *p);
 int         ft_strcmp(const char *s1, const char *s2);
 char        *ft_stradd_quote(char *str, int len);
 char	    *ft_lower(char *str);
 Long_64bits ft_strtoHex(char *str);
+
 char        *ft_hexToBin(Long_64bits n, int byteSz);
 void	    ft_putstr(char *s);
 void    	ft_putnbr(int fd, int n);
@@ -132,7 +137,7 @@ void    md5(t_hash *hash);
 */
 
 # define    SHA256_WordSz  8
-# define    SHA256_byteSz  SHA256_WordSz * WORD_ByteSz     // 32 bytes / 256 bits  
+# define    SHA256_byteSz  SHA256_WordSz * WORD_ByteSz     // 8 * 4 = 32 bytes / 256 bits  
 
 typedef struct  s_sha
 {
@@ -143,7 +148,8 @@ typedef struct  s_sha
 }               t_sha;
 
 void        sha256(t_hash *hash);
-void        sha256_mod256(Mem_8bits **msg, int *len);
+void        sha256_msg(Mem_8bits **msg, int byteSz, Mem_8bits *dest);
+// void        sha256_mod256(Mem_8bits **msg, int *len);
 void        sha256_xor_32bits(Word_32bits *sha1, Word_32bits *sha2, Word_32bits **result);
 void        sha256_xor_8bits(Mem_8bits *sha1, Mem_8bits *sha2, Mem_8bits **result);
 
@@ -168,7 +174,7 @@ typedef struct  s_cipher
     Mem_8bits   *vector;    // malloc
 }               t_cipher;
 
-Mem_8bits     *pbkdf2_sha256(Mem_8bits *pwd, Mem_8bits *s, int c);
+Mem_8bits     *pbkdf2_sha256(Mem_8bits *pwd, Mem_8bits *salt, int c);
 
 // typedef struct  s_pbkdf2
 // {
@@ -178,6 +184,8 @@ Mem_8bits     *pbkdf2_sha256(Mem_8bits *pwd, Mem_8bits *s, int c);
 /*
     BASE64 Data --------------------------------------
 */
+
+# define    BASE64  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
 void        base64(t_hash *hash);
 

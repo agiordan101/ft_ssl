@@ -63,16 +63,17 @@ int     file_handler(t_hash *node, char *file)
     if (!node && !(node = addmsg_back()))
         return EXIT_FAILURE;
 
-    if (!(node->name = ft_strnew(file)))
+    if (!(node->name = ft_strdup(file)))
         return EXIT_FAILURE;
     if ((fd = open(file, O_RDONLY)) == -1)
         node->error = FILENOTFOUND;
     else
     {
         node->len = get_file_len(file);
-        if (!(node->msg = (char *)malloc(sizeof(char) * (node->len + 1))))
-		    malloc_failed("Unable to malloc msg in parsing file_handler() function\n");
-        node->msg[node->len] = '\0';
+        // if (!(node->msg = (char *)malloc(sizeof(char) * (node->len + 1))))
+		//     malloc_failed("Unable to malloc msg in parsing file_handler() function\n");
+        // node->msg[node->len] = '\0';
+        node->msg = ft_strnew(node->len);
 
         if (read(fd, node->msg, node->len) == -1)
             return EXIT_FAILURE;
@@ -86,7 +87,7 @@ int     string_handler(t_hash *node, char *av_next)
     if (!node && !(node = addmsg_back()))
         return EXIT_FAILURE;
 
-    if (!(node->msg = ft_strnew(av_next)))
+    if (!(node->msg = ft_strdup(av_next)))
         return EXIT_FAILURE;
     node->len = ft_strlen(av_next);
     if (!(node->name = ft_stradd_quote(av_next, node->len)))
@@ -132,7 +133,7 @@ int     param_handler(e_flags flag, char *av_next, int *i)
     else if (flag & K)
         ssl.cipher.key = parse_key(av_next);
     else if (flag & P_cipher)
-        ssl.cipher.password = ft_strnew(av_next);
+        ssl.cipher.password = ft_strdup(av_next);
     else if (flag & S_cipher)
         ssl.cipher.salt = parse_key(av_next);
     else if (flag & V)
@@ -233,9 +234,10 @@ int     stdin_handler()
             return EXIT_FAILURE;
 
         tmp = node->msg;
-        if (!(node->msg = (char *)malloc(sizeof(char) * (node->len + ret + 1))))
-		    malloc_failed("Unable to malloc msg in parsing stdin_handler() function\n");
-        node->msg[node->len + ret] = '\0';
+        // if (!(node->msg = (char *)malloc(sizeof(char) * (node->len + ret + 1))))
+		//     malloc_failed("Unable to malloc msg in parsing stdin_handler() function\n");
+        // node->msg[node->len + ret] = '\0';
+        node->msg = ft_strnew(node->len + ret);
         ft_memcpy(node->msg, tmp, node->len);
         ft_memcpy(node->msg + node->len, buff, ret);
         if (tmp)
@@ -247,7 +249,7 @@ int     stdin_handler()
     node->stdin = 1;
     if (ssl.flags & P_md)
     {
-        tmp = ft_strnew(node->msg);
+        tmp = ft_strdup(node->msg);
         if (tmp[node->len - 1] == '\n')
             tmp[node->len - 1] = '\0'; //To remove \n, it's like 'echo -n <node->msg> | ./ft_ssl ...'
 
@@ -261,7 +263,7 @@ int     stdin_handler()
         }
     }
     else
-        node->name = ft_strnew("stdin");
+        node->name = ft_strdup("stdin");
     return node->name ? 0 : EXIT_FAILURE;
 }
 

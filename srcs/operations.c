@@ -33,29 +33,35 @@ Mem_8bits   *padXbits(Mem_8bits **mem, int byteSz, int newSz)
 
     if (byteSz < newSz)
     {
-        if (!(pad = (Mem_8bits *)malloc(sizeof(Mem_8bits) * (newSz + 1))))
-		    malloc_failed("Unable to malloc msg in operations padXbits() function\n");
-        pad[newSz] = '\0';
-        ft_bzero(pad, newSz + 1);
+        // if (!(pad = (Mem_8bits *)malloc(sizeof(Mem_8bits) * (newSz + 1))))
+		//     malloc_failed("Unable to malloc msg in operations padXbits() function\n");
+        // pad[newSz] = '\0';
+        // ft_bzero(pad, newSz + 1);
+        pad = ft_memnew(newSz);
         ft_memcpy(pad, *mem, byteSz);
         free(*mem);
         *mem = pad;
     }
     else if (newSz < byteSz)
         ft_bzero(*mem + newSz, byteSz - newSz);
-    // *byteSz = newSz;
     return *mem;
 }
 
 void        padding(Mem_8bits **data, Long_64bits *byteSz, char reverseByteSz)
 {
+    // printf("data: %p\n", *data);
+    // printf("byteSz: %ld\n", *byteSz);
+    // exit(0);
+
     Long_64bits extend_byteSz =\
         *byteSz - (*byteSz % CHUNK_ByteSz) + // Find byteSz of the filled chunks.
         CHUNK_ByteSz * (*byteSz % CHUNK_ByteSz >= CHUNK_ByteSz - LONG64_ByteSz ? 2 : 1); // Add 1 chunk (witch is partially written), and add another one if we cannot cpy byteSz_mem at the end (overwritting is not possible)
 
+    // printf("byteSz: %ld\n", *byteSz);
+    // printf("extend_byteSz: %ld\n", extend_byteSz);
+
     // Extend data until a multiple of chunk size (64 bytes / 512 bits)
     padXbits(data, *byteSz, extend_byteSz);
-
 
     // Append byte "10000000" after msg
     Mem_8bits endmsg = ENDMSG;

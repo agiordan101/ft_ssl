@@ -95,7 +95,8 @@ void        md5(t_hash *hash)
 
     // Cpy MD5 result
     hash->hashWordSz = MD5_WordSz;
-    if (!(hash->hash = malloc(hash->hashWordSz * WORD_ByteSz)))
-        malloc_failed("Unable to malloc hash in md5() function\n");
-    ft_memcpy(hash->hash, md5.hash, hash->hashWordSz * WORD_ByteSz);
+    // if (!(hash->hash = malloc(hash->hashWordSz * WORD_ByteSz)))
+    //     malloc_failed("Unable to malloc hash in md5() function\n");
+    // ft_memcpy(hash->hash, md5.hash, hash->hashWordSz * WORD_ByteSz);
+    hash->hash = (Word_32bits *)ft_memdup((Mem_8bits *)md5.hash, MD5_byteSz);
 }

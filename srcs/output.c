@@ -92,9 +92,10 @@ void    classic_output(t_hash *hash)
 
 void    md_output(t_hash *hash)
 {
-    if (hash->error == FILENOTFOUND)
-        file_not_found(hash);
-    else if (hash->stdin)
+    // if (hash->error == FILENOTFOUND)
+    //     file_not_found(hash);
+    // else if (hash->stdin)
+    if (hash->stdin)
     {
         if (ssl.flags & Q && ssl.flags & P_md)
             stdin_quiet_output(hash);
@@ -120,7 +121,10 @@ void    cipher_output(t_hash *hash)
 
 void    output(t_hash *hash)
 {
-    if (ssl.command & MD)
+    if (hash->error == FILENOTFOUND)
+        file_not_found(hash);
+    // if (ssl.command & MD)
+    else if (ssl.command & MD)
         md_output(hash);
     else if (ssl.command & CIPHER)
         cipher_output(hash);

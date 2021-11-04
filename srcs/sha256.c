@@ -1,6 +1,10 @@
 #include "ft_ssl.h"
 
-static void init_sha(t_sha *sha, Mem_8bits *chunks, Long_64bits chunksSz)
+/*
+    SHA-256 algorithm
+*/
+
+static void                 init_sha(t_sha *sha, Mem_8bits *chunks, Long_64bits chunksSz)
 {
     sha->chunks = chunks;
     sha->chunksSz = chunksSz;    
@@ -105,6 +109,10 @@ void        sha256(t_hash *hash)
 {
     t_sha   sha;
 
+    // printf("hash->len: %d\n", hash->len);
+    // printf("data: %p\n", hash->msg);
+    // printf("byteSz: %d\n", hash->len);
+
     padding((Mem_8bits **)&hash->msg, (Long_64bits *)&hash->len, 1);
     init_sha(&sha, (Mem_8bits *)hash->msg, (Long_64bits)hash->len);
 
@@ -119,26 +127,37 @@ void        sha256(t_hash *hash)
 
     // Cpy SHA256 result
     hash->hashWordSz = SHA256_WordSz;
-    if (!(hash->hash = malloc(hash->hashWordSz * WORD_ByteSz)))
-        malloc_failed("Unable to malloc msg in sha256() function\n");
-    ft_memcpy(hash->hash, sha.hash, hash->hashWordSz * WORD_ByteSz);
+    // if (!(hash->hash = malloc(hash->hashWordSz * WORD_ByteSz)))
+    //     malloc_failed("Unable to malloc msg in sha256() function\n");
+    // ft_memcpy(hash->hash, sha.hash, hash->hashWordSz * WORD_ByteSz);
+    hash->hash = (Word_32bits *)ft_memdup((Mem_8bits *)sha.hash, SHA256_byteSz);
 
     // little endian to big endian
     for (Word_32bits *tmp = hash->hash; tmp < hash->hash + hash->hashWordSz; tmp += 1)
         endianReverse((Mem_8bits *)tmp, WORD_ByteSz);
 }
 
+/*
+    SHA-256 related functions
+*/
 
-void        sha256_msg(Mem_8bits **msg, int *byteSz)
+void        sha256_msg(Mem_8bits **msg, int byteSz, Mem_8bits *dest)
 {
-    t_hash hash = (t_hash){0, NULL, *msg, *byteSz, NULL, 0, 0, NULL};
+    // t_hash hash = (t_hash){0, NULL, *msg, byteSz, NULL, 0, 0, NULL};
+    t_hash hash = (t_hash){0, NULL, NULL, byteSz, NULL, 0, 0, NULL};
+    // if (!(hash.msg = (Mem_8bits *)malloc(sizeof(Mem_8bits) * (byteSz + 1))))
+    //     malloc_failed("Unable to malloc in sha256_msg() function\n");
+    // ft_bzero(hash.msg, byteSz + 1);
+    // ft_memcpy(hash.msg, *msg, byteSz);
+    hash.msg = ft_memdup(*msg, byteSz);
 
     sha256(&hash);
-    md_hash_output(&hash);
-    *msg = (Mem_8bits *)hash.hash;
-    *byteSz = hash.hashWordSz * WORD_ByteSz;
+    // md_hash_output(&hash);
+    // printf("\n");
+    // *msg = (Mem_8bits *)hash.hash;
+    // *byteSz = hash.hashWordSz * WORD_ByteSz;
+    ft_memcpy(dest, (Mem_8bits *)hash.hash, SHA256_byteSz);
 }
-
 
 inline void sha256_xor_32bits(Word_32bits *sha1, Word_32bits *sha2, Word_32bits **result)
 {
@@ -149,5 +168,9 @@ inline void sha256_xor_32bits(Word_32bits *sha1, Word_32bits *sha2, Word_32bits 
 inline void sha256_xor_8bits(Mem_8bits *sha1, Mem_8bits *sha2, Mem_8bits **result)
 {
     for (int i = 0; i < SHA256_byteSz; i++)
+    {
+        // printf("sha256_xor_8bits index %d\n", i);
+        // printf("sha256_xor_8bits index %d: %c\n", i, (*result)[i]);
         (*result)[i] = sha1[i] ^ sha2[i];
+    }
 }

@@ -1,47 +1,55 @@
 #include "ft_ssl.h"
 
-// static Word_32bits   *HMAC_sha256(Mem_8bits *pwd, Word_32bits *key)
-// {
+Mem_8bits     *pbkdf2_sha256(Mem_8bits *pwd, Mem_8bits *salt, int c)
+/*
+    Desired output length: KEY_byteSz = 8 bytes / 64 bits
 
-//     // return ;
-// }
+    Algorithm:
 
-Mem_8bits     *pbkdf2_sha256(Mem_8bits *pwd, Mem_8bits *s, int c)
+    key = (U1 ^ U2 ^ ... ^ Uc) & 0xffffffffffffffff
+
+    U1 = sha256(pwd, salt)
+    U2 = sha256(pwd, U1)
+    ...
+    Uc = sha256(pwd, Uc-1)
+*/
 {
-    Word_32bits *dkn = NULL;
-    // Word_32bits *dkn1;
-    Mem_8bits   salt[KEY_byteSz];
-    // ft_bzero(salt, KEY_byteSz);
+    printf("\nPBKDF2 START\n");
 
-    // Mem_8bits ipad[CHUNK_ByteSz];
-    // Mem_8bits opad[CHUNK_ByteSz];
+    int         pwdlen = ft_strlen(pwd);
+    int         concatlen = pwdlen + SHA256_byteSz;
+    Mem_8bits   *concat = ft_memnew(concatlen);
 
-    printf("salt: %s\n", s);
-    printBits(&s, KEY_byteSz);
+    Mem_8bits   *key = ft_memnew(SHA256_byteSz);
+    ft_memcpy(key, salt, KEY_byteSz);
 
-    ft_memcpy(salt, &s, KEY_byteSz);
-    printBits(salt, KEY_byteSz);
+    Mem_8bits   sha_prev[SHA256_byteSz];
+    Mem_8bits   sha_curr[SHA256_byteSz];
 
-    endianReverse(salt, KEY_byteSz);
-    printBits(salt, KEY_byteSz);
+    // printBits(salt, KEY_byteSz);
 
-    // for (int i = 0; i < CHUNK_ByteSz; i++)
-    // {
-    //     ipad[i] = 0x36;
-    //     opad[i] = 0x5c;
-    // }
+    for (int i = 0; i < c; i++)
+    {
+        ft_memcpy(sha_prev, key, SHA256_byteSz);
 
-    // Word_32bits *tmp = ;
+        ft_memcpy(concat, pwd, pwdlen);
+        ft_memcpy(concat + pwdlen, sha_prev, SHA256_byteSz);
 
-    // for (int i = 0; i < c; i++)
-    // {
-    //     // Word_32bits *dkn1 = HMAC_sha256(pwd, dkn);
-    //     // dkn = 
-    //     sha256_msg(&pwd);
-    //     sha256_xor_32bits(dkn, dkn1, &dkn);
-    // }
+        // printf("\nconcat: \n");
+        // printBits(concat, concatlen);
 
+        sha256_msg((Mem_8bits **)&concat, concatlen, (Mem_8bits *)sha_curr);
+        if (i)
+            sha256_xor_8bits(sha_prev, sha_curr, (Mem_8bits **)&key);
+        else
+            ft_memcpy(key, sha_curr, SHA256_byteSz);
 
-    // printf("Key generation: %lx\n", dkn);
-    return 0;
+        // printf("key: \n");
+        // printBits(key, SHA256_byteSz);
+    }
+
+    free(concat);
+    ft_bzero(key + KEY_byteSz, SHA256_byteSz - KEY_byteSz);
+    printBits(key, KEY_byteSz);
+    return key;
 }

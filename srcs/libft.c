@@ -27,19 +27,35 @@ inline void	*ft_memcpy(void *dest, const void *src, size_t n)
 	return (castdest);
 }
 
-inline char	*ft_strnew(char *src)
+inline Mem_8bits *ft_memnew(int byteSz)
 {
-	char	*str;
-	int 	len = ft_strlen(src);
+    Mem_8bits   *mem;
 
-	if (!(str = (char *)malloc(sizeof(char) * (len + 1))))
-		malloc_failed("Unable to malloc string in ft_strnew() function\n");
-	ft_memcpy(str, src, len);
-	str[len] = '\0';
-	return (str);
+    if (!(mem = (Mem_8bits *)malloc(sizeof(Mem_8bits) * (byteSz + 1))))
+        malloc_failed("Unable to malloc new memory space in ft_memnew() function\n");
+    ft_bzero(mem, byteSz + 1);
+    return mem;
 }
 
-inline char	*ft_strinsert(char *str1, char *toinsert, char *str2)
+inline Mem_8bits *ft_memdup(Mem_8bits *mem, int byteSz)
+{
+    Mem_8bits   *dup = ft_memnew(byteSz);
+    ft_memcpy(dup, mem, byteSz);
+    return dup;
+}
+
+inline char     *ft_strnew(int len)
+{
+    return ft_memnew(len);
+}
+
+inline char     *ft_strdup(char *src)
+{
+    return ft_memdup(src, ft_strlen(src));
+    // return ft_memdup((Mem_8bits *)src, ft_strlen(src));
+}
+
+inline char     *ft_strinsert(char *str1, char *toinsert, char *str2)
 {
     int     str1len = ft_strlen(str1);
     int     toinsertlen = ft_strlen(toinsert);
@@ -47,11 +63,11 @@ inline char	*ft_strinsert(char *str1, char *toinsert, char *str2)
     char    concat[str1len + toinsertlen + str2len + 1];
     ft_bzero(concat, str1len + toinsertlen + str2len + 1);
 
-    printf("lengths: %d / %d / %d\n", str1len, toinsertlen, str2len);
+    // printf("lengths: %d / %d / %d\n", str1len, toinsertlen, str2len);
     ft_memcpy(concat, str1, str1len);
     ft_memcpy(concat + str1len, toinsert, toinsertlen);
     ft_memcpy(concat + str1len + toinsertlen, str2, str2len);
-    return ft_strnew((char *)&concat);
+    return ft_strdup((char *)&concat);
 }
 
 inline int	ft_strlen(char *p)
@@ -148,10 +164,10 @@ char                *ft_hexToBin(Long_64bits n, int byteSz)
     unsigned char hex[16] = HEXABASE;
     unsigned char *num = (unsigned char *)&n;
 
-    if (!(bin = (char *)malloc(sizeof(char) * (byteSz * 2 + 1))))
-        malloc_failed("Unable to malloc string in libft ft_hexToBin function\n");
-    bin[byteSz * 2] = '\0';
-    // for (int i = byteSz; i >= 0; i--)
+    // if (!(bin = (char *)malloc(sizeof(char) * (byteSz * 2 + 1))))
+    //     malloc_failed("Unable to malloc string in libft ft_hexToBin function\n");
+    // bin[byteSz * 2] = '\0';
+    bin = ft_memnew(byteSz * 2);
     for (int i = 0; i < byteSz; i++)
     {
         bin[byteSz - i * 2] = hex[num[i] / 16];
@@ -178,7 +194,8 @@ Mem_8bits           *ft_strHexToBin(Mem_8bits *str, int byteSz)
     ft_bzero(out, KEY_byteSz);
 
     // Skip zero bytes at the beginning
-    while (!bin[bin_i] && bin_i < KEY_byteSz) bin_i++;
+    while (!bin[bin_i] && bin_i < KEY_byteSz)
+        bin_i++;
     printf("After zero bytes skipped, bin_i=%d\n", bin_i);
 
     // Is first non-null byte upper than 0x0f ? (To remove zero of byte left-side)
@@ -192,7 +209,9 @@ Mem_8bits           *ft_strHexToBin(Mem_8bits *str, int byteSz)
     }
     else
     {
+        // Skip first 0 (4 bits)
         out[out_i++] = bin[bin_i++] << 4;
+
         // printf("out[0]=%x\n", out[0]);
         // printf("out_i=%d\n", out_i-1);
         // printf("bin_i=%d\n\n", bin_i);
@@ -214,7 +233,7 @@ Mem_8bits           *ft_strHexToBin(Mem_8bits *str, int byteSz)
     }
     // printBits(out, out_i);
     // exit(0);
-    bin = ft_strnew(out);
+    bin = ft_strdup(out);
     return bin;
 }
 
