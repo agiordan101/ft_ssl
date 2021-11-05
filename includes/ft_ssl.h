@@ -97,6 +97,8 @@ Mem_8bits   endianReverseByte(Mem_8bits byte);
 void        endianReverse(Mem_8bits *mem, Long_64bits byteSz);
 Word_32bits rotL(Word_32bits x, Word_32bits r);
 Word_32bits rotR(Word_32bits x, Word_32bits r);
+Mem_8bits   *key_discarding(Mem_8bits *key);
+
 
 // Debug function, not used in this project
 void        printByte(char byte);
@@ -163,7 +165,8 @@ void        sha256_xor_8bits(Mem_8bits *sha1, Mem_8bits *sha2, Mem_8bits **resul
 
 typedef unsigned long   Key_64bits;
 
-# define KEY_byteSz     sizeof(Key_64bits)
+# define KEY_byteSz         sizeof(Key_64bits)
+# define KEYDISCARD_byteSz  KEY_byteSz - 1
 
 typedef struct  s_cipher
 {

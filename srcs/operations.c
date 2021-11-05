@@ -1,32 +1,5 @@
 #include "ft_ssl.h"
 
-// void        emptyExtension(Mem_8bits **mem, int memSz, int newSz)
-// {
-//     Mem_8bits *memEx;
-
-//     if (memSz >= newSz)
-//         return ;
-//     if (!(memEx = (Mem_8bits *)malloc(sizeof(Mem_8bits) * (newSz + 1))))
-//         malloc_failed("Unable to malloc in emptyExtension() function\n");
-//     ft_bzero(memEx, newSz + 1);
-//     ft_memcpy(memEx, *mem, memSz);
-//     free(*mem);
-//     *mem = memEx;
-// }
-
-// Long_64bits extend_mod_chunkSz(Mem_8bits **data, Long_64bits byteSz)
-// {
-//     Mem_8bits   *extend;
-
-//     if (!(extend = (Mem_8bits *)malloc(sizeof(Mem_8bits) * (extend_byteSz + 1))))
-//         malloc_failed("Unable to malloc extention in extend_mod_chunkSz() function\n");
-//     ft_bzero(extend, extend_byteSz + 1); //Padding with zeros
-//     ft_memcpy(extend, *data, byteSz);
-//     free(*data);
-//     *data = extend;
-//     return extend_byteSz;
-// }
-
 Mem_8bits   *padXbits(Mem_8bits **mem, int byteSz, int newSz)
 {
     Mem_8bits   *pad;

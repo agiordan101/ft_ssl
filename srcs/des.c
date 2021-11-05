@@ -72,5 +72,6 @@ static void         init_vars(t_cipher *cipher)
 void                descbc(t_hash *hash)
 {
     init_vars(&ssl.cipher);
+    Mem_8bits *newkey = key_discarding(ssl.cipher.key);
     freexit(EXIT_SUCCESS);
 }

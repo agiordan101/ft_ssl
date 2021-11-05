@@ -108,10 +108,12 @@ int     s_handler(char *av_next, int *i)
 
 Mem_8bits *parse_key(char *str)
 {
-    str = ft_strHexToBin(str, ft_strlen(str));
+    Mem_8bits   *memstr = (Mem_8bits *)str;
+
+    str = (char *)ft_strHexToBin(memstr, ft_strlen(str));
     padXbits((Mem_8bits **)&str, ft_strlen(str), KEY_byteSz);
     // printBits(str, KEY_byteSz);
-    return str;
+    return (Mem_8bits *)str;
 }
 
 int     param_handler(e_flags flag, char *av_next, int *i)
@@ -133,7 +135,7 @@ int     param_handler(e_flags flag, char *av_next, int *i)
     else if (flag & K)
         ssl.cipher.key = parse_key(av_next);
     else if (flag & P_cipher)
-        ssl.cipher.password = ft_strdup(av_next);
+        ssl.cipher.password = (Mem_8bits *)ft_strdup(av_next);
     else if (flag & S_cipher)
         ssl.cipher.salt = parse_key(av_next);
     else if (flag & V)
@@ -145,19 +147,23 @@ int     param_handler(e_flags flag, char *av_next, int *i)
 e_flags strToFlag(char *str)
 {
     if (!ft_strcmp(str, "-p"))
+    {
         if (ssl.command & MD)
             return P_md;
         else if (ssl.command & CIPHER)
             return P_cipher;
+    }
     if (!ft_strcmp(str, "-q"))
         return Q;
     if (!ft_strcmp(str, "-r"))
         return R;
     if (!ft_strcmp(str, "-s"))
+    {
         if (ssl.command & MD)
             return S_md;
         else if (ssl.command & CIPHER)
             return S_cipher;
+    }
 
     if (!ft_strcmp(str, "-d"))
         return D;
