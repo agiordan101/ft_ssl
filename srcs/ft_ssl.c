@@ -13,16 +13,16 @@ void    ssl_free()
 {
     t_hash      *tmp;
     t_hash      *hash = ssl.hash;
-    t_cipher    *cipher = &ssl.cipher;
+    t_des    *des = &ssl.des;
 
-    if (cipher->key)
-        free(cipher->key);
-    if (cipher->password)
-        free(cipher->password);
-    if (cipher->salt)
-        free(cipher->salt);
-    if (cipher->vector)
-        free(cipher->vector);
+    if (des->key)
+        free(des->key);
+    if (des->password)
+        free(des->password);
+    if (des->salt)
+        free(des->salt);
+    if (des->vector)
+        free(des->vector);
 
     while (hash)
     {

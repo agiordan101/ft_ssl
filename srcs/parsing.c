@@ -133,13 +133,13 @@ int     param_handler(e_flags flag, char *av_next, int *i)
     else if (flag & O)
         ssl.output_file = av_next;
     else if (flag & K)
-        ssl.cipher.key = parse_key(av_next);
+        ssl.des.key = parse_key(av_next);
     else if (flag & P_cipher)
-        ssl.cipher.password = (Mem_8bits *)ft_strdup(av_next);
+        ssl.des.password = (Mem_8bits *)ft_strdup(av_next);
     else if (flag & S_cipher)
-        ssl.cipher.salt = parse_key(av_next);
+        ssl.des.salt = parse_key(av_next);
     else if (flag & V)
-        ssl.cipher.vector = parse_key(av_next);
+        ssl.des.vector = parse_key(av_next);
     (*i)++;
     return 0;
 }

@@ -55,6 +55,7 @@ typedef struct  s_hash
     struct s_hash *next;
 }               t_hash;
 
+Mem_8bits   *parse_key(char *str);
 int         parsing(int ac, char **av);
 void        freexit(int failure);
 void        malloc_failed(char *errormsg);
@@ -98,6 +99,7 @@ void        endianReverse(Mem_8bits *mem, Long_64bits byteSz);
 Word_32bits rotL(Word_32bits x, Word_32bits r);
 Word_32bits rotR(Word_32bits x, Word_32bits r);
 Mem_8bits   *key_discarding(Mem_8bits *key);
+Mem_8bits   *bits_permutations(Mem_8bits *key, char *pt);
 
 
 // Debug function, not used in this project
@@ -166,23 +168,22 @@ void        sha256_xor_8bits(Mem_8bits *sha1, Mem_8bits *sha2, Mem_8bits **resul
 typedef unsigned long   Key_64bits;
 
 # define KEY_byteSz         sizeof(Key_64bits)
+# define KEY_bitSz          KEY_byteSz * 8
 # define KEYDISCARD_byteSz  KEY_byteSz - 1
 
-typedef struct  s_cipher
+typedef struct  s_des
 {
     Mem_8bits   *key;       // malloc
     Mem_8bits   *password;  // malloc
     Mem_8bits   *salt;      // malloc
     int         saltSz;
     Mem_8bits   *vector;    // malloc
-}               t_cipher;
+    char        ipt[KEY_bitSz];
+    char        fpt[KEY_bitSz];
+    char        testpt[KEY_bitSz];
+}               t_des;
 
 Mem_8bits     *pbkdf2_sha256(Mem_8bits *pwd, Mem_8bits *salt, int c);
-
-// typedef struct  s_pbkdf2
-// {
-
-// }               t_pbkdf2;
 
 /*
     BASE64 Data --------------------------------------
@@ -191,7 +192,6 @@ Mem_8bits     *pbkdf2_sha256(Mem_8bits *pwd, Mem_8bits *salt, int c);
 # define    BASE64  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
 void        base64(t_hash *hash);
-
 
 
 /*
@@ -206,6 +206,7 @@ void        descbc(t_hash *hash);
 
 
 
+
 /*
     MAIN structure ----------------------------------
 */
@@ -215,7 +216,7 @@ typedef struct  s_ssl
     char        *hash_func;
     void        (*hash_func_addr)();
     e_command   command;
-    t_cipher    cipher;
+    t_des       des;
 
     e_flags     flags;
     t_hash      *hash;
