@@ -29,26 +29,45 @@ void                endianReverse(Mem_8bits *mem, Long_64bits byteSz)
         mem[c] = tmp[byteSz - c - 1];
 }
 
-Mem_8bits           *key_discarding(Mem_8bits *key)
+Long_64bits         key_discarding(Mem_8bits *p)
 {
-    Mem_8bits   dk[KEYDISCARD_byteSz];
-    Mem_8bits   mask = 0b11111110;
-    int         shift = 7;
+    Long_64bits     dk = 0;
+    Long_64bits     key = *((Long_64bits *)p);
+    Mem_8bits       mask = 0b01111111;
 
-    // printf("\n--- key_discarding ---\n");
-    // printBits(key, KEY_byteSz);
-    for (int i = 0; i < (int)KEYDISCARD_byteSz; i++)
+    printf("\nkey_discarding:\n");
+    printBits((Mem_8bits *)&key, KEY_byteSz);
+    for (int i = KEY_byteSz - 1; i >= 0; i--)
     {
-        // printf("mask = %d\n", mask);
-        // printBits(&mask, 1);
-        // printf("shift = %d\n\n", shift);
-        dk[i] = ((key[i] & mask) << (7 - shift)) | (key[i + 1] >> shift);
-        mask = mask / 2 - 1;
-        shift--;
+        dk <<= 7;
+        dk = dk | (p[i] & mask);
     }
-    // printBits(dk, KEYDISCARD_byteSz);
-    return ft_memdup(dk, KEYDISCARD_byteSz);
+    printBits((Mem_8bits *)&dk, KEY_byteSz);
+    return dk;
 }
+
+
+
+// Mem_8bits           *key_discarding(Mem_8bits *key)
+// {
+//     Mem_8bits   dk[KEYDISCARD_byteSz];
+//     Mem_8bits   mask = 0b11111110;
+//     int         shift = 7;
+
+//     printf("\n--- key_discarding ---\n");
+//     printBits(key, KEY_byteSz);
+//     for (int i = 0; i < (int)KEYDISCARD_byteSz; i++)
+//     {
+//         // printf("mask = %d\n", mask);
+//         // printBits(&mask, 1);
+//         // printf("shift = %d\n\n", shift);
+//         dk[i] = ((key[i] & mask) << (7 - shift)) | (key[i + 1] >> shift);
+//         mask = mask / 2 - 1;
+//         shift--;
+//     }
+//     printBits(dk, KEYDISCARD_byteSz);
+//     return ft_memdup(dk, KEYDISCARD_byteSz);
+// }
 
 Mem_8bits           *bits_permutations(Mem_8bits *plaintext, char *pt)
 {

@@ -98,14 +98,17 @@ Mem_8bits   endianReverseByte(Mem_8bits byte);
 void        endianReverse(Mem_8bits *mem, Long_64bits byteSz);
 Word_32bits rotL(Word_32bits x, Word_32bits r);
 Word_32bits rotR(Word_32bits x, Word_32bits r);
-Mem_8bits   *key_discarding(Mem_8bits *key);
-Mem_8bits   *bits_permutations(Mem_8bits *key, char *pt);
+Long_64bits key_discarding(Mem_8bits *p);
+// Mem_8bits   *key_discarding(Mem_8bits *key);
+// Mem_8bits   *bits_permutations(Mem_8bits *key, char *pt);
 
 
 // Debug function, not used in this project
 void        printByte(char byte);
 void        printBits(void *p, int size);
 void        printHex(void *p, int size);
+void        printWord(Word_32bits word);
+void        printLong(Long_64bits l);
 
 
 

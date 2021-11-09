@@ -1,11 +1,31 @@
 #include "ft_ssl.h"
 
 // Debug function, not used in this project
+void    printRevByte(char byte)
+{
+    for (int j = 0; j < 8; j++)
+        printf("%u", (byte >> j) & 1);
+    printf(" ");
+}
 void    printByte(char byte)
 {
     for (int j = 7; j >= 0; j--)
         printf("%u", (byte >> j) & 1);
     printf(" ");
+}
+
+void    printWord(Word_32bits word)
+{
+    for (int j = 31; j >= 0; j--)
+        printf("%u", (word >> j) & 1);
+    printf("\n");
+}
+
+void    printLong(Long_64bits l)
+{
+    for (int j = 63; j >= 0; j--)
+        printf("%lu", (l >> j) & 1);
+    printf("\n");
 }
 
 // Debug function, not used in this project
@@ -16,11 +36,12 @@ void    printBits(void *p, int size)
     ft_memcpy(mem, (char *)p, size);
     mem[size] = '\0';
 
-    printf("len=%d -> >%s<\n", size, mem);
+    // printf("len=%d -> >%s<\n", size, mem);
     for (int i = 0; i < size; i++)
     {
         if (i && i % 8 == 0)
             puts("");
+        // printRevByte(mem[i]);
         printByte(mem[i]);
     }
     puts("");
@@ -39,3 +60,5 @@ void    printHex(void *p, int size)
             printf("%x ", (unsigned int)mem[i]);
     puts("");
 }
+
+

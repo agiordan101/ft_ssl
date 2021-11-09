@@ -72,34 +72,34 @@ static void         init_vars(t_des *des)
     };
     ft_memcpy(des->ipt, ipt, 64);
 
-    // Final Permutation Table
-    char fpt[KEY_bitSz] = {
-        40, 8, 48, 16, 56, 24, 64, 32,
-        39, 7, 47, 15, 55, 23, 63, 31,
-        38, 6, 46, 14, 54, 22, 62, 30,
-        37, 5, 45, 13, 53, 21, 61, 29,
-        36, 4, 44, 12, 52, 20, 60, 28,
-        35, 3, 43, 11, 51, 19, 59, 27,
-        34, 2, 42, 10, 50, 18, 58, 26,
-        33, 1, 41, 9,  49, 17, 57, 25
-    };
-    ft_memcpy(des->fpt, fpt, 64);
+    // // Final Permutation Table
+    // char fpt[KEY_bitSz] = {
+    //     40, 8, 48, 16, 56, 24, 64, 32,
+    //     39, 7, 47, 15, 55, 23, 63, 31,
+    //     38, 6, 46, 14, 54, 22, 62, 30,
+    //     37, 5, 45, 13, 53, 21, 61, 29,
+    //     36, 4, 44, 12, 52, 20, 60, 28,
+    //     35, 3, 43, 11, 51, 19, 59, 27,
+    //     34, 2, 42, 10, 50, 18, 58, 26,
+    //     33, 1, 41, 9,  49, 17, 57, 25
+    // };
+    // ft_memcpy(des->fpt, fpt, 64);
 
-    // Test Permutation Table
-    char testpt[KEY_bitSz];
-    // for (int i = 0; i < 64; i++)
-    //     testpt[i] = i;
+    // // Test Permutation Table
+    // char testpt[KEY_bitSz];
+    // // for (int i = 0; i < 64; i++)
+    // //     testpt[i] = i;
     
-    for (int i = 0; i < 8; i++)
-        for (int j = 0; j < 8; j++)
-            testpt[i * 8 + j] = (7 - i) * 8 + j;
+    // for (int i = 0; i < 8; i++)
+    //     for (int j = 0; j < 8; j++)
+    //         testpt[i * 8 + j] = (7 - i) * 8 + j;
     
     // for (int i = 0; i < 64; i++)
     //     printf("%d ", testpt[i]);
     // printf("\n");
     // testpt[2] = 62;
     // testpt[62] = 2;
-    ft_memcpy(des->testpt, testpt, 64);
+    // ft_memcpy(des->testpt, testpt, 64);
 
     printf("\ncipher->vector:\n");
     // if (des->vector)
@@ -111,21 +111,57 @@ static void         init_vars(t_des *des)
     key_output(des->key);
 }
 
-// static Mem_8bits    *key_transformation(Mem_8bits *key, int round)
-// /*
-//     Transform a 56-bit key into 48-bit key
-// */
-// {
-//     Mem_8bits k0[4];
-//     Mem_8bits k1[4];
-// }
+static Long_64bits    key_transformation(Long_64bits key, int round)
+/*
+    Transform a 56-bit key into 48-bit key
+*/
+{
+    Word_32bits keymask = (1 << 28) - 1;
+    static char keybitshift[16] = {
+        1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1
+    };
+    static char ptable[48] = {
+        14, 17, 11, 24, 1, 5,
+        3,  28, 15, 6, 21, 10,
+        23, 19, 12, 4, 26, 8,
+        16, 7,  27, 20, 13, 2,
+        41, 52, 31, 37, 47, 55,
+        30, 40, 51, 45, 33, 48,
+        44, 49, 39, 56, 34, 53,
+        46, 42, 50, 36, 29, 32
+    };
+
+    printf("\nkey_transformation:\n");
+    printLong(key);
+
+    Word_32bits rpart = key & keymask;
+    Word_32bits lpart = key >> 28;
+    printWord(rpart);
+    printWord(lpart);
+
+    rpart = (rpart << keybitshift[round]) & keymask | rpart >> (28 - keybitshift[round]);
+    lpart = (lpart << keybitshift[round]) & keymask | lpart >> (28 - keybitshift[round]);
+    printWord(rpart);
+    printWord(lpart);
+
+    Long_64bits concat = (Long_64bits)lpart << 28 | rpart;
+    printLong(concat);
+
+    Long_64bits tk = 0;
+    for (int i = 0; i < 48; i++)
+        tk |= (((concat >> (ptable[i] - 1)) & 1) << i);
+
+    printLong(tk);
+    return tk;
+}
 
 void                descbc(t_hash *hash)
 {
     init_vars(&ssl.des);
-    Mem_8bits *newkey = key_discarding(ssl.des.key);
-    bits_permutations(ssl.des.key, ssl.des.ipt);
+    Long_64bits newkey = key_discarding(ssl.des.key);
+    // bits_permutations(ssl.des.key, ssl.des.ipt);
     // bits_permutations(ssl.des.key, ssl.des.testpt);
+    newkey = key_transformation(newkey, 0);
 
     freexit(EXIT_SUCCESS);
 }
