@@ -101,6 +101,7 @@ Word_32bits rotR(Word_32bits x, Word_32bits r);
 Long_64bits key_discarding(Mem_8bits *p);
 // Mem_8bits   *key_discarding(Mem_8bits *key);
 // Mem_8bits   *bits_permutations(Mem_8bits *key, char *pt);
+Long_64bits     bits_permutations(Long_64bits mem, char *ptable, int bitLen);
 
 
 // Debug function, not used in this project
@@ -181,9 +182,10 @@ typedef struct  s_des
     Mem_8bits   *salt;      // malloc
     int         saltSz;
     Mem_8bits   *vector;    // malloc
+    Long_64bits subkeys[16];
     char        ipt[KEY_bitSz];
     char        fpt[KEY_bitSz];
-    char        testpt[KEY_bitSz];
+    // char        testpt[KEY_bitSz];
 }               t_des;
 
 Mem_8bits     *pbkdf2_sha256(Mem_8bits *pwd, Mem_8bits *salt, int c);
@@ -195,6 +197,7 @@ Mem_8bits     *pbkdf2_sha256(Mem_8bits *pwd, Mem_8bits *salt, int c);
 # define    BASE64  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
 void        base64(t_hash *hash);
+void        base64_msg(Mem_8bits **msg, int byteSz, Mem_8bits *dest);
 
 
 /*

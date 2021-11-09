@@ -152,3 +152,27 @@ void                base64(t_hash *hash)
     else
         encode(hash);
 }
+
+
+
+
+
+void        base64_msg(Mem_8bits **msg, int byteSz, Mem_8bits *dest)
+{
+    // t_hash hash = (t_hash){0, NULL, *msg, byteSz, NULL, 0, 0, NULL};
+    t_hash hash = (t_hash){0, NULL, NULL, byteSz, NULL, 0, 0, NULL};
+    // if (!(hash.msg = (Mem_8bits *)malloc(sizeof(Mem_8bits) * (byteSz + 1))))
+    //     malloc_failed("Unable to malloc in sha256_msg() function\n");
+    // ft_bzero(hash.msg, byteSz + 1);
+    // ft_memcpy(hash.msg, *msg, byteSz);
+    hash.msg = ft_memdup(*msg, byteSz);
+
+    encode(&hash);
+    // md_hash_output(&hash);
+    // printf("\n");
+    // *msg = (Mem_8bits *)hash.hash;
+    // *byteSz = hash.hashWordSz * WORD_ByteSz;
+    ft_memcpy(dest, (Mem_8bits *)hash.hash, byteSz);
+    free(hash.msg);
+    free(hash.hash);
+}
