@@ -33,7 +33,7 @@ inline static Mem_8bits    *generate_key()
 }
 
 
-static Long_64bits    key_transformation(Long_64bits key, int round)
+static void    key_transformation(t_des *des)
 /*
     Transform a 56-bit key into 48-bit key
 */
@@ -73,6 +73,8 @@ static Long_64bits    key_transformation(Long_64bits key, int round)
         46, 42, 50, 36, 29, 32
     };
 
+    Long_64bits key = *((Long_64bits *)des->key);
+
     printf("\nkey_transformation:\n");
     printLong(key);
 
@@ -80,21 +82,24 @@ static Long_64bits    key_transformation(Long_64bits key, int round)
 
     Word_32bits rpart = key & keymask;
     Word_32bits lpart = key >> 28;
-    printWord(rpart);
-    printWord(lpart);
+    // printWord(rpart);
+    // printWord(lpart);
 
-    // kzfonzefonzefonzeofinzef need to loop and reuse rpart / lpart
-    rpart = (rpart << keybitshift[round]) & keymask | rpart >> (28 - keybitshift[round]);
-    lpart = (lpart << keybitshift[round]) & keymask | lpart >> (28 - keybitshift[round]);
-    printWord(rpart);
-    printWord(lpart);
+    for (int i = 0; i < 16; i++)
+    {
+        // kzfonzefonzefonzeofinzef need to loop and reuse rpart / lpart
+        rpart = (rpart << keybitshift[i]) & keymask | rpart >> (28 - keybitshift[i]);
+        lpart = (lpart << keybitshift[i]) & keymask | lpart >> (28 - keybitshift[i]);
+        // printWord(rpart);
+        // printWord(lpart);
 
-    Long_64bits tk = (Long_64bits)lpart << 28 | rpart;
-    printLong(tk);
+        key = (Long_64bits)lpart << 28 | rpart;
+        // printLong(tk);
 
-    tk = bits_permutations(tk, ptable, 48);
-    printLong(tk);
-    return tk;
+        des->subkeys[i] = bits_permutations(key, ptable, 48);
+        printf("\n%lx\n", des->subkeys[i]);
+        // printLong(tk);
+    }
 }
 
 static void         init_vars(t_des *des)
@@ -125,13 +130,7 @@ static void         init_vars(t_des *des)
         des->key = pbkdf2_sha256(des->password, des->salt, 3);
 
     // Key scheldule
-    for (int i = 0; i < 16; i++)
-    {
-
-        des->subkeys[i] = key_transformation(*((Long_64bits *)des->key), i);
-        printf("\n%lx\n", des->subkeys[i]);
-    }
-    exit(0);
+    key_transformation(des);
 
     // Initial Permutation Table
     char ipt[KEY_bitSz] = {
@@ -269,7 +268,7 @@ static Long_64bits            feistel_algorithm(Long_64bits plaintext)
         lpart ^= rpart;
         rpart ^= lpart;
         printf("lpart rpart: %lx %lx\n", lpart, rpart);
-        printf("lpart rpart: %s %s\n", (char *)&lpart, (char *)&rpart);
+        // printf("lpart rpart: %s %s\n", (char *)&lpart, (char *)&rpart);
     }
 
     plaintext = (Long_64bits)lpart << 32 | rpart;
