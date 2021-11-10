@@ -113,8 +113,44 @@ void                endianReverse(Mem_8bits *mem, Long_64bits byteSz)
 Long_64bits     bits_permutations(Long_64bits mem, char *ptable, int bitLen)
 {
     Long_64bits tk = 0;
-
+    // printLong(mem);
     for (int i = 0; i < bitLen; i++)
-        tk |= (((mem >> (ptable[i] - 1)) & 1) << i);
+    {
+        int nb = ptable[i] - 1;
+        int ni = i;
+        // printf("%d => ", nb);
+        int mod = nb % 8;
+        int modi = i % 8;
+        nb = nb - mod + 7 - mod;
+        ni = ni - modi + 7 - modi;
+        // printf("%d\n", nb);
+        tk |= (((mem >> (nb)) & 1) << ni);
+    }
+    // printLong(tk);
+    // printf("%lx\n", tk);
+    // exit(0);
     return tk;
 }
+Long_64bits     _bits_permutations(Long_64bits mem, char *ptable, int bitLen)
+{
+    Long_64bits tk = 0;
+    // printLong(mem);
+    for (int i = 0; i < bitLen; i++)
+    {
+        int nb = ptable[i] - 1;
+        int ni = i;
+        // printf("%d => ", nb);
+        // int mod = nb % 8;
+        // int modi = i % 8;
+        // nb = nb - mod + 7 - mod;
+        // ni = ni - modi + 7 - modi;
+        // printf("%d\n", nb);
+        tk |= (((mem >> (nb)) & 1) << ni);
+    }
+    // printLong(tk);
+    // printf("%lx\n", tk);
+    // exit(0);
+    return tk;
+}
+
+

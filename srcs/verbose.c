@@ -24,7 +24,12 @@ void    printWord(Word_32bits word)
 void    printLong(Long_64bits l)
 {
     for (int j = 63; j >= 0; j--)
+    {
         printf("%lu", (l >> j) & 1);
+        if (j % 8 == 0)
+            putchar(' ');
+    }
+
     printf("\n");
 }
 

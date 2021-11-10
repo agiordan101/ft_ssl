@@ -101,6 +101,7 @@ Word_32bits rotR(Word_32bits x, Word_32bits r);
 Long_64bits key_discarding(Mem_8bits *p);
 // Mem_8bits   *key_discarding(Mem_8bits *key);
 // Mem_8bits   *bits_permutations(Mem_8bits *key, char *pt);
+Long_64bits     _bits_permutations(Long_64bits mem, char *ptable, int bitLen);
 Long_64bits     bits_permutations(Long_64bits mem, char *ptable, int bitLen);
 
 
