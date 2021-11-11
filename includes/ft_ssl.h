@@ -51,6 +51,7 @@ typedef struct  s_hash
     int             len;        // Length of content
     Word_32bits     *hash;
     int             hashWordSz;
+    int             hashByteSz;
     int             error;      // FILENOTFOUND or 0
     struct s_hash *next;
 }               t_hash;

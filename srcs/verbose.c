@@ -17,7 +17,11 @@ void    printByte(char byte)
 void    printWord(Word_32bits word)
 {
     for (int j = 31; j >= 0; j--)
+    {
         printf("%u", (word >> j) & 1);
+        if (j % 8 == 0)
+            putchar(' ');
+    }
     printf("\n");
 }
 

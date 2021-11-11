@@ -131,6 +131,7 @@ Long_64bits     bits_permutations(Long_64bits mem, char *ptable, int bitLen)
     // exit(0);
     return tk;
 }
+
 Long_64bits     _bits_permutations(Long_64bits mem, char *ptable, int bitLen)
 {
     Long_64bits tk = 0;

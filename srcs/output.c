@@ -114,9 +114,17 @@ void    md_output(t_hash *hash)
 
 void    cipher_output(t_hash *hash)
 {
-    if (((char *)hash->hash)[hash->hashWordSz - 1] == '\n')
-        ((char *)hash->hash)[hash->hashWordSz - 1] = '\0'; //To remove \n, it's like 'echo -n <node->msg> | ./ft_ssl ...'
-    ft_putstr((char *)hash->hash);
+    if (ssl.hash_func_addr == base64)
+    {
+        if (((char *)hash->hash)[hash->hashWordSz - 1] == '\n')
+            ((char *)hash->hash)[hash->hashWordSz - 1] = '\0'; //To remove \n, it's like 'echo -n <node->msg> | ./ft_ssl ...'
+        ft_putstr((char *)hash->hash);
+    }
+    else
+    {
+        // ft_printHex(hash->hash);
+        printf("%lx\n", hash->hash);
+    }
 }
 
 void    output(t_hash *hash)

@@ -262,7 +262,7 @@ Word_32bits          feistel_func(Word_32bits halfblock, Long_64bits subkey)
         28, 29, 28, 29, 30, 31, 32, 1
     };
     // Straight Permutation Table
-    int finalperm[32] = {
+    char finalperm[32] = {
         16, 7, 20, 21,
         29, 12, 28, 17,
         1, 15, 23, 26,
@@ -278,18 +278,18 @@ Word_32bits          feistel_func(Word_32bits halfblock, Long_64bits subkey)
     char        s0;
     char        s1;
 
-    printf("halfblock: %lx\n", halfblock);
+    // printf("halfblock: %lx\n", halfblock);
 
     exp_halfblock = bits_permutations(halfblock, exp_d, 48);
 
-    printf("exp_halfblock: %lx\n", exp_halfblock);
+    // printf("exp_halfblock: %lx\n", exp_halfblock);
     
     exp_halfblock ^= subkey;
     // endianReverse((Mem_8bits *)&exp_halfblock, 8);
     // exp_halfblock >> 16;
-    exp_halfblock = bits_permutations(exp_halfblock, bitorder, 48);
-    printf("exp_halfblock xor: %lx\n", exp_halfblock);
-    printLong(exp_halfblock);
+    exp_halfblock = _bits_permutations(exp_halfblock, bitorder, 48);
+    // printf("exp_halfblock xor: %lx\n", exp_halfblock);
+    // printLong(exp_halfblock);
 
     for (int i = 0; i < 8; i++)
     // for (int i = 7; i >= 0; i--)
@@ -300,29 +300,31 @@ Word_32bits          feistel_func(Word_32bits halfblock, Long_64bits subkey)
         s1 = (box & 0b011110) >> 1;
         outblock |= (S[i][s0][s1] << (i * 4));
         exp_halfblock >>= 6;
-        printf("box %x col %d row %d\toutblock: %lx\n", box, s1, s0, outblock);
+        // printf("box %x col %d row %d\toutblock: %lx\n", box, s1, s0, outblock);
     }
 
     // for (int i = 0; i < 8; i++)
     outblock = ((outblock >> 4) & 0x0f0f0f0f) | ((outblock << 4) & 0xf0f0f0f0);
 
-    printf("outblock: %lx\n", outblock);
+    // printf("outblock: %lx\n", outblock);
+    // printWord(outblock);
 
     outblock = _bits_permutations(outblock, bitorder, 32);
-    printf("outblock: %lx\n", outblock);
+    // printf("outblock: %lx\n", outblock);
+    // printWord(outblock);
 
-    outblock = bits_permutations(outblock, finalperm, 32);
-    printf("outblock: %lx\n", outblock);
+    outblock = _bits_permutations(outblock, finalperm, 32);
+    // printf("outblock: %lx\n", outblock);
 
     outblock = _bits_permutations(outblock, bitorder, 32);
-    printf("outblock: %lx\n", outblock);
+    // printf("outblock: %lx\n", outblock);
     return outblock;
 }
 
 static Long_64bits            feistel_algorithm(Long_64bits plaintext)
 {
     plaintext = bits_permutations(plaintext, ssl.des.ipt, 64);
-    printf("After ipt permutation: %lx\n", plaintext);
+    // printf("After ipt permutation: %lx\n", plaintext);
 
     Word_32bits lpart = plaintext & ((1 << 32) - 1);
     Word_32bits rpart = plaintext >> 32;
@@ -339,15 +341,14 @@ static Long_64bits            feistel_algorithm(Long_64bits plaintext)
         lpart ^= rpart;
         rpart ^= lpart;
 
-        printf("lpart rpart %d: %lx %lx\n", i, lpart, rpart);
+        // printf("lpart rpart %d: %lx %lx\n", i, lpart, rpart);
         // printf("lpart rpart: %s %s\n", (char *)&lpart, (char *)&rpart);
     }
 
     plaintext = (Long_64bits)lpart << 32 | rpart;
     plaintext = bits_permutations(plaintext, ssl.des.fpt, 64);
-    printf("After fpt permutation: %lx\n", plaintext);
-    printf("After fpt permutation: %s\n", (char *)&plaintext);
-    exit(0);
+    // printf("After fpt permutation: %lx\n", plaintext);
+    // printf("After fpt permutation: %s\n", (char *)&plaintext);
 
     return plaintext;
 }
@@ -358,21 +359,23 @@ static void         encode(t_hash *hash, Mem_8bits *pt, int ptByteSz)
     Long_64bits ciphertext[ptSz];
     Long_64bits *plaintext = (Long_64bits *)pt;
 
-    printf("\nptByteSz: %d\tptSz: %d\n", ptByteSz, ptSz);
+    // printf("\nptByteSz: %d\tptSz: %d\n", ptByteSz, ptSz);
     // while (ptByteSz >= 8)
     for (int i = 0; i < ptSz; i++)
     {
-        printf("\n*plaintext: %lx\n", *plaintext);
+        // printf("\n*plaintext: %lx\n", *plaintext);
         ciphertext[i] = feistel_algorithm(*plaintext);
         // ptByteSz -= 8;
-        printf("%lx\n", ciphertext[i]);
+        // printf("%lx\n", ciphertext[i]);
         plaintext++;
     }
     // Padd last bytes
-    printf("end ecode\n");
 
     // base64_msg((Mem_8bits **)&ciphertext, ptSz, (Mem_8bits *)hash->hash);
-
+    
+    endianReverse((Mem_8bits *)ciphertext, ptSz);
+    hash->hash = ft_memdup((Mem_8bits *)ciphertext, ptByteSz);
+    hash->hashByteSz = ptByteSz;
 }
 
 void                descbc(t_hash *hash)

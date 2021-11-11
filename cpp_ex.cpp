@@ -204,11 +204,14 @@ string encrypt(string pt, vector<string> rkb, vector<string> rk)
 
 			cout << "col " << col << "\trow " << row << "  " << bin2hex(op) << endl;
 		}
-		// Straight D-box
 		cout << bin2hex(op) << endl;
-		op = permute(op, per, 32);
+		cout << op << endl;
 
+		// Straight D-box
+		op = permute(op, per, 32);
 		cout << bin2hex(op) << endl;
+		cout << op << endl;
+
 		// XOR left and op
 		x = xor_(op, left);
 
