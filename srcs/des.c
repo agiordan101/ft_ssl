@@ -1,6 +1,6 @@
 #include "ft_ssl.h"
 
-static void         ask_password(t_des *des)
+static void             ask_password(t_des *des)
 {
     char *firstmsg_1 = "enter ";
     char *secondmsg_1 = "Verifying - enter ";
@@ -23,7 +23,7 @@ static void         ask_password(t_des *des)
         free(password);
 }
 
-inline static Mem_8bits    *generate_key()
+inline static Mem_8bits *generate_key()
 {
     Mem_8bits key[KEY_byteSz];
 
@@ -33,7 +33,7 @@ inline static Mem_8bits    *generate_key()
 }
 
 
-static void    key_transformation(t_des *des)
+static void             key_transformation(t_des *des)
 /*
     Transform a 56-bit key into 48-bit key
 */
@@ -105,8 +105,8 @@ static void    key_transformation(t_des *des)
     for (int i = 0; i < 16; i++)
     {
         // Left shift based on keybitshift (round index)
-        rpart = (rpart << keybitshift[i]) & keymask | rpart >> (28 - keybitshift[i]);
-        lpart = (lpart << keybitshift[i]) & keymask | lpart >> (28 - keybitshift[i]);
+        rpart = ((rpart << keybitshift[i]) & keymask) | (rpart >> (28 - keybitshift[i]));
+        lpart = ((lpart << keybitshift[i]) & keymask) | (lpart >> (28 - keybitshift[i]));
         // printf("Left: ");
         // printWord(lpart);
         // printWord(rpart);
@@ -134,7 +134,7 @@ static void    key_transformation(t_des *des)
     // exit(0);
 }
 
-static void         init_vars(t_des *des)
+static void             init_vars(t_des *des)
 {
     printf("des->vector: %s\n", des->vector);
     printf("des->salt: %s\n", des->salt);
@@ -204,7 +204,7 @@ static void         init_vars(t_des *des)
     // exit(0);
 }
 
-Word_32bits          feistel_func(Word_32bits halfblock, Long_64bits subkey)
+Word_32bits             feistel_func(Word_32bits halfblock, Long_64bits subkey)
 {
     // S-box Table
     static char S[8][4][16] = {
@@ -321,7 +321,7 @@ Word_32bits          feistel_func(Word_32bits halfblock, Long_64bits subkey)
     return outblock;
 }
 
-static Long_64bits            feistel_algorithm(Long_64bits plaintext)
+static Long_64bits      feistel_algorithm(Long_64bits plaintext)
 {
     plaintext = bits_permutations(plaintext, ssl.des.ipt, 64);
     // printf("After ipt permutation: %lx\n", plaintext);
@@ -353,7 +353,7 @@ static Long_64bits            feistel_algorithm(Long_64bits plaintext)
     return plaintext;
 }
 
-static void         encode(t_hash *hash, Mem_8bits *pt, int ptByteSz)
+static void             encode(t_hash *hash, Mem_8bits *pt, int ptByteSz)
 {
     int         ptSz = (ptByteSz + 7) / 8;
     Long_64bits ciphertext[ptSz];
