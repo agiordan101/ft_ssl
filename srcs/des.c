@@ -375,9 +375,8 @@ static void             encode(t_hash *hash, Mem_8bits *pt, int ptByteSz)
         plaintext++;
     }
     // Padd last bytes
+    // Convert to base64 of course   // base64_msg((Mem_8bits **)&ciphertext, ptSz, (Mem_8bits *)hash->hash);
 
-    // base64_msg((Mem_8bits **)&ciphertext, ptSz, (Mem_8bits *)hash->hash);
-    
     endianReverse((Mem_8bits *)ciphertext, ptSz);
     hash->hash = ft_memdup((Mem_8bits *)ciphertext, ptByteSz);
     hash->hashByteSz = ptByteSz;
