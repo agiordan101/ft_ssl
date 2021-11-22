@@ -145,7 +145,7 @@ static void             init_vars(t_des *des)
 
     srand(time(NULL));
     // Vector is only for CBC mode, ft_ssl failed if it's not provided
-    if (!des->vector && !ft_strcmp(ssl.hash_func, "DES-CBC"))
+    if (!des->vector && des->mode == DESCBC)
     {
         ft_putstr("\nInitialization vector is undefined\n");
         freexit(EXIT_SUCCESS);
@@ -358,14 +358,19 @@ static void             encode(t_hash *hash, Mem_8bits *pt, int ptByteSz)
     int         ptSz = (ptByteSz + 7) / 8;
     Long_64bits ciphertext[ptSz];
     Long_64bits *plaintext = (Long_64bits *)pt;
+    Long_64bits bloc;
 
     // printf("\nptByteSz: %d\tptSz: %d\n", ptByteSz, ptSz);
     // while (ptByteSz >= 8)
     for (int i = 0; i < ptSz; i++)
     {
-        // printf("\n*plaintext: %lx\n", *plaintext);
-        ciphertext[i] = feistel_algorithm(*plaintext);
-        // ptByteSz -= 8;
+        bloc = *plaintext;
+        if (ssl.des.mode == DESCBC)
+            bloc ^= i ? ciphertext[i] : ssl.des.vector;
+        printf("\nbloc: %lx\n", bloc);
+
+        ciphertext[i] = feistel_algorithm(bloc);
+
         // printf("%lx\n", ciphertext[i]);
         plaintext++;
     }
@@ -378,7 +383,7 @@ static void             encode(t_hash *hash, Mem_8bits *pt, int ptByteSz)
     hash->hashByteSz = ptByteSz;
 }
 
-void                descbc(t_hash *hash)
+void                des(t_hash *hash)
 {
     /*
         Actually works only for des-ecb encryption & plaintext % 64 == 0

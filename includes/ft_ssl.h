@@ -1,4 +1,3 @@
-
 # include <stdlib.h>
 # include <unistd.h>
 # include <stdio.h>
@@ -177,19 +176,6 @@ typedef unsigned long   Key_64bits;
 # define KEY_bitSz          KEY_byteSz * 8
 # define KEYDISCARD_byteSz  KEY_byteSz - 1
 
-typedef struct  s_des
-{
-    Mem_8bits   *key;       // malloc
-    Mem_8bits   *password;  // malloc
-    Mem_8bits   *salt;      // malloc
-    int         saltSz;
-    Mem_8bits   *vector;    // malloc
-    Long_64bits subkeys[16];
-    char        ipt[KEY_bitSz];
-    char        fpt[KEY_bitSz];
-    // char        testpt[KEY_bitSz];
-}               t_des;
-
 Mem_8bits     *pbkdf2_sha256(Mem_8bits *pwd, Mem_8bits *salt, int c);
 
 /*
@@ -206,12 +192,23 @@ void        base64_msg(Mem_8bits **msg, int byteSz, Mem_8bits *dest);
     DES Data --------------------------------------
 */
 
-// typedef struct  s_des
-// {
-// }               t_des;
+typedef enum    desmode {
+    DESECB=1, DESCBC=2
+}               e_desmode;
 
-void        descbc(t_hash *hash);
+typedef struct  s_des
+{
+    e_desmode   mode;
+    Mem_8bits   *key;       // malloc
+    Mem_8bits   *password;  // malloc
+    Mem_8bits   *salt;      // malloc
+    Mem_8bits   *vector;    // malloc
+    Long_64bits subkeys[16];
+    char        ipt[KEY_bitSz];     // Initial permutation table
+    char        fpt[KEY_bitSz];     // Final   permutation table
+}               t_des;
 
+void        des(t_hash *hash);
 
 
 

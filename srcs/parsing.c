@@ -1,4 +1,4 @@
-#include "ft_ssl.h"
+desecb#include "ft_ssl.h"
 
 inline void  init_hash(t_hash *hash)
 {
@@ -202,17 +202,19 @@ int     hash_func_handler(char *str)
         ssl.hash_func_addr = base64;
         ssl.command = CIPHER;
     }
-    else if (!ft_strcmp(str, "des-ecb"))
+    else if (!ft_strcmp(str, "des") || !ft_strcmp(str, "des-ecb"))
     {
         ssl.hash_func = "DES-ECB";
-        ssl.hash_func_addr = descbc;
+        ssl.hash_func_addr = des;
         ssl.command = CIPHER;
+        ssl.des.mode = DESECB;
     }
-    else if (!ft_strcmp(str, "des") || !ft_strcmp(str, "des-cbc"))
+    else if (!ft_strcmp(str, "des-cbc"))
     {
         ssl.hash_func = "DES-CBC";
-        ssl.hash_func_addr = descbc;
+        ssl.hash_func_addr = des;
         ssl.command = CIPHER;
+        ssl.des.mode = DESCBC;
     }
     else
     {
