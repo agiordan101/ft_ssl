@@ -380,6 +380,9 @@ static void             encode(t_hash *hash, Mem_8bits *pt, int ptByteSz)
 
 void                descbc(t_hash *hash)
 {
+    /*
+        Actually works only for des-ecb encryption & plaintext % 64 == 0
+    */
     printf("hash->msg: %s\n", hash->msg);
 
     init_vars(&ssl.des);
