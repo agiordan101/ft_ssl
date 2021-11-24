@@ -50,7 +50,7 @@ typedef struct  s_hash
     int             len;        // Length of content
     Word_32bits     *hash;
     int             hashWordSz;
-    int             hashByteSz;
+    // int             hashByteSz;
     int             error;      // FILENOTFOUND or 0
     struct s_hash *next;
 }               t_hash;
@@ -172,7 +172,7 @@ void        sha256_xor_8bits(Mem_8bits *sha1, Mem_8bits *sha2, Mem_8bits **resul
 
 typedef unsigned long   Key_64bits;
 
-# define KEY_byteSz         sizeof(Key_64bits)
+# define KEY_byteSz         sizeof(Key_64bits)      // 8 bytes / 64 bits
 # define KEY_bitSz          KEY_byteSz * 8
 # define KEYDISCARD_byteSz  KEY_byteSz - 1
 

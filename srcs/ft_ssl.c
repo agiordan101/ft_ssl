@@ -79,6 +79,7 @@ int     main(int ac, char **av)
     while (hash)
     {
         // printf("hash->msg: >%s<\n", hash->msg);
+        // printf("hash->name: >%s<\n", hash->name);
         ssl.hash_func_addr(hash);
         output(hash);
         hash = hash->next;

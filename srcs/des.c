@@ -32,7 +32,6 @@ inline static Mem_8bits *generate_key()
     return ft_strdup(key);
 }
 
-
 static void             key_transformation(t_des *des)
 /*
     Transform a 56-bit key into 48-bit key
@@ -100,7 +99,7 @@ static void             key_transformation(t_des *des)
     // Word_32bits rpart = key >> 28;
     printWord(lpart);
     printWord(rpart);
-    printf("%lx %lx\n", lpart, rpart);
+    printf("%x %x\n", lpart, rpart);
 
     for (int i = 0; i < 16; i++)
     {
@@ -136,12 +135,14 @@ static void             key_transformation(t_des *des)
 
 static void             init_vars(t_des *des)
 {
-    printf("des->vector: %s\n", des->vector);
-    printf("des->salt: %s\n", des->salt);
-    printf("des->password: %s\n", des->password);
-    // printf("des->key: %s\n\n", des->key);
-    printf("des->key: %lx\n", *((Long_64bits *)des->key));
+    // printf("\ncipher->password: %s\n", des->password);
+    // printf("cipher->key:\n");
     // key_output(des->key);
+    // printf("\ncipher->salt:\n");
+    // key_output(des->salt);
+    // printf("\ncipher->vector:\n");
+    // key_output(des->vector);
+    // printf("\n");
 
     srand(time(NULL));
     // Vector is only for CBC mode, ft_ssl failed if it's not provided
@@ -193,14 +194,19 @@ static void             init_vars(t_des *des)
     };
     ft_memcpy(des->fpt, fpt, 64);
 
-    printf("\ncipher->vector:\n");
-    // if (des->vector)
-    key_output(des->vector);
+    
+    // printf("des->vector: %lx\n", des->vector ? *((Long_64bits *)des->vector) : 0);
+    // printf("\ndes->salt: %lx\n", des->salt ? *((Long_64bits *)des->salt) : 0);
+    // printf("\ncipher->password: %lx\n", des->password ? *((Long_64bits *)des->password) : 0);
+    // printf("\ndes->key: %lx\n", des->key ? *((Long_64bits *)des->key) : 0);
+    printf("\ncipher->password: %s\n", des->password);
+    printf("cipher->key:\n");
+    key_output(des->key);
     printf("\ncipher->salt:\n");
     key_output(des->salt);
-    printf("\ncipher->password:\n%s", des->password);
-    printf("\ncipher->key:\n");
-    key_output(des->key);
+    printf("\ncipher->vector:\n");
+    key_output(des->vector);
+    printf("\n");
     // exit(0);
 }
 
@@ -326,7 +332,7 @@ static Long_64bits      feistel_algorithm(Long_64bits plaintext)
     plaintext = bits_permutations(plaintext, ssl.des.ipt, 64);
     // printf("After ipt permutation: %lx\n", plaintext);
 
-    Word_32bits lpart = plaintext & ((1 << 32) - 1);
+    Word_32bits lpart = plaintext & (((Long_64bits)1 << 32) - 1);
     Word_32bits rpart = plaintext >> 32;
 
     // printWord(lpart);
@@ -360,29 +366,30 @@ static void             encode(t_hash *hash, Mem_8bits *pt, int ptByteSz)
     Long_64bits *plaintext = (Long_64bits *)pt;
     Long_64bits bloc;
 
-    // printf("\nptByteSz: %d\tptSz: %d\n", ptByteSz, ptSz);
+    printf("\nptByteSz: %d\tptSz: %d\n", ptByteSz, ptSz);
     // while (ptByteSz >= 8)
     for (int i = 0; i < ptSz; i++)
     {
         bloc = *plaintext;
         if (ssl.des.mode == DESCBC)
-            bloc ^= i ? ciphertext[i] : ssl.des.vector;
-        printf("\nbloc: %lx\n", bloc);
+            bloc ^= i ? ciphertext[i] : (Long_64bits)ssl.des.vector;
+        printf("\n plaintext: %lx\n", bloc);
 
         ciphertext[i] = feistel_algorithm(bloc);
 
-        // printf("%lx\n", ciphertext[i]);
+        printf("ciphertext: %lx\n", ciphertext[i]);
         plaintext++;
     }
     // Padd last bytes
     // Convert to base64 of course   // base64_msg((Mem_8bits **)&ciphertext, ptSz, (Mem_8bits *)hash->hash);
 
     endianReverse((Mem_8bits *)ciphertext, ptSz);
-    hash->hash = ft_memdup((Mem_8bits *)ciphertext, ptByteSz);
-    hash->hashByteSz = ptByteSz;
+    hash->hash = (Word_32bits *)ft_memdup((Mem_8bits *)ciphertext, ptByteSz);
+    hash->hashWordSz = ptSz * 2;
+    printf("hash->hash: %ls\n", hash->hash);
 }
 
-void                des(t_hash *hash)
+void                    des(t_hash *hash)
 {
     /*
         Actually works only for des-ecb encryption & plaintext % 64 == 0

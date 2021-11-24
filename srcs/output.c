@@ -44,8 +44,16 @@ void    file_not_found(t_hash *hash)
 void    key_output(Mem_8bits *p)
 {
     Word_32bits *key = (Word_32bits *)p;
-    for (Word_32bits *tmp = key; tmp < key + KEY_byteSz / WORD_ByteSz; tmp += 1)
+    for (Word_32bits *tmp = key; tmp && tmp < key + KEY_byteSz / WORD_ByteSz; tmp += 1)
         ft_printHex(*tmp);
+}
+
+void    cipher_hash_output(t_hash *p)
+{
+    Word_32bits *hash = p->hash;
+    for (int i = 0; i < p->hashWordSz; i++)
+        printf("%x\n", hash[i]);
+        // ft_printHex(hash[i]);
 }
 
 void    md_hash_output(t_hash *p)
@@ -121,17 +129,13 @@ void    cipher_output(t_hash *hash)
         ft_putstr((char *)hash->hash);
     }
     else
-    {
-        // ft_printHex(hash->hash);
-        printf("%lx\n", hash->hash);
-    }
+        cipher_hash_output(hash);
 }
 
 void    output(t_hash *hash)
 {
     if (hash->error == FILENOTFOUND)
         file_not_found(hash);
-    // if (ssl.command & MD)
     else if (ssl.command & MD)
         md_output(hash);
     else if (ssl.command & CIPHER)
