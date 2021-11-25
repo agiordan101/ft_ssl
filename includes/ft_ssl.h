@@ -48,7 +48,8 @@ typedef struct  s_hash
     char            *name;      // stdin / file name / -s string arg // Malloc
     char            *msg;       // Content to hash // Malloc
     int             len;        // Length of content
-    Word_32bits     *hash;
+    Word_32bits     *hash_32bits;
+    Long_64bits     *hash_64bits;
     int             hashWordSz;
     // int             hashByteSz;
     int             error;      // FILENOTFOUND or 0
@@ -78,7 +79,7 @@ Long_64bits ft_strtoHex(char *str);
 char        *ft_hexToBin(Long_64bits n, int byteSz);
 void	    ft_putstr(char *s);
 void    	ft_putnbr(int fd, int n);
-void        ft_printHex(Word_32bits n);
+void        ft_printHex(Long_64bits n, int byteSz);
 Mem_8bits   *ft_strHexToBin(Mem_8bits *str, int byteSz);
 
 void        output(t_hash *hash);

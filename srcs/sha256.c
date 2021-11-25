@@ -127,13 +127,13 @@ void        sha256(t_hash *hash)
 
     // Cpy SHA256 result
     hash->hashWordSz = SHA256_WordSz;
-    // if (!(hash->hash = malloc(hash->hashWordSz * WORD_ByteSz)))
+    // if (!(hash->hash_32bits = malloc(hash->hashWordSz * WORD_ByteSz)))
     //     malloc_failed("Unable to malloc msg in sha256() function\n");
-    // ft_memcpy(hash->hash, sha.hash, hash->hashWordSz * WORD_ByteSz);
-    hash->hash = (Word_32bits *)ft_memdup((Mem_8bits *)sha.hash, SHA256_byteSz);
+    // ft_memcpy(hash->hash_32bits, sha.hash, hash->hashWordSz * WORD_ByteSz);
+    hash->hash_32bits = (Word_32bits *)ft_memdup((Mem_8bits *)sha.hash, SHA256_byteSz);
 
     // little endian to big endian
-    for (Word_32bits *tmp = hash->hash; tmp < hash->hash + hash->hashWordSz; tmp += 1)
+    for (Word_32bits *tmp = hash->hash_32bits; tmp < hash->hash_32bits + hash->hashWordSz; tmp += 1)
         endianReverse((Mem_8bits *)tmp, WORD_ByteSz);
 }
 
@@ -144,7 +144,7 @@ void        sha256(t_hash *hash)
 void        sha256_msg(Mem_8bits **msg, int byteSz, Mem_8bits *dest)
 {
     // t_hash hash = (t_hash){0, NULL, *msg, byteSz, NULL, 0, 0, NULL};
-    t_hash hash = (t_hash){0, NULL, NULL, byteSz, NULL, 0, 0, NULL};
+    t_hash hash = (t_hash){0, NULL, NULL, byteSz, NULL, NULL, 0, 0, NULL};
     // if (!(hash.msg = (Mem_8bits *)malloc(sizeof(Mem_8bits) * (byteSz + 1))))
     //     malloc_failed("Unable to malloc in sha256_msg() function\n");
     // ft_bzero(hash.msg, byteSz + 1);
@@ -154,11 +154,11 @@ void        sha256_msg(Mem_8bits **msg, int byteSz, Mem_8bits *dest)
     sha256(&hash);
     // md_hash_output(&hash);
     // printf("\n");
-    // *msg = (Mem_8bits *)hash.hash;
+    // *msg = (Mem_8bits *)hash.hash_32bits;
     // *byteSz = hash.hashWordSz * WORD_ByteSz;
-    ft_memcpy(dest, (Mem_8bits *)hash.hash, SHA256_byteSz);
+    ft_memcpy(dest, (Mem_8bits *)hash.hash_32bits, SHA256_byteSz);
     free(hash.msg);
-    free(hash.hash);
+    free(hash.hash_32bits);
 }
 
 inline void sha256_xor_32bits(Word_32bits *sha1, Word_32bits *sha2, Word_32bits **result)

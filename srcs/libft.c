@@ -237,14 +237,14 @@ Mem_8bits           *ft_strHexToBin(Mem_8bits *str, int byteSz)
     return bin;
 }
 
-void    	        ft_printHex(Word_32bits n)
+void    	        ft_printHex(Long_64bits n, int byteSz)
 {
     unsigned char hex[16] = HEXABASE;
     unsigned char *word = (unsigned char *)&n;
     unsigned char c_16e0;
     unsigned char c_16e1;
 
-    for (int i = 0; i < WORD_ByteSz; i++)
+    for (int i = 0; i < byteSz; i++)
     {
         c_16e0 = hex[word[i] % 16];
         c_16e1 = hex[word[i] / 16];

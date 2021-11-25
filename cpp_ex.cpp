@@ -96,8 +96,10 @@ string xor_(string a, string b)
 }
 string encrypt(string pt, vector<string> rkb, vector<string> rk)
 {
+	cout << "bloc: " << pt << endl;
 	// Hexadecimal to binary
 	pt = hex2bin(pt);
+	cout << "bloc: " << pt << endl;
 
 	// Initial Permutation Table
 	int initial_perm[64] = { 58, 50, 42, 34, 26, 18, 10, 2,
@@ -111,6 +113,7 @@ string encrypt(string pt, vector<string> rkb, vector<string> rk)
 	// Initial Permutation
 	pt = permute(pt, initial_perm, 64);
 	cout << "After initial permutation: " << bin2hex(pt) << endl;
+	cout << "After initial permutation: " << pt << endl;
 
 	// Splitting
 	string left = pt.substr(0, 32);
@@ -176,14 +179,14 @@ string encrypt(string pt, vector<string> rkb, vector<string> rk)
 		// Expansion D-box
 		string right_expanded = permute(right, exp_d, 48);
 
-		cout << bin2hex(right) << endl;
-		cout << bin2hex(right_expanded) << endl;
+		// cout << bin2hex(right) << endl;
+		// cout << bin2hex(right_expanded) << endl;
 
 		// XOR RoundKey[i] and right_expanded
 		string x = xor_(rkb[i], right_expanded);
 
-		cout << bin2hex(x) << endl;
-		cout << x << endl;
+		// cout << bin2hex(x) << endl;
+		// cout << x << endl;
 
 		// S-boxes
 		string op = "";
@@ -202,15 +205,15 @@ string encrypt(string pt, vector<string> rkb, vector<string> rk)
 			val = val % 2;
 			op += char(val + '0');
 
-			cout << "col " << col << "\trow " << row << "  " << bin2hex(op) << endl;
+			// cout << "col " << col << "\trow " << row << "  " << bin2hex(op) << endl;
 		}
-		cout << bin2hex(op) << endl;
-		cout << op << endl;
+		// cout << bin2hex(op) << endl;
+		// cout << op << endl;
 
 		// Straight D-box
 		op = permute(op, per, 32);
-		cout << bin2hex(op) << endl;
-		cout << op << endl;
+		// cout << bin2hex(op) << endl;
+		// cout << op << endl;
 
 		// XOR left and op
 		x = xor_(op, left);
@@ -243,16 +246,33 @@ string encrypt(string pt, vector<string> rkb, vector<string> rk)
 	string cipher = bin2hex(permute(combine, final_perm, 64));
 	return cipher;
 }
+std::string string_to_hex(const std::string& input)
+{
+    static const char hex_digits[] = "0123456789ABCDEF";
+
+    std::string output;
+    output.reserve(input.length() * 2);
+    for (unsigned char c : input)
+    {
+        output.push_back(hex_digits[c >> 4]);
+        output.push_back(hex_digits[c & 15]);
+    }
+    return output;
+}
 int main()
 {
 	// pt is plain text
 	string pt, key;
-	/*cout<<"Enter plain text(in hexadecimal): ";
-	cin>>pt;
-	cout<<"Enter key(in hexadecimal): ";
+	/*cout<<"Enter key(in hexadecimal): ";
 	cin>>key;*/
 
-	pt = "123456ABCD132536";
+	// cout<<"Enter plain text(in hexadecimal): ";
+	// cin>>pt;
+	pt = "42 is nice";
+	// pt = string_to_hex(pt);
+	// pt = "123456ABCD132536";
+    cout << "txt plaintext: " << pt << endl;
+	
 	key = "AABB09182736CCDD";
 	// Key Generation
 
@@ -322,8 +342,19 @@ int main()
 	}
 
 	cout << "\nEncryption:\n\n";
-	string cipher = encrypt(pt, rkb, rk);
-	cout << "\nCipher Text: " << cipher << endl;
+	// string cipher = encrypt(pt, rkb, rk);
+	
+	// cout << "\nCipher Text: ";
+	for (int i = 0; i < (pt.length() + 7) / 8; i++)
+	{
+		string strp = pt.substr(i * 8, (i + 1) * 8);
+		string hexp = string_to_hex(strp);
+		
+		cout << "txt plaintext: " << strp << endl;
+		cout << "hex plaintext: " << hexp << endl;
+		cout << "   ciphertext: " << encrypt(hexp, rkb, rk) << endl;
+	}
+	cout << endl;
 
 	// cout << "\nDecryption\n\n";
 	// reverse(rkb.begin(), rkb.end());

@@ -42,10 +42,10 @@ static void         encode(t_hash *hash)
 
     // printBits(hash->msg, hash->len);
     hash->hashWordSz = get_len_encoded(hash->len);
-    // if (!(hash->hash = malloc(hash->hashWordSz * WORD_ByteSz)))
+    // if (!(hash->hash_32bits = malloc(hash->hashWordSz * WORD_ByteSz)))
     //     malloc_failed("Unable to malloc hash in base64 encode() function.\n");
-    hash->hash = (Word_32bits *)ft_memnew(hash->hashWordSz * WORD_ByteSz);
-    char *hash_p = (char *)hash->hash;
+    hash->hash_32bits = (Word_32bits *)ft_memnew(hash->hashWordSz * WORD_ByteSz);
+    char *hash_p = (char *)hash->hash_32bits;
 
     // Padding to the next 24bits block of memory
     char *msg_24bits_blocks_end = hash->msg + hash->len + (hash->len % 3 ? 3 - hash->len % 3 : 0);
@@ -82,7 +82,7 @@ static void         encode(t_hash *hash)
         // printf("tmp: %p\n", tmp);
         // printf("msg_24bits_blocks_end: %p\n", msg_24bits_blocks_end);
     }
-    // printBits(hash->hash, hash->hashWordSz);
+    // printBits(hash->hash_32bits, hash->hashWordSz);
 }
 
 static void         clean_base64(Mem_8bits **msg, int *len)
@@ -119,10 +119,10 @@ static void         decode(t_hash *hash)
     // printBits(hash->msg, hash->len);
     // printf("get_len_decoded: %d\n", get_len_decoded(hash->msg, hash->len));
     hash->hashWordSz = get_len_decoded(hash->msg, hash->len);
-    // if (!(hash->hash = malloc(hash->hashWordSz * WORD_ByteSz)))
+    // if (!(hash->hash_32bits = malloc(hash->hashWordSz * WORD_ByteSz)))
     //     malloc_failed("Unable to malloc hash in base64 decode() function\n");
-    hash->hash = (Word_32bits *)ft_memnew(hash->hashWordSz * WORD_ByteSz);
-    char *hash_p = (char *)hash->hash;
+    hash->hash_32bits = (Word_32bits *)ft_memnew(hash->hashWordSz * WORD_ByteSz);
+    char *hash_p = (char *)hash->hash_32bits;
    
     for (Mem_8bits *tmp = hash->msg; (char *)tmp < hash->msg + hash->len; tmp += 4)
     {
@@ -141,7 +141,7 @@ static void         decode(t_hash *hash)
         ft_memcpy(hash_p, (char *)decoded, 3);
         hash_p += 3;
     }
-    // printBits(hash->hash, hash->hashWordSz);
+    // printBits(hash->hash_32bits, hash->hashWordSz);
 }
 
 void                base64(t_hash *hash)
@@ -160,7 +160,7 @@ void                base64(t_hash *hash)
 void        base64_msg(Mem_8bits **msg, int byteSz, Mem_8bits *dest)
 {
     // t_hash hash = (t_hash){0, NULL, *msg, byteSz, NULL, 0, 0, NULL};
-    t_hash hash = (t_hash){0, NULL, NULL, byteSz, NULL, 0, 0, NULL};
+    t_hash hash = (t_hash){0, NULL, NULL, byteSz, NULL, NULL, 0, 0, NULL};
     // if (!(hash.msg = (Mem_8bits *)malloc(sizeof(Mem_8bits) * (byteSz + 1))))
     //     malloc_failed("Unable to malloc in sha256_msg() function\n");
     // ft_bzero(hash.msg, byteSz + 1);
@@ -170,9 +170,9 @@ void        base64_msg(Mem_8bits **msg, int byteSz, Mem_8bits *dest)
     encode(&hash);
     // md_hash_output(&hash);
     // printf("\n");
-    // *msg = (Mem_8bits *)hash.hash;
+    // *msg = (Mem_8bits *)hash.hash_32bits;
     // *byteSz = hash.hashWordSz * WORD_ByteSz;
-    ft_memcpy(dest, (Mem_8bits *)hash.hash, byteSz);
+    ft_memcpy(dest, (Mem_8bits *)hash.hash_32bits, byteSz);
     free(hash.msg);
-    free(hash.hash);
+    free(hash.hash_32bits);
 }

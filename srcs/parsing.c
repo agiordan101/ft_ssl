@@ -2,7 +2,7 @@
 
 inline void  init_hash(t_hash *hash)
 {
-    *hash = (t_hash){0, NULL, NULL, 0, NULL, 0, 0, NULL};
+    *hash = (t_hash){0, NULL, NULL, 0, NULL, NULL, 0, 0, NULL};
 }
 
 t_hash *     addmsg_front()

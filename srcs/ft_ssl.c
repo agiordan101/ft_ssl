@@ -30,8 +30,8 @@ void    ssl_free()
             free(hash->name);
         if (hash->msg)
             free(hash->msg);
-        if (hash->hash)
-            free(hash->hash);
+        if (hash->hash_32bits)
+            free(hash->hash_32bits);
         tmp = hash;
         hash = hash->next;
         free(tmp);

@@ -329,15 +329,19 @@ Word_32bits             feistel_func(Word_32bits halfblock, Long_64bits subkey)
 
 static Long_64bits      feistel_algorithm(Long_64bits plaintext)
 {
+    printf("bloc: %lx :\n", plaintext);
+    printLong(plaintext);
+
     plaintext = bits_permutations(plaintext, ssl.des.ipt, 64);
-    // printf("After ipt permutation: %lx\n", plaintext);
+    printf("After ipt permutation: %lx :\n", plaintext);
+    printLong(plaintext);
 
     Word_32bits lpart = plaintext & (((Long_64bits)1 << 32) - 1);
     Word_32bits rpart = plaintext >> 32;
 
     // printWord(lpart);
     // printWord(rpart);
-    // printf("lpart rpart: %lx %lx\n", lpart, rpart);
+    printf("lpart rpart: %lx %lx\n", lpart, rpart);
 
     for (int i = 0; i < 16; i++)
     {
@@ -347,8 +351,7 @@ static Long_64bits      feistel_algorithm(Long_64bits plaintext)
         lpart ^= rpart;
         rpart ^= lpart;
 
-        // printf("lpart rpart %d: %lx %lx\n", i, lpart, rpart);
-        // printf("lpart rpart: %s %s\n", (char *)&lpart, (char *)&rpart);
+        printf("lpart rpart %d: %lx %lx\tkey %lx\n", i, lpart, rpart, ssl.des.subkeys[i]);
     }
 
     plaintext = (Long_64bits)lpart << 32 | rpart;
@@ -366,27 +369,45 @@ static void             encode(t_hash *hash, Mem_8bits *pt, int ptByteSz)
     Long_64bits *plaintext = (Long_64bits *)pt;
     Long_64bits bloc;
 
-    printf("\nptByteSz: %d\tptSz: %d\n", ptByteSz, ptSz);
+    printf("\n- DES ECRYPTION -\nptByteSz: %d\tptSz: %d\n", ptByteSz, ptSz);
     // while (ptByteSz >= 8)
     for (int i = 0; i < ptSz; i++)
     {
+        printf("\n *plaintext: %lx\n", *plaintext);
+        printLong(*plaintext);
         bloc = *plaintext;
+
+        if (i == ptSz - 1)
+            // endianReverse((Mem_8bits *)&bloc, 8);
+            bloc <<= (8 - (ptByteSz % 8)) * 8;
+        
+        printf("\n bloc: %lx\n", bloc);
+        printLong(bloc);
+
         if (ssl.des.mode == DESCBC)
+        {
             bloc ^= i ? ciphertext[i] : (Long_64bits)ssl.des.vector;
-        printf("\n plaintext: %lx\n", bloc);
+            printf("  CBC bloc: %lx\n", bloc);
+        }
 
         ciphertext[i] = feistel_algorithm(bloc);
 
         printf("ciphertext: %lx\n", ciphertext[i]);
+        
         plaintext++;
     }
-    // Padd last bytes
-    // Convert to base64 of course   // base64_msg((Mem_8bits **)&ciphertext, ptSz, (Mem_8bits *)hash->hash);
 
-    endianReverse((Mem_8bits *)ciphertext, ptSz);
-    hash->hash = (Word_32bits *)ft_memdup((Mem_8bits *)ciphertext, ptByteSz);
+    // Padd last bytes ? Already padded ?
+
+    // for (int i = 0; i < ptSz; i++)
+    //     endianReverse((Mem_8bits *)(ciphertext + i), LONG64_ByteSz);
+
+    // Convert to base64 of course   // base64_msg((Mem_8bits **)&ciphertext, ptSz, (Mem_8bits *)hash->hash_32bits);
+    
+    hash->hash_64bits = (Long_64bits *)ft_memdup((Mem_8bits *)ciphertext, ptSz * LONG64_ByteSz);
     hash->hashWordSz = ptSz * 2;
-    printf("hash->hash: %ls\n", hash->hash);
+
+    // exit(0);
 }
 
 void                    des(t_hash *hash)
