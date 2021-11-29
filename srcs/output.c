@@ -134,7 +134,9 @@ void    cipher_output(t_hash *hash)
             ((char *)hash->hash_32bits)[hash->hashWordSz - 1] = '\0'; //To remove \n, it's like 'echo -n <node->msg> | ./ft_ssl ...'
         ft_putstr((char *)hash->hash_32bits);
     }
-    else
+    else if (ssl.hash_func_addr == des && ssl.flags & O)
+        hash_64bits_output(hash);
+    else if (ssl.hash_func_addr == des)
         classic_output(hash, LONG64_ByteSz);
 }
 

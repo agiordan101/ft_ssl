@@ -118,21 +118,30 @@ inline char	*ft_lower(char *str)
 	return str;
 }
 
+inline void	ft_putstdout(char *s)
+{
+    int ret = write(1, s, ft_strlen(s));
+}
+
 inline void	ft_putstr(char *s)
 {
     int ret = write(ssl.fd_out, s, ft_strlen(s));
     if (ret < 0)
     {
-        char c = '\n';
-        ret = write(1, "write() failed in ft_putstr(), fd=", 35);
+        ret = write(1, "write() failed in ft_putstr(), fd= ", 36);
         ft_putnbr(1, ssl.fd_out);
-        ret = write(1, &c, 1);
+        ft_putstdout("\n");
         freexit(EXIT_FAILURE);
     }
 }
 
 void    	ft_putnbr(int fd, int n)
 {
+    if (n < 0)
+    {
+        ft_putstdout("-");
+        ft_putnbr(fd, -n);
+    }
 	if (n > 9)
 	{
 		ft_putnbr(fd, n / 10);
@@ -251,8 +260,10 @@ void    	        ft_printHex(Long_64bits n, int byteSz)
         if (write(ssl.fd_out, &c_16e1, 1) == -1 ||\
             write(ssl.fd_out, &c_16e0, 1) == -1)
         {
-            int ret = write(1, "ft_printHex() has failed.\n", 27);
-            (void)ret;
+            ft_putstdout("write() in ft_printHex() has failed (fd = ");
+            ft_putnbr(1, ssl.fd_out);
+            ft_putstdout("):\n");
+            perror(NULL);
             freexit(EXIT_FAILURE);
         }
     }

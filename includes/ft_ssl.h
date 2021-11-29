@@ -78,9 +78,11 @@ Long_64bits ft_strtoHex(char *str);
 
 char        *ft_hexToBin(Long_64bits n, int byteSz);
 void	    ft_putstr(char *s);
+void    	ft_putstdout(char *s);
 void    	ft_putnbr(int fd, int n);
 void        ft_printHex(Long_64bits n, int byteSz);
 Mem_8bits   *ft_strHexToBin(Mem_8bits *str, int byteSz);
+
 
 void        output(t_hash *hash);
 void        key_output(Mem_8bits *p);

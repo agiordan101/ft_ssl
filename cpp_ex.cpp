@@ -94,12 +94,36 @@ string xor_(string a, string b)
 	}
 	return ans;
 }
+string xorhex_(string a, string b)
+{
+	return bin2hex(xor_(hex2bin(a), hex2bin(b)));
+}
+
+std::string ascii_to_hex(const std::string& input)
+{
+    static const char hex_digits[] = "0123456789ABCDEF";
+
+    std::string output;
+    output.reserve(input.length() * 2);
+    for (unsigned char c : input)
+    {
+        output.push_back(hex_digits[c >> 4]);
+        output.push_back(hex_digits[c & 15]);
+    }
+    return output;
+}
+
 string encrypt(string pt, vector<string> rkb, vector<string> rk)
 {
-	cout << "bloc: " << pt << endl;
+	cout << "bloc hex: " << pt << endl;
 	// Hexadecimal to binary
 	pt = hex2bin(pt);
-	cout << "bloc: " << pt << endl;
+	cout << "bloc bin: " << pt << endl;
+
+	//padding zeros
+	// string pad = "0"
+	pt.insert(pt.end(), 64 - pt.length(), '0');
+	cout << "pad: " << pt << endl;
 
 	// Initial Permutation Table
 	int initial_perm[64] = { 58, 50, 42, 34, 26, 18, 10, 2,
@@ -112,8 +136,8 @@ string encrypt(string pt, vector<string> rkb, vector<string> rk)
 							63, 55, 47, 39, 31, 23, 15, 7 };
 	// Initial Permutation
 	pt = permute(pt, initial_perm, 64);
-	cout << "After initial permutation: " << bin2hex(pt) << endl;
-	cout << "After initial permutation: " << pt << endl;
+	cout << "After initial permutation hex: " << bin2hex(pt) << endl;
+	cout << "After initial permutation bin: " << pt << endl;
 
 	// Splitting
 	string left = pt.substr(0, 32);
@@ -246,38 +270,13 @@ string encrypt(string pt, vector<string> rkb, vector<string> rk)
 	string cipher = bin2hex(permute(combine, final_perm, 64));
 	return cipher;
 }
-std::string string_to_hex(const std::string& input)
-{
-    static const char hex_digits[] = "0123456789ABCDEF";
 
-    std::string output;
-    output.reserve(input.length() * 2);
-    for (unsigned char c : input)
-    {
-        output.push_back(hex_digits[c >> 4]);
-        output.push_back(hex_digits[c & 15]);
-    }
-    return output;
-}
 int main()
 {
-	// pt is plain text
-	string pt, key;
-	/*cout<<"Enter key(in hexadecimal): ";
-	cin>>key;*/
-
-	// cout<<"Enter plain text(in hexadecimal): ";
-	// cin>>pt;
-	pt = "42 is nice";
-	// pt = string_to_hex(pt);
-	// pt = "123456ABCD132536";
-    cout << "txt plaintext: " << pt << endl;
-	
-	key = "AABB09182736CCDD";
-	// Key Generation
-
-	// Hex to binary
-	key = hex2bin(key);
+	string pt = "42 is nice";
+	string key = hex2bin("AABB09182736CCDD");
+	string hash = "ABCDEF0000000000"; // Hash is like vector turn 0
+	bool descbc = true;
 
 	// Parity bit drop table
 	int keyp[56] = { 57, 49, 41, 33, 25, 17, 9,
@@ -292,7 +291,7 @@ int main()
     cout << bin2hex(key) << endl;
 	// getting 56 bit key from 64 bit using the parity bits
 	key = permute(key, keyp, 56); // key without parity
-    cout << bin2hex(key) << endl;
+    cout << "Key: " << bin2hex(key) << endl;
 
 	// Number of bit shifts
 	int shift_table[16] = { 1, 1, 2, 2,
@@ -314,9 +313,10 @@ int main()
 	string left = key.substr(0, 28);
 	string right = key.substr(28, 28);
 
-	cout << "left: " << left << " " << right << endl;
-	cout << "left: " << bin2hex(left) << " " << bin2hex(right) << endl;
+	// cout << "left: " << left << " " << right << endl;
+	// cout << "left: " << bin2hex(left) << " " << bin2hex(right) << endl;
 
+	// Init vars
 	vector<string> rkb; // rkb for RoundKeys in binary
 	vector<string> rk; // rk for RoundKeys in hexadecimal
 	for (int i = 0; i < 16; i++) {
@@ -330,29 +330,44 @@ int main()
 		// Combining
 		string combine = left + right;
 
-		cout << bin2hex(combine) << endl;
+		// cout << bin2hex(combine) << endl;
 
 		// Key Compression
 		string RoundKey = permute(combine, key_comp, 48);
-		cout << bin2hex(RoundKey) << endl;
-		cout << endl;
+		// cout << bin2hex(RoundKey) << endl;
+		// cout << endl;
 
 		rkb.push_back(RoundKey);
 		rk.push_back(bin2hex(RoundKey));
 	}
 
 	cout << "\nEncryption:\n\n";
-	// string cipher = encrypt(pt, rkb, rk);
-	
-	// cout << "\nCipher Text: ";
+	cout << "Plaintext: " << pt << endl;
+	cout << "Key      : " << bin2hex(key) << endl;
+	cout << "Vector   : " << hash << endl << endl;
+
 	for (int i = 0; i < (pt.length() + 7) / 8; i++)
 	{
-		string strp = pt.substr(i * 8, (i + 1) * 8);
-		string hexp = string_to_hex(strp);
-		
-		cout << "txt plaintext: " << strp << endl;
-		cout << "hex plaintext: " << hexp << endl;
-		cout << "   ciphertext: " << encrypt(hexp, rkb, rk) << endl;
+		string strpt = pt.substr(i * 8, (i + 1) * 8);
+		string hexpt = ascii_to_hex(strpt);
+
+		hexpt.insert(hexpt.end(), 16 - hexpt.length(), '0');
+
+		// cout << "txt plaintext: " << strpt << endl;
+		cout << endl << "hex vector   : " << hash << endl;
+		cout << "hex plaintext: " << hexpt << endl;
+		cout <<     "bin vector   : " << hex2bin(hash) << endl;
+		cout << "bin plaintext: " << hex2bin(hexpt) << endl;
+
+		if (descbc == true)
+		{
+			hexpt = xorhex_(hash, hexpt);
+			cout << "bin bloc     : " << hex2bin(hexpt) << "\t(CBC xor)" << endl;
+			cout << "hex bloc     : " << hexpt << "\t(CBC xor)" << endl;
+		}
+
+		hash = encrypt(hexpt, rkb, rk);
+		cout << "\nciphertext [" << i << "] (cbc=" << descbc << "): " << hash << endl;
 	}
 	cout << endl;
 
