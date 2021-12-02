@@ -236,3 +236,12 @@ typedef struct  s_ssl
 }               t_ssl;
 
 extern t_ssl    ssl;
+
+
+
+
+
+
+
+
+

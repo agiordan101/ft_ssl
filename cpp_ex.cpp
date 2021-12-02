@@ -284,7 +284,7 @@ int main()
 			cout << "Parse >" << line << "\n<\n";
 			pt += line + '\n';
 		}
-		pt.erase(pt.length()-1);
+		// pt.erase(pt.length()-1);
 		myfile.close();
 	}
 
