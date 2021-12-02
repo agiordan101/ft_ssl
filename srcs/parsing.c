@@ -106,15 +106,19 @@ int     s_handler(char *av_next, int *i)
         return string_handler(NULL, av_next);
 }
 
-Mem_8bits *parse_key(char *str)
-{
-    Mem_8bits   *memstr = (Mem_8bits *)str;
+// Key_64bits parse_keys(char *str)
+// {
+//     // Mem_8bits   *memstr = (Mem_8bits *)str;
 
-    str = (char *)ft_strHexToBin(memstr, ft_strlen(str));
-    padXbits((Mem_8bits **)&str, ft_strlen(str), KEY_byteSz);
-    // printBits(str, KEY_byteSz);
-    return (Mem_8bits *)str;
-}
+//     // printf("Parse key: >%s<\n", str);
+//     // str = (char *)ft_strHexToBin(memstr, ft_strlen(str));
+//     // printf("Parse key: >%s<\n", str);
+//     // padXbits((Mem_8bits **)&str, ft_strlen(str), KEY_byteSz);
+//     // printBits(str, KEY_byteSz);
+//     // printf("Parse key: >%s<\n\n", str);
+//     Long_64bits tmp = ft_strtoHex(str);
+//     return (Mem_8bits *)str;
+// }
 
 int     param_handler(e_flags flag, char *av_next, int *i)
 {
@@ -133,13 +137,16 @@ int     param_handler(e_flags flag, char *av_next, int *i)
     else if (flag & O)
         ssl.output_file = av_next;
     else if (flag & K)
-        ssl.des.key = parse_key(av_next);
+        ssl.des.key = ft_strtoHex(av_next);
+        // ssl.des.key = parse_keys(av_next);
     else if (flag & P_cipher)
         ssl.des.password = (Mem_8bits *)ft_strdup(av_next);
     else if (flag & S_cipher)
-        ssl.des.salt = parse_key(av_next);
+        ssl.des.salt = ft_strtoHex(av_next);
+        // ssl.des.salt = parse_keys(av_next);
     else if (flag & V)
-        ssl.des.vector = parse_key(av_next);
+        ssl.des.vector = ft_strtoHex(av_next);
+        // ssl.des.vector = parse_keys(av_next);
     (*i)++;
     return 0;
 }

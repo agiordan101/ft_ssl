@@ -23,13 +23,27 @@ static void             ask_password(t_des *des)
         free(password);
 }
 
-inline static Mem_8bits *generate_key()
+static inline Key_64bits    generate_key()
 {
-    Mem_8bits key[KEY_byteSz];
+    Key_64bits  key = 0;
 
     for (int i = 0; i < KEY_byteSz; i++)
-        key[i] = rand() % 0xFF;
-    return ft_strdup(key);
+        key = key * 0x100 + rand() % 0x100;
+    return key;
+}
+
+static void             set_keys_for_decryption(t_des *des)
+{
+    Key_64bits tmp;
+
+    for (int i = 0; i < 8; i++)
+    {
+        tmp = des->subkeys[i];
+        des->subkeys[i] = des->subkeys[15 - i];
+        des->subkeys[15 - i] = tmp;
+        // printf("des->subkeys[%d]: %lx\n", i, des->subkeys[i]);
+        // printf("des->subkeys[%d]: %lx\n", 15 - i, des->subkeys[15 - i]);
+    }
 }
 
 static void             key_transformation(t_des *des)
@@ -37,6 +51,7 @@ static void             key_transformation(t_des *des)
     Transform a 56-bit key into 48-bit key
 */
 {
+    Key_64bits  key = des->key;
     Word_32bits keymask = (1 << 28) - 1;
     static char keybitshift[16] = {
         1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1
@@ -72,78 +87,41 @@ static void             key_transformation(t_des *des)
         46, 42, 50, 36, 29, 32
     };
 
-    Long_64bits key = *((Long_64bits *)des->key);
-    printf("\nkey_transformation:\n");
-    // printLong(key);
-    // printf("%lx\n", key);
+    printf("\nkey_transformation: %lx\n", key);
 
-    printLong(key);
-    printf("%lx\n", key);
-
-    // key = bits_permutations(key, bitorder, 64);
+    // Permutation : 64-bits -> 56-bits (Remove each 8th-bit of each bytes)
+    endianReverse((Mem_8bits *)&key, KEY_byteSz);
     key = bits_permutations(key, pc1, 56);
-    // key = bits_permutations(key, bitorder, 64);
-
-    // printf("%lx\n", key);
-    // printLong(key);
-    
-    endianReverse((Mem_8bits *)&key, 8);
+    endianReverse((Mem_8bits *)&key, KEY_byteSz);
     key >>= 8;
+    
+    printf("Permute key to 56-bits: %lx\n", key);
 
-    // printf("%lx\n", key);
-    // printLong(key);
     Word_32bits rpart = key & keymask;
     Word_32bits lpart = key >> 28;
 
-    // Word_32bits lpart = key & keymask;
-    // Word_32bits rpart = key >> 28;
-    printWord(lpart);
-    printWord(rpart);
-    printf("%x %x\n", lpart, rpart);
+    printf("Split lpart / rpart : %x / %x\n", lpart, rpart);
 
     for (int i = 0; i < 16; i++)
     {
         // Left shift based on keybitshift (round index)
         rpart = ((rpart << keybitshift[i]) & keymask) | (rpart >> (28 - keybitshift[i]));
         lpart = ((lpart << keybitshift[i]) & keymask) | (lpart >> (28 - keybitshift[i]));
-        // printf("Left: ");
-        // printWord(lpart);
-        // printWord(rpart);
-        // printf("%lx %lx\n", lpart, rpart);
 
-        key = (Long_64bits)lpart << 28 | rpart;
-        // key = (Long_64bits)rpart << 28 | lpart;
-        // printLong(tk);
-        // printf("%lx\n", key);
+        key = (Key_64bits)lpart << 28 | rpart;
 
         key <<= 8;
         endianReverse((Mem_8bits *)&key, 8);
-
-        // key = bits_permutations(key, bitorder, 64);
         des->subkeys[i] = bits_permutations(key, pc2, 48);
 
-        // endianReverse((Mem_8bits *)&des->subkeys[i], 8);
-        // des->subkeys[i] >>= 16;
-        // key = bits_permutations(key, bitorder, 64);
         printf("Key %d: %lx\n", i, des->subkeys[i]);
-        // printLong(tk);
     }
-    // printLong(key);
-    // printf("%lx\n", key);
     // exit(0);
 }
 
 static void             init_vars(t_des *des)
 {
-    // printf("\ncipher->password: %s\n", des->password);
-    // printf("cipher->key:\n");
-    // key_output(des->key);
-    // printf("\ncipher->salt:\n");
-    // key_output(des->salt);
-    // printf("\ncipher->vector:\n");
-    // key_output(des->vector);
-    // printf("\n");
-
+    printf("Init vars\n");
     srand(time(NULL));
     // Vector is only for CBC mode, ft_ssl failed if it's not provided
     if (!des->vector && des->mode == DESCBC)
@@ -156,13 +134,14 @@ static void             init_vars(t_des *des)
     if (!des->salt)
         des->salt = generate_key();
 
+    printf("Init vars 2\n");
     // A key is generated with pbkdf2 if it's not provided
     if (!des->key)
     {
         // A password is asked if it's not provided
         if (!des->password)
             ask_password(des);
-        des->key = pbkdf2_sha256(des->password, des->salt, 3);
+        // des->key = pbkdf2_sha256(des->password, des->salt, 3);
     }
 
     // Key scheldule
@@ -194,25 +173,19 @@ static void             init_vars(t_des *des)
     };
     ft_memcpy(des->fpt, fpt, 64);
 
-    // printf("des->vector: %lx\n", des->vector ? *((Long_64bits *)des->vector) : 0);
-    // printf("\ndes->salt: %lx\n", des->salt ? *((Long_64bits *)des->salt) : 0);
-    // printf("\ncipher->password: %lx\n", des->password ? *((Long_64bits *)des->password) : 0);
-    // printf("\ndes->key: %lx\n", des->key ? *((Long_64bits *)des->key) : 0);
+    // Verbose here ?
     printf("\ncipher->password: %s\n", des->password);
-    printf("cipher->key:\n");
-    // key_output(des->key);
-    printf("des->key: %lx\n", des->key);
-    printf("\ncipher->salt:\n");
-    // key_output(des->salt);
-    printf("des->salt: %lx\n", des->salt);
-    printf("\ncipher->vector:\n");
-    // key_output(des->vector);
-    printf("des->vector: %lx\n", des->vector);
+    printf("cipher->key: %lx\n", des->key);
+    printf("cipher->salt: %lx\n", des->salt);
+    printf("cipher->vector: %lx\n", des->vector);
+    // printf("cipher->key: %lx\n", *((Long_64bits *)des->key));
+    // printf("cipher->salt: %lx\n", *((Long_64bits *)des->salt));
+    // printf("cipher->vector: %lx\n", *((Long_64bits *)des->vector));
     printf("\n");
     // exit(0);
 }
 
-Word_32bits             feistel_func(Word_32bits halfblock, Long_64bits subkey)
+static Word_32bits      feistel_func(Word_32bits halfblock, Long_64bits subkey)
 {
     // S-box Table
     static char S[8][4][16] = {
@@ -332,7 +305,7 @@ Word_32bits             feistel_func(Word_32bits halfblock, Long_64bits subkey)
 static Long_64bits      feistel_algorithm(Long_64bits plaintext)
 {
     plaintext = bits_permutations(plaintext, ssl.des.ipt, 64);
-    // printf("After ipt permutation hex: %lx\nAfter ipt permutation bin:\n", plaintext);
+    printf("After ipt permutation hex: %lx\nAfter ipt permutation bin:\n", plaintext);
     // printLong(plaintext);
     // exit(0);
 
@@ -341,7 +314,7 @@ static Long_64bits      feistel_algorithm(Long_64bits plaintext)
 
     // printWord(lpart);
     // printWord(rpart);
-    // printf("lpart rpart: %lx %lx\n", lpart, rpart);
+    printf("lpart rpart: %x %x\n", lpart, rpart);
 
     for (int i = 0; i < 16; i++)
     {
@@ -351,7 +324,7 @@ static Long_64bits      feistel_algorithm(Long_64bits plaintext)
         lpart ^= rpart;
         rpart ^= lpart;
 
-        // printf("lpart rpart %d: %lx %lx\tkey %lx\n", i, lpart, rpart, ssl.des.subkeys[i]);
+        printf("lpart rpart %d: %x %x\tkey %lx\n", i, lpart, rpart, ssl.des.subkeys[i]);
     }
 
     plaintext = (Long_64bits)lpart << 32 | rpart;
@@ -362,7 +335,7 @@ static Long_64bits      feistel_algorithm(Long_64bits plaintext)
     return plaintext;
 }
 
-static void             encode(t_hash *hash, Mem_8bits *pt, int ptByteSz)
+static void             des_encryption(t_hash *hash, Mem_8bits *pt, int ptByteSz)
 {
     int         ptSz = (ptByteSz + 7) / 8;
     Long_64bits ciphertext[ptSz];
@@ -372,20 +345,20 @@ static void             encode(t_hash *hash, Mem_8bits *pt, int ptByteSz)
     // printf("\n- DES ECRYPTION -\nptByteSz: %d\tptSz: %d\n", ptByteSz, ptSz);
     for (int i = 0; i < ptSz; i++)
     {
-        // printLong(*plaintext);
         bloc = *plaintext;
+        printf("str plaintext: >%s<\n", (Mem_8bits *)plaintext);
 
-        // printf("\nhex vector: %lx\n", i ? ciphertext[i - 1] : *((Long_64bits *)ssl.des.vector));
-        // printf("hex   bloc: %lx\n", bloc);
+        // printf("\nhex vector: %lx\n", i ? ciphertext[i - 1] : ssl.des.vector);
+        printf("hex   bloc: %lx\n", bloc);
 
         // printf("bin vector: ");
-        // printLong(i ? ciphertext[i - 1] : *((Long_64bits *)ssl.des.vector));
-        // printf("bin   bloc: ");
-        // printLong(bloc);
+        // printLong(i ? ciphertext[i - 1] : ssl.des.vector);
+        printf("bin   bloc: ");
+        printLong(bloc);
 
         if (ssl.des.mode == DESCBC)
         {
-            bloc ^= i ? ciphertext[i - 1] : *((Long_64bits *)ssl.des.vector);
+            bloc ^= i ? ciphertext[i - 1] : ssl.des.vector;
         //     printf("hex   bloc: %lx (CBC xor)\n", bloc);
         //     printf("bin   bloc: ");
         //     printLong(bloc);
@@ -393,7 +366,6 @@ static void             encode(t_hash *hash, Mem_8bits *pt, int ptByteSz)
         }
 
         ciphertext[i] = feistel_algorithm(bloc);
-
         printf("ciphertext: %lx\n", ciphertext[i]);
         
         plaintext++;
@@ -413,14 +385,10 @@ void                    des(t_hash *hash)
     /*
         Actually works only for des-ecb encryption & plaintext % 64 == 0
     */
-    printf("hash->msg: %s\n", hash->msg);
+    printf("hash->msg: >%s<\n", hash->msg);
 
     init_vars(&ssl.des);
     if (ssl.flags & D)
-        // decode(hash);
-        ;
-    else
-        encode(hash, hash->msg, hash->len);
-
-    // freexit(EXIT_SUCCESS);
+        set_keys_for_decryption(&ssl.des);
+    des_encryption(hash, hash->msg, hash->len);
 }

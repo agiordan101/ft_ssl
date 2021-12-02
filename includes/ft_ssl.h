@@ -74,9 +74,11 @@ int		    ft_strlen(char *p);
 int         ft_strcmp(const char *s1, const char *s2);
 char        *ft_stradd_quote(char *str, int len);
 char	    *ft_lower(char *str);
-Long_64bits ft_strtoHex(char *str);
 
+Long_64bits ft_strtoHex(char *str);
+char        *ft_hextoStr(Long_64bits nbr);
 char        *ft_hexToBin(Long_64bits n, int byteSz);
+
 void	    ft_putstr(char *s);
 void    	ft_putstdout(char *s);
 void    	ft_putnbr(int fd, int n);
@@ -202,11 +204,11 @@ typedef enum    desmode {
 typedef struct  s_des
 {
     e_desmode   mode;
-    Mem_8bits   *key;       // malloc
     Mem_8bits   *password;  // malloc
-    Mem_8bits   *salt;      // malloc
-    Mem_8bits   *vector;    // malloc
-    Long_64bits subkeys[16];
+    Key_64bits  key;
+    Key_64bits  salt;
+    Key_64bits  vector;
+    Key_64bits  subkeys[16];
     char        ipt[KEY_bitSz];     // Initial permutation table
     char        fpt[KEY_bitSz];     // Final   permutation table
 }               t_des;

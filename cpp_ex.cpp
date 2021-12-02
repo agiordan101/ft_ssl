@@ -115,15 +115,16 @@ std::string ascii_to_hex(const std::string& input)
 
 string encrypt(string pt, vector<string> rkb, vector<string> rk)
 {
-	cout << "bloc hex: " << pt << endl;
+	// cout << "bloc hex: " << pt << endl;
 	// Hexadecimal to binary
 	pt = hex2bin(pt);
-	cout << "bloc bin: " << pt << endl;
+	// cout << "bloc bin: " << pt << endl;
 
 	//padding zeros
 	// string pad = "0"
-	pt.insert(pt.end(), 64 - pt.length(), '0');
-	cout << "pad: " << pt << endl;
+	if (pt.length() < 64)
+		pt.insert(pt.end(), 64 - pt.length(), '0');
+	// cout << "pad: " << pt << endl;
 
 	// Initial Permutation Table
 	int initial_perm[64] = { 58, 50, 42, 34, 26, 18, 10, 2,
@@ -137,7 +138,7 @@ string encrypt(string pt, vector<string> rkb, vector<string> rk)
 	// Initial Permutation
 	pt = permute(pt, initial_perm, 64);
 	cout << "After initial permutation hex: " << bin2hex(pt) << endl;
-	cout << "After initial permutation bin: " << pt << endl;
+	// cout << "After initial permutation bin: " << pt << endl;
 
 	// Splitting
 	string left = pt.substr(0, 32);
@@ -274,9 +275,25 @@ string encrypt(string pt, vector<string> rkb, vector<string> rk)
 int main()
 {
 	string pt = "42 is nice";
+	string line;
+	ifstream myfile ("biblehashed.txt");
+	if (pt == "" && myfile.is_open())
+	{
+		while ( getline (myfile, line) )
+		{
+			cout << "Parse >" << line << "\n<\n";
+			pt += line + '\n';
+		}
+		pt.erase(pt.length()-1);
+		myfile.close();
+	}
+
+	// string pt = "42 is nice";
+	// string pt = "A Conservative Version";
 	string key = hex2bin("AABB09182736CCDD");
 	string hash = "ABCDEF0000000000"; // Hash is like vector turn 0
-	bool descbc = true;
+	// bool descbc = true;
+	bool descbc = false;
 
 	// Parity bit drop table
 	int keyp[56] = { 57, 49, 41, 33, 25, 17, 9,
@@ -291,7 +308,7 @@ int main()
     cout << bin2hex(key) << endl;
 	// getting 56 bit key from 64 bit using the parity bits
 	key = permute(key, keyp, 56); // key without parity
-    cout << "Key: " << bin2hex(key) << endl;
+    cout << "Key permute to 56-bits: " << bin2hex(key) << endl;
 
 	// Number of bit shifts
 	int shift_table[16] = { 1, 1, 2, 2,
@@ -345,15 +362,26 @@ int main()
 	cout << "Plaintext: " << pt << endl;
 	cout << "Key      : " << bin2hex(key) << endl;
 	cout << "Vector   : " << hash << endl << endl;
+	string ciphertext;
 
 	for (int i = 0; i < (pt.length() + 7) / 8; i++)
 	{
-		string strpt = pt.substr(i * 8, (i + 1) * 8);
+		int i_max;
+		if ((i + 1) * 8 > pt.length()-1)
+			i_max = pt.length()-1;
+		else
+			i_max = (i + 1) * 8;
+		cout << i * 8 << " / " << i_max << " / " << pt.length() << " / " << endl;
+		string strpt = pt.substr(i * 8, i_max);
+
+		// cout << "Plaintext: >" << strpt << "<" << endl;
+
 		string hexpt = ascii_to_hex(strpt);
 
-		hexpt.insert(hexpt.end(), 16 - hexpt.length(), '0');
+		while (hexpt.length() < 16)
+			hexpt += '0';
 
-		// cout << "txt plaintext: " << strpt << endl;
+		cout << "txt plaintext: >" << strpt << "<" << endl;
 		cout << endl << "hex vector   : " << hash << endl;
 		cout << "hex plaintext: " << hexpt << endl;
 		cout <<     "bin vector   : " << hex2bin(hash) << endl;
@@ -365,11 +393,14 @@ int main()
 			cout << "bin bloc     : " << hex2bin(hexpt) << "\t(CBC xor)" << endl;
 			cout << "hex bloc     : " << hexpt << "\t(CBC xor)" << endl;
 		}
+		// while (hexpt.length() < 16)
+		// 	hexpt += '0';
 
 		hash = encrypt(hexpt, rkb, rk);
+		ciphertext += hash;
 		cout << "\nciphertext [" << i << "] (cbc=" << descbc << "): " << hash << endl;
 	}
-	cout << endl;
+	cout << endl << "Ciphertext: " << ciphertext << endl;
 
 	// cout << "\nDecryption\n\n";
 	// reverse(rkb.begin(), rkb.end());

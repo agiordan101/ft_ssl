@@ -40,7 +40,7 @@ void    file_not_found(t_hash *hash)
     ft_putstr(ssl.hash_func);
     ft_putstr(": ");
     ft_putstr(hash->name);
-    ft_putstr(": No such file or directory");
+    ft_putstr(": No such file or directory\n");
 }
 
 // ---------------------- DATA output ---------------------------
@@ -56,6 +56,11 @@ void    hash_64bits_output(t_hash *p)
 {
     for (Long_64bits *tmp = p->hash_64bits; tmp < p->hash_64bits + p->hashWordSz / 2; tmp += 1)
         ft_printHex(*tmp, LONG64_ByteSz);
+    printf("\nhash = ");
+    for (Long_64bits *tmp = p->hash_64bits; tmp < p->hash_64bits + p->hashWordSz / 2; tmp += 1)
+    {
+        printf("%s", ft_hextoStr(*tmp));
+    }
 }
 
 void    hash_32bits_output(t_hash *p)
@@ -150,7 +155,6 @@ void    output(t_hash *hash)
         md_output(hash);
     else if (ssl.command & CIPHER)
         cipher_output(hash);
-    else
-        ;
-    ft_putstr("\n");
+    if (~ssl.flags & O)
+        ft_putstr("\n");
 }

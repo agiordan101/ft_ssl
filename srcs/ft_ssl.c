@@ -5,6 +5,10 @@
     MD5 au debut sauf en reverse ou stdin
     -p -q -r alors print STDIN + \n + hash pour la premiere ligne
     .. -q -r = .. -q car -r s'annule en présence de -q
+
+
+    DES("12345678") = DES("12345678\n") Wtf ???
+
 */
 
 t_ssl    ssl;
@@ -15,14 +19,14 @@ void    ssl_free()
     t_hash      *hash = ssl.hash;
     t_des    *des = &ssl.des;
 
-    if (des->key)
-        free(des->key);
+    // if (des->key)
+    //     free(des->key);
+    // if (des->salt)
+    //     free(des->salt);
+    // if (des->vector)
+    //     free(des->vector);
     if (des->password)
         free(des->password);
-    if (des->salt)
-        free(des->salt);
-    if (des->vector)
-        free(des->vector);
 
     while (hash)
     {
@@ -72,7 +76,7 @@ int     main(int ac, char **av)
 
     // Set output file descriptor (STDOUT as default)
     if (ssl.flags & O)
-        if ((ssl.fd_out = open(ssl.output_file, O_CREAT | O_WRONLY, S_IRWXU | S_IRWXG | S_IRWXO)) == -1)
+        if ((ssl.fd_out = open(ssl.output_file, O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU | S_IRWXG | S_IRWXO)) == -1)
             open_failed(" in ft_ssl main() function\n", ssl.output_file);
 
     t_hash *hash = ssl.hash;
