@@ -111,11 +111,16 @@ static void             key_transformation(t_des *des)
         key = (Key_64bits)lpart << 28 | rpart;
 
         key <<= 8;
-        endianReverse((Mem_8bits *)&key, 8);
-        des->subkeys[i] = bits_permutations(key, pc2, 48);
+        endianReverse((Mem_8bits *)&key, KEY_byteSz);
+        
+        key = bits_permutations(key, pc2, 48);
 
-        printf("Key %d: %lx\n", i, des->subkeys[i]);
-    }
+        // endianReverse((Mem_8bits *)&key, KEY_byteSz);
+        // key >>= 16;
+        printf("Key %d: %lx\n", i, key);
+        des->subkeys[i] = key;
+ 
+   }
     // exit(0);
 }
 

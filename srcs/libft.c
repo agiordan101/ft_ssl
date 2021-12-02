@@ -159,7 +159,7 @@ inline Long_64bits  ft_strtoHex(char *str)
 	Long_64bits nbr = 0;
 
     str = ft_lower(str);
-	for (int i = 0; i < ft_strlen(str) && i < KEY_byteSz * 2; i++)
+	for (int i = 0; i < ft_strlen(str) && i < LONG64_ByteSz * 2; i++)
         if ('0' <= str[i] && str[i] <= '9')
 		    nbr = nbr * 0x10 + (str[i] - '0');
         else if ('a' <= str[i] && str[i] <= 'f')
@@ -174,92 +174,6 @@ inline char         *ft_hextoStr(Long_64bits nbr)
 	for (int i = 0; i < LONG64_ByteSz; i++)
         str[i] = (nbr >> (i * 8)) & 0xff;
 	return str;
-}
-
-// char                *ft_hexToBin(Long_64bits n, int byteSz)
-// {
-//     char          *bin;
-//     unsigned char hex[16] = HEXABASE;
-//     unsigned char *num = (unsigned char *)&n;
-
-//     // if (!(bin = (char *)malloc(sizeof(char) * (byteSz * 2 + 1))))
-//     //     malloc_failed("Unable to malloc string in libft ft_hexToBin function\n");
-//     // bin[byteSz * 2] = '\0';
-//     bin = ft_memnew(byteSz * 2);
-//     for (int i = 0; i < byteSz; i++)
-//     {
-//         bin[byteSz - i * 2] = hex[num[i] / 16];
-//         if (i + 1 < byteSz)
-//             bin[byteSz - i * 2 + 1] = hex[num[i] % 16];
-//     }
-//     return bin;
-// }
-
-Mem_8bits           *ft_strHexToBin(Mem_8bits *str, int byteSz)
-{
-    // endianReverse(str, LONG64_ByteSz);
-    // printLong(*((Long_64bits *)str));
-    printf("%s\n", str);
-    Long_64bits tmp = ft_strtoHex(str);
-    printf("%lx\n", tmp);
-    printLong(tmp);
-
-
-    printBits(&tmp, KEY_byteSz);
-    ft_printHex(tmp, KEY_byteSz);
-    printf("tmp: %lx\n", tmp);
-
-    int         bin_i = 0;
-    Mem_8bits   *bin = (Mem_8bits *)&tmp;
-    endianReverse(bin, KEY_byteSz);
-    // printBits(bin, KEY_byteSz);
-
-    int         out_i = 0;
-    Mem_8bits   out[KEY_byteSz];
-    ft_bzero(out, KEY_byteSz);
-
-    // Skip zero bytes at the beginning
-    while (bin_i < KEY_byteSz && !bin[bin_i])
-        bin_i++;
-    printf("After zero bytes skipped, bin_i=%d\n", bin_i);
-
-    // Is first non-null byte upper than 0x0f ? (To remove zero of byte left-side)
-    if (bin[bin_i] & 0b11110000)
-    {
-        while (bin_i < KEY_byteSz)
-        {
-            out[out_i++] = bin[bin_i++];
-            printf("out[%d]=%x\tbin_i=%d\n", out_i - 1, out[out_i - 1], bin_i);
-        }
-    }
-    else
-    {
-        // Skip first 0 (4 bits)
-        out[out_i++] = bin[bin_i++] << 4;
-
-        // printf("out[0]=%x\n", out[0]);
-        // printf("out_i=%d\n", out_i-1);
-        // printf("bin_i=%d\n\n", bin_i);
-        while (bin_i < KEY_byteSz)
-        {
-            out[(int)(out_i / 2)] += out_i % 2 ? bin[bin_i] >> 4 : bin[bin_i] & 0b00001111;
-            // printf("out[%d]=%x\n", (int)(out_i / 2), out[(int)(out_i / 2)]);
-            // printf("out_i=%d\n", out_i);
-            // printf("bin_i=%d\n\n", bin_i);
-            out_i++;
-
-            out[(int)(out_i / 2)] += out_i % 2 ? bin[bin_i++] & 0b11110000 : bin[bin_i++] << 4;
-            // printf("out[%d]=%x\n", (int)(out_i / 2), out[(int)(out_i / 2)]);
-            // printf("out_i=%d\n", out_i);
-            // printf("bin_i=%d\n\n", bin_i);
-            out_i++;
-        }
-        out_i = out_i % 2 ? (out_i - out_i % 2) / 2 + 1 : out_i / 2;
-    }
-    printBits(out, out_i);
-    // exit(0);
-    bin = ft_strdup(out);
-    return bin;
 }
 
 void    	        ft_printHex(Long_64bits n, int byteSz)
@@ -284,3 +198,90 @@ void    	        ft_printHex(Long_64bits n, int byteSz)
         }
     }
 }
+
+
+// char                *ft_hexToBin(Long_64bits n, int byteSz)
+// {
+//     char          *bin;
+//     unsigned char hex[16] = HEXABASE;
+//     unsigned char *num = (unsigned char *)&n;
+
+//     // if (!(bin = (char *)malloc(sizeof(char) * (byteSz * 2 + 1))))
+//     //     malloc_failed("Unable to malloc string in libft ft_hexToBin function\n");
+//     // bin[byteSz * 2] = '\0';
+//     bin = ft_memnew(byteSz * 2);
+//     for (int i = 0; i < byteSz; i++)
+//     {
+//         bin[byteSz - i * 2] = hex[num[i] / 16];
+//         if (i + 1 < byteSz)
+//             bin[byteSz - i * 2 + 1] = hex[num[i] % 16];
+//     }
+//     return bin;
+// }
+
+// Mem_8bits           *ft_strHexToBin(Mem_8bits *str, int byteSz)
+// {
+//     // endianReverse(str, LONG64_ByteSz);
+//     // printLong(*((Long_64bits *)str));
+//     printf("%s\n", str);
+//     Long_64bits tmp = ft_strtoHex(str);
+//     printf("%lx\n", tmp);
+//     printLong(tmp);
+
+
+//     printBits(&tmp, KEY_byteSz);
+//     ft_printHex(tmp, KEY_byteSz);
+//     printf("tmp: %lx\n", tmp);
+
+//     int         bin_i = 0;
+//     Mem_8bits   *bin = (Mem_8bits *)&tmp;
+//     endianReverse(bin, KEY_byteSz);
+//     // printBits(bin, KEY_byteSz);
+
+//     int         out_i = 0;
+//     Mem_8bits   out[KEY_byteSz];
+//     ft_bzero(out, KEY_byteSz);
+
+//     // Skip zero bytes at the beginning
+//     while (bin_i < KEY_byteSz && !bin[bin_i])
+//         bin_i++;
+//     printf("After zero bytes skipped, bin_i=%d\n", bin_i);
+
+//     // Is first non-null byte upper than 0x0f ? (To remove zero of byte left-side)
+//     if (bin[bin_i] & 0b11110000)
+//     {
+//         while (bin_i < KEY_byteSz)
+//         {
+//             out[out_i++] = bin[bin_i++];
+//             printf("out[%d]=%x\tbin_i=%d\n", out_i - 1, out[out_i - 1], bin_i);
+//         }
+//     }
+//     else
+//     {
+//         // Skip first 0 (4 bits)
+//         out[out_i++] = bin[bin_i++] << 4;
+
+//         // printf("out[0]=%x\n", out[0]);
+//         // printf("out_i=%d\n", out_i-1);
+//         // printf("bin_i=%d\n\n", bin_i);
+//         while (bin_i < KEY_byteSz)
+//         {
+//             out[(int)(out_i / 2)] += out_i % 2 ? bin[bin_i] >> 4 : bin[bin_i] & 0b00001111;
+//             // printf("out[%d]=%x\n", (int)(out_i / 2), out[(int)(out_i / 2)]);
+//             // printf("out_i=%d\n", out_i);
+//             // printf("bin_i=%d\n\n", bin_i);
+//             out_i++;
+
+//             out[(int)(out_i / 2)] += out_i % 2 ? bin[bin_i++] & 0b11110000 : bin[bin_i++] << 4;
+//             // printf("out[%d]=%x\n", (int)(out_i / 2), out[(int)(out_i / 2)]);
+//             // printf("out_i=%d\n", out_i);
+//             // printf("bin_i=%d\n\n", bin_i);
+//             out_i++;
+//         }
+//         out_i = out_i % 2 ? (out_i - out_i % 2) / 2 + 1 : out_i / 2;
+//     }
+//     printBits(out, out_i);
+//     // exit(0);
+//     bin = ft_strdup(out);
+//     return bin;
+// }

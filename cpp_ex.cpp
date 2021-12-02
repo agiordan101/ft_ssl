@@ -143,8 +143,8 @@ string encrypt(string pt, vector<string> rkb, vector<string> rk)
 	// Splitting
 	string left = pt.substr(0, 32);
 	string right = pt.substr(32, 32);
-	cout << "After splitting: L0=" << bin2hex(left)
-		<< " R0=" << bin2hex(right) << endl;
+	// cout << "After splitting: L0=" << bin2hex(left)
+	// 	<< " R0=" << bin2hex(right) << endl;
 
 	// Expansion D-box Table
 	int exp_d[48] = { 32, 1, 2, 3, 4, 5, 4, 5,
@@ -274,9 +274,9 @@ string encrypt(string pt, vector<string> rkb, vector<string> rk)
 
 int main()
 {
-	string pt = "42 is nice";
+	string pt = "";
 	string line;
-	ifstream myfile ("biblehashed.txt");
+	ifstream myfile ("biblehashed.h");
 	if (pt == "" && myfile.is_open())
 	{
 		while ( getline (myfile, line) )
@@ -382,9 +382,9 @@ int main()
 			hexpt += '0';
 
 		cout << "txt plaintext: >" << strpt << "<" << endl;
-		cout << endl << "hex vector   : " << hash << endl;
+		// cout << endl << "hex vector   : " << hash << endl;
 		cout << "hex plaintext: " << hexpt << endl;
-		cout <<     "bin vector   : " << hex2bin(hash) << endl;
+		// cout <<     "bin vector   : " << hex2bin(hash) << endl;
 		cout << "bin plaintext: " << hex2bin(hexpt) << endl;
 
 		if (descbc == true)
