@@ -157,15 +157,35 @@ void    	ft_putnbr(int fd, int n)
 inline Long_64bits  ft_strtoHex(char *str)
 {
 	Long_64bits nbr = 0;
+    int         i = -1;
 
     str = ft_lower(str);
-	for (int i = 0; i < ft_strlen(str) && i < LONG64_ByteSz * 2; i++)
+    while (++i < ft_strlen(str) && i < LONG64_ByteSz * 2)
         if ('0' <= str[i] && str[i] <= '9')
 		    nbr = nbr * 0x10 + (str[i] - '0');
         else if ('a' <= str[i] && str[i] <= 'f')
 		    nbr = nbr * 0x10 + 10 + (str[i] - 'a');
+    
+    // if (i < LONG64_ByteSz * 2)
+    // {
+    //     ft_putstr("hex string is too short, padding with zero bytes to length");
+    //     while (i++ < LONG64_ByteSz * 2)
+    //         nbr <<= 8;
+    // }
 	return nbr;
 }
+// inline Long_64bits  ft_strtoHex(char *str)
+// {
+// 	Long_64bits nbr = 0;
+
+//     str = ft_lower(str);
+// 	for (int i = 0; i < ft_strlen(str) && i < LONG64_ByteSz * 2; i++)
+//         if ('0' <= str[i] && str[i] <= '9')
+// 		    nbr = nbr * 0x10 + (str[i] - '0');
+//         else if ('a' <= str[i] && str[i] <= 'f')
+// 		    nbr = nbr * 0x10 + 10 + (str[i] - 'a');
+// 	return nbr;
+// }
 
 inline char         *ft_hextoStr(Long_64bits nbr)
 {

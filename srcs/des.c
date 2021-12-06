@@ -128,19 +128,25 @@ static void             init_vars(t_des *des)
 {
     printf("Init vars\n");
     srand(time(NULL));
+
     // Vector is only for CBC mode, ft_ssl failed if it's not provided
-    if (!des->vector && des->mode == DESCBC)
+    if (des->vector)
+    {
+        endianReverse((Mem_8bits *)&des->vector, KEY_byteSz);
+        if (des->mode != DESCBC)
+            ft_putstr("warning: iv not used by this cipher\n");
+    }
+    else if (des->mode == DESCBC)
     {
         ft_putstr("\nInitialization vector is undefined\n");
         freexit(EXIT_SUCCESS);
     }
-    // NEED TO OUTPUT "warning: iv not used by this cipher"
+    printf("Init vars 2\n");
 
     // A salt is randomly generated if it's not provided
     if (!des->salt)
         des->salt = generate_key();
 
-    printf("Init vars 2\n");
     // A key is generated with pbkdf2 if it's not provided
     if (!des->key)
     {
@@ -341,6 +347,39 @@ static Long_64bits      feistel_algorithm(Long_64bits plaintext)
     return plaintext;
 }
 
+static void             des_decryption(t_hash *hash, Mem_8bits *pt, int ptByteSz)
+{
+    int         ptSz = (ptByteSz + 7) / 8;
+    Long_64bits ciphertext[ptSz];
+    Long_64bits *plaintext = (Long_64bits *)pt + ptSz - 1;
+    Long_64bits bloc;
+
+    printf("\n- DES DECRYPTION -\nptByteSz: %d\tptSz: %d\n", ptByteSz, ptSz);
+    for (int i = ptSz - 1; i >= 0; i--)
+    {
+        bloc = *plaintext;
+        printf("\nstr plaintext: >%s<\n", (Mem_8bits *)plaintext);
+
+        printf("hex   bloc: %lx\n", bloc);
+
+        bloc = feistel_algorithm(bloc);
+        printf("ciphertext: %lx\n", bloc);
+        // set_keys_for_decryption(&ssl.des);
+        // printf("ciphertext rev: %lx\n", feistel_algorithm(ciphertext[i]));
+
+        if (ssl.des.mode == DESCBC)
+        {
+            printf("XOR\nbloc  %lx\nvector %lx\n", bloc, i ? *plaintext : ssl.des.vector);
+            ciphertext[i] = bloc ^ (i ? *(plaintext - 1) : ssl.des.vector);
+            printf("hex   bloc: %lx (CBC xor)\n", ciphertext[i]);
+        }
+        plaintext--;
+    }
+
+    hash->hash_64bits = (Long_64bits *)ft_memdup((Mem_8bits *)ciphertext, ptSz * LONG64_ByteSz);
+    hash->hashWordSz = ptSz * 2;
+}
+
 static void             des_encryption(t_hash *hash, Mem_8bits *pt, int ptByteSz)
 {
     int         ptSz = (ptByteSz + 8) / 8;
@@ -348,18 +387,18 @@ static void             des_encryption(t_hash *hash, Mem_8bits *pt, int ptByteSz
     Long_64bits *plaintext = (Long_64bits *)pt;
     Long_64bits bloc;
 
-    // printf("\n- DES ECRYPTION -\nptByteSz: %d\tptSz: %d\n", ptByteSz, ptSz);
+    printf("\n- DES ECRYPTION -\nptByteSz: %d\tptSz: %d\n", ptByteSz, ptSz);
     for (int i = 0; i < ptSz; i++)
     {
         bloc = *plaintext;
-        // printf("str plaintext: >%s<\n", (Mem_8bits *)plaintext);
+        printf("str plaintext: >%s<\n", (Mem_8bits *)plaintext);
 
-        // Padding with 0x06
+        // Padding with number of missing bytes
         if (i == ptSz - 1)
             des_pad_last_bloc((Mem_8bits *)&bloc);
 
-        // printf("\nhex vector: %lx\n", i ? ciphertext[i - 1] : ssl.des.vector);
-        // printf("hex   bloc: %lx\n", bloc);
+        printf("\nhex vector: %lx\n", i ? ciphertext[i - 1] : ssl.des.vector);
+        printf("hex   bloc: %lx\n", bloc);
 
         // printf("bin vector: ");
         // printLong(i ? ciphertext[i - 1] : ssl.des.vector);
@@ -368,16 +407,19 @@ static void             des_encryption(t_hash *hash, Mem_8bits *pt, int ptByteSz
 
         if (ssl.des.mode == DESCBC)
         {
+            printf("XOR\nbloc  %lx\nvector %lx\n", bloc, i ? ciphertext[i - 1] : ssl.des.vector);
             bloc ^= i ? ciphertext[i - 1] : ssl.des.vector;
-        //     printf("hex   bloc: %lx (CBC xor)\n", bloc);
+            printf("hex   bloc: %lx (CBC xor)\n", bloc);
+        }
         //     printf("bin   bloc: ");
         //     printLong(bloc);
         //     printf(" (CBC xor)\n");
-        }
 
         ciphertext[i] = feistel_algorithm(bloc);
         printf("ciphertext: %lx\n", ciphertext[i]);
-        
+        // set_keys_for_decryption(&ssl.des);
+        // printf("ciphertext rev: %lx\n", feistel_algorithm(ciphertext[i]));
+
         plaintext++;
     }
 
@@ -395,10 +437,19 @@ void                    des(t_hash *hash)
     /*
         Actually works only for des-ecb encryption & plaintext % 64 == 0
     */
-    printf("hash->msg: >%s<\n", hash->msg);
-
     init_vars(&ssl.des);
+
+    printf("hash->msg (len=%d): >%s<\n", hash->len, hash->msg);
     if (ssl.flags & D)
+    {
         set_keys_for_decryption(&ssl.des);
-    des_encryption(hash, hash->msg, hash->len);
+        des_decryption(hash, hash->msg, hash->len);
+    }
+    else
+        des_encryption(hash, hash->msg, hash->len);
+    // des_encryption(hash, hash->msg, hash->len);
+    // ft_memcpy(hash->msg, hash->hash_64bits, hash->hashWordSz * 4);
+    // hash->len = hash->hashWordSz * 4;
+    // printf("hash->msg (len=%d): >%s<\n", hash->len, hash->msg);
+    // des_decryption(hash, hash->msg, hash->len);
 }

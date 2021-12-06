@@ -106,6 +106,21 @@ int     s_handler(char *av_next, int *i)
         return string_handler(NULL, av_next);
 }
 
+Key_64bits  parse_keys(char *av_next)
+{
+    Key_64bits  key = ft_strtoHex(av_next);
+
+    // printf("parse key: %lx\n", key);
+    if (!(key & 0xff00000000000000))
+    {
+        ft_putstr("hex string is too short, padding with zero bytes to length\n");
+        while (!(key & 0xff00000000000000))
+            key <<= 8;
+    }
+    // printf("parse key: %lx\n", key);
+    return key;
+}
+
 int     param_handler(e_flags flag, char *av_next, int *i)
 {
     // printf("V flag condition %d\n", flag & V);
@@ -123,13 +138,13 @@ int     param_handler(e_flags flag, char *av_next, int *i)
     else if (flag & O)
         ssl.output_file = av_next;
     else if (flag & K)
-        ssl.des.key = ft_strtoHex(av_next);
+        ssl.des.key = parse_keys(av_next);
     else if (flag & P_cipher)
         ssl.des.password = (Mem_8bits *)ft_strdup(av_next);
     else if (flag & S_cipher)
-        ssl.des.salt = ft_strtoHex(av_next);
+        ssl.des.salt = parse_keys(av_next);
     else if (flag & V)
-        ssl.des.vector = ft_strtoHex(av_next);
+        ssl.des.vector = parse_keys(av_next);
     (*i)++;
     return 0;
 }
