@@ -134,6 +134,7 @@ static void             init_vars(t_des *des)
         ft_putstr("\nInitialization vector is undefined\n");
         freexit(EXIT_SUCCESS);
     }
+    // NEED TO OUTPUT "warning: iv not used by this cipher"
 
     // A salt is randomly generated if it's not provided
     if (!des->salt)
@@ -310,7 +311,7 @@ static Word_32bits      feistel_func(Word_32bits halfblock, Long_64bits subkey)
 static Long_64bits      feistel_algorithm(Long_64bits plaintext)
 {
     plaintext = bits_permutations(plaintext, ssl.des.ipt, 64);
-    printf("After ipt permutation hex: %lx\nAfter ipt permutation bin:\n", plaintext);
+    // printf("After ipt permutation hex: %lx\nAfter ipt permutation bin:\n", plaintext);
     // printLong(plaintext);
     // exit(0);
 
@@ -319,7 +320,7 @@ static Long_64bits      feistel_algorithm(Long_64bits plaintext)
 
     // printWord(lpart);
     // printWord(rpart);
-    printf("lpart rpart: %x %x\n", lpart, rpart);
+    // printf("lpart rpart: %x %x\n", lpart, rpart);
 
     for (int i = 0; i < 16; i++)
     {
@@ -329,7 +330,7 @@ static Long_64bits      feistel_algorithm(Long_64bits plaintext)
         lpart ^= rpart;
         rpart ^= lpart;
 
-        printf("lpart rpart %d: %x %x\tkey %lx\n", i, lpart, rpart, ssl.des.subkeys[i]);
+        // printf("lpart rpart %d: %x %x\tkey %lx\n", i, lpart, rpart, ssl.des.subkeys[i]);
     }
 
     plaintext = (Long_64bits)lpart << 32 | rpart;
@@ -342,7 +343,7 @@ static Long_64bits      feistel_algorithm(Long_64bits plaintext)
 
 static void             des_encryption(t_hash *hash, Mem_8bits *pt, int ptByteSz)
 {
-    int         ptSz = (ptByteSz + 7) / 8;
+    int         ptSz = (ptByteSz + 8) / 8;
     Long_64bits ciphertext[ptSz];
     Long_64bits *plaintext = (Long_64bits *)pt;
     Long_64bits bloc;
@@ -351,19 +352,19 @@ static void             des_encryption(t_hash *hash, Mem_8bits *pt, int ptByteSz
     for (int i = 0; i < ptSz; i++)
     {
         bloc = *plaintext;
-        printf("str plaintext: >%s<\n", (Mem_8bits *)plaintext);
+        // printf("str plaintext: >%s<\n", (Mem_8bits *)plaintext);
 
         // Padding with 0x06
         if (i == ptSz - 1)
             des_pad_last_bloc((Mem_8bits *)&bloc);
 
         // printf("\nhex vector: %lx\n", i ? ciphertext[i - 1] : ssl.des.vector);
-        printf("hex   bloc: %lx\n", bloc);
+        // printf("hex   bloc: %lx\n", bloc);
 
         // printf("bin vector: ");
         // printLong(i ? ciphertext[i - 1] : ssl.des.vector);
-        printf("bin   bloc: ");
-        printLong(bloc);
+        // printf("bin   bloc: ");
+        // printLong(bloc);
 
         if (ssl.des.mode == DESCBC)
         {

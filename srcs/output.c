@@ -56,8 +56,8 @@ void    hash_64bits_output(t_hash *p)
 {
     for (Long_64bits *tmp = p->hash_64bits; tmp < p->hash_64bits + p->hashWordSz / 2; tmp += 1)
     {   
-        ft_printHex(*tmp, LONG64_ByteSz);
         printf("\n");
+        ft_printHex(*tmp, LONG64_ByteSz);
     }
     printf("\nhash = ");
     for (Long_64bits *tmp = p->hash_64bits; tmp < p->hash_64bits + p->hashWordSz / 2; tmp += 1)
@@ -158,6 +158,8 @@ void    output(t_hash *hash)
         md_output(hash);
     else if (ssl.command & CIPHER)
         cipher_output(hash);
-    if (~ssl.flags & O)
-        ft_putstr("\n");
+    // if (~ssl.flags & O)
+    //     ft_putstr("\n");
+    char c = '\n';
+    c = write(ssl.fd_out, &c, 1);
 }
