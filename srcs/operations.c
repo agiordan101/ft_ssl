@@ -55,3 +55,15 @@ void        padding(Mem_8bits **data, Long_64bits *byteSz, char reverseByteSz)
 
     *byteSz = extend_byteSz;
 }
+
+void        des_pad_last_bloc(Mem_8bits *bloc)
+{
+    int missing_bytes = 0;
+
+    for (int i = 0; i < LONG64_ByteSz; i++)
+        if (!bloc[i])
+            missing_bytes++;
+    for (int i = 0; i < LONG64_ByteSz; i++)
+        if (!bloc[i])
+            bloc[i] = missing_bytes;
+}

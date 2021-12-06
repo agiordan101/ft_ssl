@@ -353,6 +353,10 @@ static void             des_encryption(t_hash *hash, Mem_8bits *pt, int ptByteSz
         bloc = *plaintext;
         printf("str plaintext: >%s<\n", (Mem_8bits *)plaintext);
 
+        // Padding with 0x06
+        if (i == ptSz - 1)
+            des_pad_last_bloc((Mem_8bits *)&bloc);
+
         // printf("\nhex vector: %lx\n", i ? ciphertext[i - 1] : ssl.des.vector);
         printf("hex   bloc: %lx\n", bloc);
 

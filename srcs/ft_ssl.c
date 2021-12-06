@@ -9,6 +9,8 @@
 
     DES("12345678") = DES("12345678\n") Wtf ???
 
+    -nosalt to make
+
 */
 
 t_ssl    ssl;

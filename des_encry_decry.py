@@ -278,10 +278,13 @@ def pad(msg):
     print("No padding required")
   return(msg)
 
-def ascii_to_strhex(msg):
+def ascii_to_strhex(msg): 
+  hexbase = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F']
   hex = ""
   for c in msg:
-    hex += chr(int(ord(c) / 16)) + chr(int(ord(c) % 16))
+    hex += hexbase[int(ord(c) / 16)] + hexbase[int(ord(c) % 16)]
+    # print(f"ascii_to_strhex: {c} -> {hexbase[int(ord(c) / 16)]}{hexbase[int(ord(c) % 16)]}")
+  print(f"ascii_to_strhex: {hex}")
   return hex
 
 # Main function
@@ -293,6 +296,7 @@ print(plain_text)
 # quit()
 
 plain_text = ascii_to_strhex(plain_text)
+print(f"plain_text: {plain_text}")
 
 # print("Enter the message to be encrypted: ")
 # plain_text=input()
@@ -304,8 +308,14 @@ key="AABB09182736CCDD"
 key=pad(key)
 print("Key after padding: ",key)
 
-cipher_text=bin_to_hexa(encrypt(plain_text,key))
-print("Cipher text is: ",cipher_text)
+cipher_text = ""
+ipt=0
+while ipt*16 < len(plain_text):
+  print(f"Encryption: >{plain_text[ipt*16:(ipt+1)*16]}<")
+  cipher_text += bin_to_hexa(encrypt(plain_text[ipt*16:(ipt+1)*16],key))
+  print("Cipher text is: ",cipher_text) 
+  ipt += 1
+
 
 '''
 ----------OUTPUT----------

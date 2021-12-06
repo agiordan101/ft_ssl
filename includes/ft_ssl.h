@@ -214,6 +214,7 @@ typedef struct  s_des
 }               t_des;
 
 void        des(t_hash *hash);
+void        des_pad_last_bloc(Mem_8bits *bloc);
 
 
 
