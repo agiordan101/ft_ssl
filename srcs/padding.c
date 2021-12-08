@@ -20,12 +20,8 @@ Mem_8bits   *padXbits(Mem_8bits **mem, int byteSz, int newSz)
     return *mem;
 }
 
-void        padding(Mem_8bits **data, Long_64bits *byteSz, char reverseByteSz)
+void        md_padding(Mem_8bits **data, Long_64bits *byteSz, char reverseByteSz)
 {
-    // printf("data: %p\n", *data);
-    // printf("byteSz: %ld\n", *byteSz);
-    // exit(0);
-
     Long_64bits extend_byteSz =\
         *byteSz - (*byteSz % CHUNK_ByteSz) + // Find byteSz of the filled chunks.
         CHUNK_ByteSz * (*byteSz % CHUNK_ByteSz >= CHUNK_ByteSz - LONG64_ByteSz ? 2 : 1); // Add 1 chunk (witch is partially written), and add another one if we cannot cpy byteSz_mem at the end (overwritting is not possible)
@@ -56,14 +52,41 @@ void        padding(Mem_8bits **data, Long_64bits *byteSz, char reverseByteSz)
     *byteSz = extend_byteSz;
 }
 
-void        des_pad_last_bloc(Mem_8bits *bloc)
-{
-    int missing_bytes = 0;
+// void        des_padding(Mem_8bits *bloc)
+// {
+//     int missing_bytes = 0;
 
-    for (int i = 0; i < LONG64_ByteSz; i++)
-        if (!bloc[i])
-            missing_bytes++;
-    for (int i = 0; i < LONG64_ByteSz; i++)
-        if (!bloc[i])
-            bloc[i] = missing_bytes;
+//     for (int i = 0; i < LONG64_ByteSz; i++)
+//         if (!bloc[i])
+//             missing_bytes++;
+//     for (int i = 0; i < LONG64_ByteSz; i++)
+//         if (!bloc[i])
+//             bloc[i] = missing_bytes;
+// }
+Long_64bits des_padding(Mem_8bits *bloc)
+{
+    Mem_8bits   newbloc[LONG64_ByteSz];
+    ft_bzero(newbloc, LONG64_ByteSz);
+    int         missing_bytes;
+    int         i = -1;
+
+    while (++i < LONG64_ByteSz && bloc[i])
+        newbloc[i] = bloc[i];
+    missing_bytes = 8 - i;
+    while (i < LONG64_ByteSz)
+        newbloc[i++] = missing_bytes;
+    return *((Long_64bits *)newbloc);
+}
+
+void        des_unpadding(Long_64bits *lastbloc, int *ptSz)
+{
+    Mem_8bits   lastbyte = *lastbloc & 0xff;
+
+    printf("lastbloc : %lx\tptSz : %d\n", *lastbloc, *ptSz);
+    printf("lastbyte : %d\n", lastbyte);
+    if (lastbyte == 0x08)
+        (*ptSz)--;
+    else if (0x01 <= lastbyte && lastbyte <= 0x07)
+        *lastbloc >>= lastbyte * 8;
+    printf("lastbloc : %lx\tptSz : %d (out)\n", *lastbloc, *ptSz);
 }

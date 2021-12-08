@@ -105,16 +105,12 @@ static void hash_chunk(t_sha *sha, Word_32bits *chunk)
     sha->hash[7] += h;
 }
 
-void        sha256(t_hash *hash)
+Mem_8bits   *sha256(Mem_8bits *plaintext, Long_64bits ptByteSz)
 {
     t_sha   sha;
 
-    // printf("hash->len: %d\n", hash->len);
-    // printf("data: %p\n", hash->msg);
-    // printf("byteSz: %d\n", hash->len);
-
-    padding((Mem_8bits **)&hash->msg, (Long_64bits *)&hash->len, 1);
-    init_sha(&sha, (Mem_8bits *)hash->msg, (Long_64bits)hash->len);
+    md_padding(&plaintext, &ptByteSz, 1);
+    init_sha(&sha, plaintext, ptByteSz);
 
     // printBits(chunks, CHUNK_ByteSz);
     Word_32bits *chunks = (Word_32bits *)sha.chunks;
@@ -125,50 +121,19 @@ void        sha256(t_hash *hash)
         chunk += CHUNK_ByteSz / WORD_ByteSz;
     }
 
-    // Cpy SHA256 result
-    hash->hashWordSz = SHA256_WordSz;
-    // if (!(hash->hash_32bits = malloc(hash->hashWordSz * WORD_ByteSz)))
-    //     malloc_failed("Unable to malloc msg in sha256() function\n");
-    // ft_memcpy(hash->hash_32bits, sha.hash, hash->hashWordSz * WORD_ByteSz);
-    hash->hash_32bits = (Word_32bits *)ft_memdup((Mem_8bits *)sha.hash, SHA256_byteSz);
-
     // little endian to big endian
-    for (Word_32bits *tmp = hash->hash_32bits; tmp < hash->hash_32bits + hash->hashWordSz; tmp += 1)
+    for (Word_32bits *tmp = (Word_32bits *)sha.hash; tmp < sha.hash + SHA256_WordSz; tmp += 1)
         endianReverse((Mem_8bits *)tmp, WORD_ByteSz);
+
+    return ft_memdup((Mem_8bits *)sha.hash, SHA256_byteSz);
 }
 
 /*
     SHA-256 related functions
 */
 
-void        sha256_msg(Mem_8bits **msg, int byteSz, Mem_8bits *dest)
-{
-    // t_hash hash = (t_hash){0, NULL, *msg, byteSz, NULL, 0, 0, NULL};
-    t_hash hash = (t_hash){0, NULL, NULL, byteSz, NULL, NULL, 0, 0, NULL};
-    // if (!(hash.msg = (Mem_8bits *)malloc(sizeof(Mem_8bits) * (byteSz + 1))))
-    //     malloc_failed("Unable to malloc in sha256_msg() function\n");
-    // ft_bzero(hash.msg, byteSz + 1);
-    // ft_memcpy(hash.msg, *msg, byteSz);
-    hash.msg = ft_memdup(*msg, byteSz);
-
-    sha256(&hash);
-    // md_hash_output(&hash);
-    // printf("\n");
-    // *msg = (Mem_8bits *)hash.hash_32bits;
-    // *byteSz = hash.hashWordSz * WORD_ByteSz;
-    ft_memcpy(dest, (Mem_8bits *)hash.hash_32bits, SHA256_byteSz);
-    free(hash.msg);
-    free(hash.hash_32bits);
-}
-
-inline void sha256_xor_32bits(Word_32bits *sha1, Word_32bits *sha2, Word_32bits **result)
-{
-    for (int i = 0; i < SHA256_WordSz; i++)
-        (*result)[i] = sha1[i] ^ sha2[i];
-}
-
 inline void sha256_xor_8bits(Mem_8bits *sha1, Mem_8bits *sha2, Mem_8bits **result)
 {
-    for (int i = 0; i < SHA256_byteSz; i++)
+    for (uint i = 0; i < SHA256_byteSz; i++)
         (*result)[i] = sha1[i] ^ sha2[i];
 }

@@ -21,12 +21,6 @@ void    ssl_free()
     t_hash      *hash = ssl.hash;
     t_des    *des = &ssl.des;
 
-    // if (des->key)
-    //     free(des->key);
-    // if (des->salt)
-    //     free(des->salt);
-    // if (des->vector)
-    //     free(des->vector);
     if (des->password)
         free(des->password);
 
@@ -36,8 +30,8 @@ void    ssl_free()
             free(hash->name);
         if (hash->msg)
             free(hash->msg);
-        if (hash->hash_32bits)
-            free(hash->hash_32bits);
+        if (hash->hash)
+            free(hash->hash);
         tmp = hash;
         hash = hash->next;
         free(tmp);
@@ -86,7 +80,10 @@ int     main(int ac, char **av)
     {
         // printf("hash->msg: >%s<\n", hash->msg);
         // printf("hash->name: >%s<\n", hash->name);
-        ssl.hash_func_addr(hash);
+
+        hash->hash = ssl.hash_func_addr(hash->msg, hash->len);
+        hash->hashByteSz = ft_strlen(hash->hash);
+
         output(hash);
         hash = hash->next;
     }

@@ -77,12 +77,12 @@ static void hash_chunk(t_md5 *md5, Word_32bits *chunk)
     md5->hash[3] += d;
 }
 
-void        md5(t_hash *hash)
+Mem_8bits   *md5(Mem_8bits *plaintext, Long_64bits ptByteSz)
 {
     t_md5   md5;
 
-    padding((Mem_8bits **)&hash->msg, (Long_64bits *)&hash->len, 0);
-    init_md5(&md5, (Mem_8bits *)hash->msg, (Long_64bits)hash->len);
+    md_padding(&plaintext, &ptByteSz, 0);
+    init_md5(&md5, plaintext, ptByteSz);
     // printBits(md5.chunks, md5.chunksSz);
 
     Word_32bits *chunks = (Word_32bits *)md5.chunks;
@@ -93,7 +93,5 @@ void        md5(t_hash *hash)
         chunk += CHUNK_ByteSz / WORD_ByteSz;
     }
 
-    // Cpy MD5 result
-    hash->hash_32bits = (Word_32bits *)ft_memdup((Mem_8bits *)md5.hash, MD5_byteSz);
-    hash->hashWordSz = MD5_WordSz;
+    return ft_memdup((Mem_8bits *)md5.hash, MD5_byteSz);
 }

@@ -48,10 +48,12 @@ typedef struct  s_hash
     char            *name;      // stdin / file name / -s string arg // Malloc
     char            *msg;       // Content to hash // Malloc
     int             len;        // Length of content
+    
     Word_32bits     *hash_32bits;
-    Long_64bits     *hash_64bits;
-    int             hashWordSz;
-    // int             hashByteSz;
+    
+    Mem_8bits       *hash;
+    int             hashByteSz;
+
     int             error;      // FILENOTFOUND or 0
     struct s_hash *next;
 }               t_hash;
@@ -97,15 +99,12 @@ void        print_usage();
 */
 
 Mem_8bits   *padXbits(Mem_8bits **mem, int byteSz, int newSz);
-void        padding(Mem_8bits **data, Long_64bits *byteSz, char reverseByteSz);
 
-Mem_8bits   endianReverseByte(Mem_8bits byte);
-void        endianReverse(Mem_8bits *mem, Long_64bits byteSz);
-Word_32bits rotL(Word_32bits x, Word_32bits r);
-Word_32bits rotR(Word_32bits x, Word_32bits r);
-Long_64bits key_discarding(Mem_8bits *p);
-// Mem_8bits   *key_discarding(Mem_8bits *key);
-// Mem_8bits   *bits_permutations(Mem_8bits *key, char *pt);
+Mem_8bits       endianReverseByte(Mem_8bits byte);
+void            endianReverse(Mem_8bits *mem, Long_64bits byteSz);
+Word_32bits     rotL(Word_32bits x, Word_32bits r);
+Word_32bits     rotR(Word_32bits x, Word_32bits r);
+Long_64bits     key_discarding(Mem_8bits *p);
 Long_64bits     _bits_permutations(Long_64bits mem, char *ptable, int bitLen);
 Long_64bits     bits_permutations(Long_64bits mem, char *ptable, int bitLen);
 
@@ -127,6 +126,8 @@ void        printLong(Long_64bits l);
 
 # define CHUNK_ByteSz   (16 * sizeof(Word_32bits))    // 64 bytes or 512 bits
 
+void        md_padding(Mem_8bits **data, Long_64bits *byteSz, char reverseByteSz);
+
 /*
     MD5 Data -----------------------------------------
 */
@@ -143,7 +144,8 @@ typedef struct  s_md5
     Word_32bits hash[MD5_WordSz];
 }               t_md5;
 
-void    md5(t_hash *hash);
+Mem_8bits   *md5(Mem_8bits *plaintext, Long_64bits ptByteSz);
+void        md5_t_hash(t_hash *hash);
 
 
 /*
@@ -161,12 +163,14 @@ typedef struct  s_sha
     Word_32bits hash[SHA256_WordSz];
 }               t_sha;
 
-void        sha256(t_hash *hash);
-void        sha256_msg(Mem_8bits **msg, int byteSz, Mem_8bits *dest);
+// void        sha256(t_hash *hash);
+// void        sha256_msg(Mem_8bits **msg, int byteSz, Mem_8bits *dest);
 // void        sha256_mod256(Mem_8bits **msg, int *len);
-void        sha256_xor_32bits(Word_32bits *sha1, Word_32bits *sha2, Word_32bits **result);
-void        sha256_xor_8bits(Mem_8bits *sha1, Mem_8bits *sha2, Mem_8bits **result);
+// void        sha256_xor_32bits(Word_32bits *sha1, Word_32bits *sha2, Word_32bits **result);
 
+Mem_8bits   *sha256(Mem_8bits *plaintext, Long_64bits ptByteSz);
+void        sha256_t_hash(t_hash *hash);
+void        sha256_xor_8bits(Mem_8bits *sha1, Mem_8bits *sha2, Mem_8bits **result);
 
 
 /*
@@ -213,8 +217,10 @@ typedef struct  s_des
     char        fpt[KEY_bitSz];     // Final   permutation table
 }               t_des;
 
-void        des(t_hash *hash);
-void        des_pad_last_bloc(Mem_8bits *bloc);
+// void        des(t_hash *hash);
+Mem_8bits   *des(Mem_8bits *plaintext, Long_64bits ptByteSz);
+Long_64bits des_padding(Mem_8bits *bloc);
+void        des_unpadding(Long_64bits *lastbloc, int *ptSz);
 
 
 
@@ -225,7 +231,7 @@ void        des_pad_last_bloc(Mem_8bits *bloc);
 typedef struct  s_ssl
 {
     char        *hash_func;
-    void        (*hash_func_addr)();
+    Mem_8bits   *(*hash_func_addr)(Mem_8bits *pt, Long_64bits ptByteSz);
     e_command   command;
     t_des       des;
 
@@ -237,12 +243,3 @@ typedef struct  s_ssl
 }               t_ssl;
 
 extern t_ssl    ssl;
-
-
-
-
-
-
-
-
-

@@ -17,7 +17,7 @@ SRC			=	$(NAME).c \
 				pbkdf2.c \
 				des.c \
 				bitwise.c \
-				operations.c \
+				padding.c \
 				libft.c \
 				output.c \
 				verbose.c

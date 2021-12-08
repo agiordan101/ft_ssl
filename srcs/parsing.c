@@ -110,14 +110,12 @@ Key_64bits  parse_keys(char *av_next)
 {
     Key_64bits  key = ft_strtoHex(av_next);
 
-    // printf("parse key: %lx\n", key);
     if (!(key & 0xff00000000000000))
     {
         ft_putstr("hex string is too short, padding with zero bytes to length\n");
         while (!(key & 0xff00000000000000))
             key <<= 8;
     }
-    // printf("parse key: %lx\n", key);
     return key;
 }
 

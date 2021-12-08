@@ -54,22 +54,27 @@ void    key_output(Mem_8bits *p)
 
 void    hash_64bits_output(t_hash *p)
 {
-    for (Long_64bits *tmp = p->hash_64bits; tmp < p->hash_64bits + p->hashWordSz / 2; tmp += 1)
-    {   
-        printf("\n");
+    Long_64bits *hash = (Long_64bits *)p->hash;
+    int         bloc64bitsSz = p->hashByteSz / LONG64_ByteSz;
+
+    for (Long_64bits *tmp = hash; tmp < hash + bloc64bitsSz; tmp += 1)
         ft_printHex(*tmp, LONG64_ByteSz);
-    }
-    printf("\nhash = ");
-    for (Long_64bits *tmp = p->hash_64bits; tmp < p->hash_64bits + p->hashWordSz / 2; tmp += 1)
-    {
-        printf("%s", ft_hextoStr(*tmp));
-    }
+    // printf("\nhash = ");
+    // for (Long_64bits *tmp = p->hash_64bits; tmp < p->hash_64bits + p->hashWordSz / 2; tmp += 1)
+    // {
+    //     printf("%s", ft_hextoStr(*tmp));
+    // }
 }
 
 void    hash_32bits_output(t_hash *p)
 {
-    for (Word_32bits *tmp = p->hash_32bits; tmp < p->hash_32bits + p->hashWordSz; tmp += 1)
+    Word_32bits *hash = (Word_32bits *)p->hash;
+    int         bloc32bitsSz = p->hashByteSz / WORD_ByteSz;
+
+    for (Word_32bits *tmp = hash; tmp < hash + bloc32bitsSz; tmp += 1)
         ft_printHex(*tmp, WORD_ByteSz);
+    // for (Word_32bits *tmp = p->hash_32bits; tmp < p->hash_32bits + p->hashWordSz; tmp += 1)
+    //     ft_printHex(*tmp, WORD_ByteSz);
 }
 
 void    classic_output(t_hash *hash, int hashBlocByteSz)
@@ -138,8 +143,8 @@ void    cipher_output(t_hash *hash)
 {
     if (ssl.hash_func_addr == base64)
     {
-        if (((char *)hash->hash_32bits)[hash->hashWordSz - 1] == '\n')
-            ((char *)hash->hash_32bits)[hash->hashWordSz - 1] = '\0'; //To remove \n, it's like 'echo -n <node->msg> | ./ft_ssl ...'
+        if (((char *)hash->hash)[hash->hashByteSz / 4 - 1] == '\n')
+            ((char *)hash->hash)[hash->hashByteSz / 4 - 1] = '\0'; //To remove \n, it's like 'echo -n <node->msg> | ./ft_ssl ...'
         ft_putstr((char *)hash->hash_32bits);
     }
     else if (ssl.hash_func_addr == des && ssl.flags & O)
