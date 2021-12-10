@@ -77,12 +77,12 @@ static void hash_chunk(t_md5 *md5, Word_32bits *chunk)
     md5->hash[3] += d;
 }
 
-Mem_8bits   *md5(Mem_8bits *plaintext, Long_64bits ptByteSz)
+Mem_8bits   *md5(Mem_8bits **plaintext, Long_64bits ptByteSz)
 {
     t_md5   md5;
 
-    md_padding(&plaintext, &ptByteSz, 0);
-    init_md5(&md5, plaintext, ptByteSz);
+    md_padding(plaintext, &ptByteSz, 0);
+    init_md5(&md5, *plaintext, ptByteSz);
     // printBits(md5.chunks, md5.chunksSz);
 
     Word_32bits *chunks = (Word_32bits *)md5.chunks;

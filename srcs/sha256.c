@@ -105,12 +105,12 @@ static void hash_chunk(t_sha *sha, Word_32bits *chunk)
     sha->hash[7] += h;
 }
 
-Mem_8bits   *sha256(Mem_8bits *plaintext, Long_64bits ptByteSz)
+Mem_8bits   *sha256(Mem_8bits **plaintext, Long_64bits ptByteSz)
 {
     t_sha   sha;
 
-    md_padding(&plaintext, &ptByteSz, 1);
-    init_sha(&sha, plaintext, ptByteSz);
+    md_padding(plaintext, &ptByteSz, 1);
+    init_sha(&sha, *plaintext, ptByteSz);
 
     // printBits(chunks, CHUNK_ByteSz);
     Word_32bits *chunks = (Word_32bits *)sha.chunks;

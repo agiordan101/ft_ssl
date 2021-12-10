@@ -1,174 +1,154 @@
 #include "ft_ssl.h"
 
-// static inline int   base64ToInt(char num)
-// {
-//     if ('A' <= num && num <= 'Z')
-//         return num - 'A';
-//     if ('a' <= num && num <= 'z')
-//         return 26 + num - 'a';
-//     if ('0' <= num && num <= '9')
-//         return 52 + num - '0';
-//     if (num == '+')
-//         return 62;
-//     if (num == '/')
-//         return 62;
-//     if (num == '=')
-//         return 420;
-//     return -1;
-// }
-
-// static inline int   get_len_encoded(int len)
-// {
-//     return (int)(len / 3) * 4 + (len % 3 ? 4 : 0);
-// }
-
-// static inline int   get_len_decoded(Mem_8bits *msg, int len)
-// {
-//     if (msg[len - 1] == '=')
-//     {
-//         if (msg[--len - 1] == '=')
-//             return (int)(--len / 4) * 3 + 1;
-//         return (int)(len / 4) * 3 + 2;
-//     }
-//     return (int)(len / 4) * 3;
-// }
-
-// static void         encode(t_hash *hash)
-// {
-//     char        base[65] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-//     Mem_8bits   group[4];
-//     Mem_8bits   b2;
-//     Mem_8bits   b3;
-
-//     // printBits(hash->msg, hash->len);
-//     hash->hashWordSz = get_len_encoded(hash->len);
-//     // if (!(hash->hash_32bits = malloc(hash->hashWordSz * WORD_ByteSz)))
-//     //     malloc_failed("Unable to malloc hash in base64 encode() function.\n");
-//     hash->hash_32bits = (Word_32bits *)ft_memnew(hash->hashWordSz * WORD_ByteSz);
-//     char *hash_p = (char *)hash->hash_32bits;
-
-//     // Padding to the next 24bits block of memory
-//     char *msg_24bits_blocks_end = hash->msg + hash->len + (hash->len % 3 ? 3 - hash->len % 3 : 0);
-//     for (Mem_8bits *tmp = hash->msg; (char *)tmp < msg_24bits_blocks_end; tmp += 3)
-//     {
-//         b2 = (char *)(tmp + 1) < msg_24bits_blocks_end ? *(tmp + 1) : 0b0;
-//         b3 = (char *)(tmp + 2) < msg_24bits_blocks_end ? *(tmp + 2) : 0b0;
-//         // printf("\nBits begin loop:\n");
-//         // printBits(tmp, 1);
-//         // printBits(&b2, 1);
-//         // printBits(&b3, 1);
-//         // 00101011 11000101  10101000
-//         // 001010 111100 010110 101000
-//         group[0] = *tmp >> 2;
-//         group[1] = (*tmp & 0b00000011) << 4 | b2 >> 4;
-//         group[2] = (b2 & 0b00001111) << 2 | b3 >> 6;
-//         group[3] = b3 & 0b00111111;
-
-//         for (int i = 0; i < 4; i++)
-//             group[i] = (Mem_8bits)base[group[i]];
-        
-//         if (!b2)
-//             group[2] = '=';
-//         if (!b3)
-//             group[3] = '=';
-
-//         // printf("Bits of group[4] end loop:\n");
-//         // for (int i = 0; i < 4; i++)
-//         //     printBits((Mem_8bits *)&group[i], 1);
-
-//         ft_memcpy(hash_p, (char *)group, 4);
-//         hash_p += 4;
-//         // printf("tmp: %p\n", tmp);
-//         // printf("tmp: %p\n", tmp);
-//         // printf("msg_24bits_blocks_end: %p\n", msg_24bits_blocks_end);
-//     }
-//     // printBits(hash->hash_32bits, hash->hashWordSz);
-// }
-
-// static void         clean_base64(Mem_8bits **msg, int *len)
-// {
-//     char        base[65] = BASE64;
-//     char        newmsg[*len];
-
-//     // printf("msg: %s\n", *msg);
-//     int newlen = 0;
-//     for (int i = 0; i < *len; i++)
-//     {
-//         if (base64ToInt((*msg)[i]) != -1)
-//             newmsg[newlen++] = (*msg)[i];
-//     }
-
-//     free(*msg);
-//     // if (!(*msg = (char *)malloc(sizeof(char) * (newlen + 1))))
-//     //     malloc_failed("Unable to malloc msg in base64 clean_base64() function\n");
-//     // (*msg)[newlen] = '\0';
-//     // ft_memcpy(*msg, newmsg, newlen);
-//     *msg = ft_memdup(newmsg, newlen);
-//     *len = newlen;
-//     // printf("msg clean: %s\n", *msg);
-// }
-
-// static void         decode(t_hash *hash)
-// {
-//     Mem_8bits   group[4];
-//     Mem_8bits   decoded[3];
-
-//     // printBits(hash->msg, hash->len);
-//     clean_base64((Mem_8bits **)&hash->msg, &hash->len);
-
-//     // printBits(hash->msg, hash->len);
-//     // printf("get_len_decoded: %d\n", get_len_decoded(hash->msg, hash->len));
-//     hash->hashWordSz = get_len_decoded(hash->msg, hash->len);
-//     // if (!(hash->hash_32bits = malloc(hash->hashWordSz * WORD_ByteSz)))
-//     //     malloc_failed("Unable to malloc hash in base64 decode() function\n");
-//     hash->hash_32bits = (Word_32bits *)ft_memnew(hash->hashWordSz * WORD_ByteSz);
-//     char *hash_p = (char *)hash->hash_32bits;
-   
-//     for (Mem_8bits *tmp = hash->msg; (char *)tmp < hash->msg + hash->len; tmp += 4)
-//     {
-//         // 001010 111100 010110 101000
-//         // 00101011 11000101  10101000
-
-//         for (int i = 0; i < 4; i++)
-//             group[i] = tmp[i] == '=' ? 0b0 : base64ToInt(tmp[i]);
-
-//         // printBits(group, 4);
-//         decoded[0] = group[0] << 2 | group[1] >> 4;
-//         decoded[1] = group[1] << 4 | group[2] >> 2;
-//         decoded[2] = group[2] << 6 | group[3];
-//         // printBits(decoded, 3);
-
-//         ft_memcpy(hash_p, (char *)decoded, 3);
-//         hash_p += 3;
-//     }
-//     // printBits(hash->hash_32bits, hash->hashWordSz);
-// }
-
-void                base64(t_hash *hash)
+static inline int   base64_to_bin(char num)
 {
-    printf("hash->msg: %s\n", hash->msg);
-    // if (ssl.flags & D)
-    //     decode(hash);
-    // else
-    //     encode(hash);
+    if ('A' <= num && num <= 'Z')
+        return num - 'A';
+    if ('a' <= num && num <= 'z')
+        return 26 + num - 'a';
+    if ('0' <= num && num <= '9')
+        return 52 + num - '0';
+    if (num == '+')
+        return 62;
+    if (num == '/')
+        return 63;
+    if (num == '=')
+        return 420;
+    return -1;
 }
 
-// // void        base64_msg(Mem_8bits **msg, int byteSz, Mem_8bits *dest)
-// // {
-// //     // t_hash hash = (t_hash){0, NULL, *msg, byteSz, NULL, 0, 0, NULL};
-// //     t_hash hash = (t_hash){0, NULL, NULL, byteSz, NULL, NULL, 0, 0, NULL};
-// //     // if (!(hash.msg = (Mem_8bits *)malloc(sizeof(Mem_8bits) * (byteSz + 1))))
-// //     //     malloc_failed("Unable to malloc in sha256_msg() function\n");
-// //     // ft_bzero(hash.msg, byteSz + 1);
-// //     // ft_memcpy(hash.msg, *msg, byteSz);
-// //     hash.msg = ft_memdup(*msg, byteSz);
+static inline void  bin_to_base64(Mem_8bits *bin, int byteSz)
+{
+    // static char        base[65] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    static char     base[65] = BASE64;
 
-// //     encode(&hash);
-// //     // md_hash_output(&hash);
-// //     // printf("\n");
-// //     // *msg = (Mem_8bits *)hash.hash_32bits;
-// //     // *byteSz = hash.hashWordSz * WORD_ByteSz;
-// //     ft_memcpy(dest, (Mem_8bits *)hash.hash_32bits, byteSz);
-// //     free(hash.msg);
-// //     free(hash.hash_32bits);
-// // }
+    for (int i = 0; i < byteSz; i++)
+        bin[i] = (Mem_8bits)base[bin[i]];
+}
+
+static void         clean_base64(Mem_8bits *msg, int *len)
+{
+    int         newlen = 0;
+
+    // printf("clean msg (len=%d): %s\n", *len, msg);
+    for (int i = 0; i < *len; i++)
+        if (base64_to_bin(msg[i]) != -1)
+            msg[newlen++] = msg[i];
+
+    ft_bzero(msg + newlen, *len - newlen);
+    // printf("msg clean (len=%d): %s\n", newlen, msg);
+    *len = newlen;
+}
+
+static inline int   get_len_encoded(int len)
+{
+    return (int)(len / 3) * 4 + (len % 3 ? 4 : 0);
+}
+
+static inline int   get_len_decoded(Mem_8bits *msg, int len)
+{
+    if (msg[len - 1] == '=')
+    {
+        if (msg[--len - 1] == '=')
+            return (int)(--len / 4) * 3 + 1;
+        return (int)(len / 4) * 3 + 2;
+    }
+    return (int)(len / 4) * 3;
+}
+
+static inline void  split_3to4bytes(Mem_8bits b1, Mem_8bits b2, Mem_8bits b3, Mem_8bits *res)
+{
+    // Transform: 00101011 11000101  10101000
+    // Into     : 001010 111100 010110 101000
+    res[0] = b1 >> 2;
+    res[1] = (b1 & 0b00000011) << 4 | b2 >> 4;
+    res[2] = (b2 & 0b00001111) << 2 | b3 >> 6;
+    res[3] = b3 & 0b00111111;
+}
+
+static Mem_8bits    *encode(Mem_8bits *plaintext, int ptByteSz)
+{
+    int         hashByteSz = get_len_encoded(ptByteSz);
+    Mem_8bits   bytecode[4];
+    Mem_8bits   *hash = ft_memnew(hashByteSz);
+    Mem_8bits   *hash_tmp = hash;
+
+    // printf("plaintext  (len=%d): >%s<\n", ptByteSz, plaintext);
+    Mem_8bits   *pt_tmp = plaintext;
+    Mem_8bits   *pt_end = plaintext + ptByteSz;
+    while (pt_tmp + 2 < pt_end)
+    {
+        // printf("\nBits begin loop:\n");
+        // printBits(pt_tmp, 3);
+
+        // Convert 3 bytes of 8-bits data in 4 bytes of 6-bits data
+        split_3to4bytes(*pt_tmp, *(pt_tmp + 1), *(pt_tmp + 2), (Mem_8bits *)bytecode);
+
+        // printf("Bits of bytecode[4] end loop:\n");
+        // for (int i = 0; i < 4; i++)
+        //     printBits((Mem_8bits *)&bytecode[i], 1);
+
+        // Convert each 6-bits to base64 number
+        bin_to_base64(bytecode, 4);
+
+        // printf("bytecode[4] end loop: >%s<\n", (char *)bytecode);
+
+        ft_memcpy(hash_tmp, (char *)bytecode, 4);
+        pt_tmp += 3;
+        hash_tmp += 4;
+    }
+    if (pt_tmp < pt_end)
+    {
+        split_3to4bytes(
+            *pt_tmp,
+            pt_tmp + 1 < pt_end ? *(pt_tmp + 1) : 0,
+            pt_tmp + 2 < pt_end ? *(pt_tmp + 2) : 0,
+            (Mem_8bits *)bytecode
+        );
+        bin_to_base64(bytecode, 4);
+        if (pt_tmp + 1 >= pt_end)
+            bytecode[2] = '=';
+        if (pt_tmp + 2 >= pt_end)
+            bytecode[3] = '=';
+        ft_memcpy(hash_tmp, (char *)bytecode, 4);
+    }
+
+    // printf("hash end   (len=%d): >%s<\n", hashByteSz, hash);
+    return hash;
+}
+
+static Mem_8bits    *decode(Mem_8bits *plaintext, int ptByteSz)
+{
+    int         hashByteSz = get_len_decoded(plaintext, ptByteSz);
+    Mem_8bits   bytecode[4];
+    Mem_8bits   *hash = ft_memnew(hashByteSz);
+    Mem_8bits   *hash_tmp = hash;
+
+    // printf("plaintext  (len=%d): >%s<\n", ptByteSz, plaintext);
+    clean_base64(plaintext, &ptByteSz);
+
+    Mem_8bits   *pt_end = plaintext + ptByteSz;
+    for (Mem_8bits *pt_tmp = plaintext; pt_tmp < pt_end; pt_tmp += 4)
+    {
+        for (int i = 0; i < 4; i++)
+            bytecode[i] = (pt_tmp[i] == '=') ? 0b0 : base64_to_bin(pt_tmp[i]);
+
+        // printBits(bytecode, 4);
+        hash_tmp[0] = bytecode[0] << 2 | bytecode[1] >> 4;
+        hash_tmp[1] = bytecode[1] << 4 | bytecode[2] >> 2;
+        hash_tmp[2] = bytecode[2] << 6 | bytecode[3];
+        // printBits(hash_tmp, 3);
+        hash_tmp += 3;
+    }
+    // printf("hash end   (len=%d): >%s<\n", hashByteSz, hash);
+    return hash;
+}
+
+Mem_8bits           *base64(Mem_8bits **plaintext, Long_64bits ptByteSz)
+{
+    // printf("plaintext: %s\n", plaintext);
+    if (ssl.flags & D)
+        return decode(*plaintext, ptByteSz);
+    else
+        return encode(*plaintext, ptByteSz);
+}

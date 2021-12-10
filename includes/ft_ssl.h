@@ -49,10 +49,8 @@ typedef struct  s_hash
     char            *msg;       // Content to hash // Malloc
     int             len;        // Length of content
     
-    Word_32bits     *hash_32bits;
-    
-    Mem_8bits       *hash;
-    int             hashByteSz;
+    Mem_8bits       *hash;      // Hashed bytecode
+    int             hashByteSz; // Byte size
 
     int             error;      // FILENOTFOUND or 0
     struct s_hash *next;
@@ -98,7 +96,7 @@ void        print_usage();
     Bitwise operations --------------------------------
 */
 
-Mem_8bits   *padXbits(Mem_8bits **mem, int byteSz, int newSz);
+Mem_8bits       *padXbits(Mem_8bits **mem, int byteSz, int newSz);
 
 Mem_8bits       endianReverseByte(Mem_8bits byte);
 void            endianReverse(Mem_8bits *mem, Long_64bits byteSz);
@@ -144,7 +142,8 @@ typedef struct  s_md5
     Word_32bits hash[MD5_WordSz];
 }               t_md5;
 
-Mem_8bits   *md5(Mem_8bits *plaintext, Long_64bits ptByteSz);
+// Mem_8bits   *md5(Mem_8bits **plaintext, Long_64bits ptByteSz);
+Mem_8bits   *md5(Mem_8bits **plaintext, Long_64bits ptByteSz);
 void        md5_t_hash(t_hash *hash);
 
 
@@ -168,7 +167,7 @@ typedef struct  s_sha
 // void        sha256_mod256(Mem_8bits **msg, int *len);
 // void        sha256_xor_32bits(Word_32bits *sha1, Word_32bits *sha2, Word_32bits **result);
 
-Mem_8bits   *sha256(Mem_8bits *plaintext, Long_64bits ptByteSz);
+Mem_8bits   *sha256(Mem_8bits **plaintext, Long_64bits ptByteSz);
 void        sha256_t_hash(t_hash *hash);
 void        sha256_xor_8bits(Mem_8bits *sha1, Mem_8bits *sha2, Mem_8bits **result);
 
@@ -193,8 +192,9 @@ Mem_8bits     *pbkdf2_sha256(Mem_8bits *pwd, Mem_8bits *salt, int c);
 
 # define    BASE64  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
-void        base64(t_hash *hash);
-void        base64_msg(Mem_8bits **msg, int byteSz, Mem_8bits *dest);
+Mem_8bits   *base64(Mem_8bits **plaintext, Long_64bits ptByteSz);
+// void        base64(t_hash *hash);
+// void        base64_msg(Mem_8bits **msg, int byteSz, Mem_8bits *dest);
 
 
 /*
@@ -218,7 +218,7 @@ typedef struct  s_des
 }               t_des;
 
 // void        des(t_hash *hash);
-Mem_8bits   *des(Mem_8bits *plaintext, Long_64bits ptByteSz);
+Mem_8bits   *des(Mem_8bits **plaintext, Long_64bits ptByteSz);
 Long_64bits des_padding(Mem_8bits *bloc);
 void        des_unpadding(Long_64bits *lastbloc, int *ptSz);
 
@@ -231,7 +231,7 @@ void        des_unpadding(Long_64bits *lastbloc, int *ptSz);
 typedef struct  s_ssl
 {
     char        *hash_func;
-    Mem_8bits   *(*hash_func_addr)(Mem_8bits *pt, Long_64bits ptByteSz);
+    Mem_8bits   *(*hash_func_addr)(Mem_8bits **plaintext, Long_64bits ptByteSz);
     e_command   command;
     t_des       des;
 

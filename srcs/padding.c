@@ -6,14 +6,12 @@ Mem_8bits   *padXbits(Mem_8bits **mem, int byteSz, int newSz)
 
     if (byteSz < newSz)
     {
-        // if (!(pad = (Mem_8bits *)malloc(sizeof(Mem_8bits) * (newSz + 1))))
-		//     malloc_failed("Unable to malloc msg in operations padXbits() function\n");
-        // pad[newSz] = '\0';
-        // ft_bzero(pad, newSz + 1);
+        // printf("addr: %p\n", *mem);
         pad = ft_memnew(newSz);
         ft_memcpy(pad, *mem, byteSz);
         free(*mem);
         *mem = pad;
+        // printf("addr: %p\n", *mem);
     }
     else if (newSz < byteSz)
         ft_bzero(*mem + newSz, byteSz - newSz);
@@ -36,7 +34,6 @@ void        md_padding(Mem_8bits **data, Long_64bits *byteSz, char reverseByteSz
     Mem_8bits endmsg = ENDMSG;
     ft_memcpy(*data + *byteSz, &endmsg, sizeof(Mem_8bits));
 
-
     // Transform Long_64bits memory to Mem_8bits memory (endianness matter)
     Long_64bits byteSz_bitSz = *byteSz * 8;
     Mem_8bits   byteSz_mem[LONG64_ByteSz];
@@ -52,17 +49,6 @@ void        md_padding(Mem_8bits **data, Long_64bits *byteSz, char reverseByteSz
     *byteSz = extend_byteSz;
 }
 
-// void        des_padding(Mem_8bits *bloc)
-// {
-//     int missing_bytes = 0;
-
-//     for (int i = 0; i < LONG64_ByteSz; i++)
-//         if (!bloc[i])
-//             missing_bytes++;
-//     for (int i = 0; i < LONG64_ByteSz; i++)
-//         if (!bloc[i])
-//             bloc[i] = missing_bytes;
-// }
 Long_64bits des_padding(Mem_8bits *bloc)
 {
     Mem_8bits   newbloc[LONG64_ByteSz];
@@ -83,7 +69,7 @@ void        des_unpadding(Long_64bits *lastbloc, int *ptSz)
     Mem_8bits   lastbyte = *lastbloc & 0xff;
 
     printf("lastbloc : %lx\tptSz : %d\n", *lastbloc, *ptSz);
-    printf("lastbyte : %d\n", lastbyte);
+    printf("lastbyte : %x\n", lastbyte);
     if (lastbyte == 0x08)
         (*ptSz)--;
     else if (0x01 <= lastbyte && lastbyte <= 0x07)

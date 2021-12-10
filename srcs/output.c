@@ -55,15 +55,11 @@ void    key_output(Mem_8bits *p)
 void    hash_64bits_output(t_hash *p)
 {
     Long_64bits *hash = (Long_64bits *)p->hash;
-    int         bloc64bitsSz = p->hashByteSz / LONG64_ByteSz;
+    int         bloc64bitsSz = ((p->hashByteSz + 7) / 8) * 8 / LONG64_ByteSz;
 
+    // printf("Hash (len=%d): %lx\n", bloc64bitsSz, hash[0]);
     for (Long_64bits *tmp = hash; tmp < hash + bloc64bitsSz; tmp += 1)
         ft_printHex(*tmp, LONG64_ByteSz);
-    // printf("\nhash = ");
-    // for (Long_64bits *tmp = p->hash_64bits; tmp < p->hash_64bits + p->hashWordSz / 2; tmp += 1)
-    // {
-    //     printf("%s", ft_hextoStr(*tmp));
-    // }
 }
 
 void    hash_32bits_output(t_hash *p)
@@ -141,13 +137,15 @@ void    md_output(t_hash *hash)
 
 void    cipher_output(t_hash *hash)
 {
+    printf("hash->hash: %p\n", hash->hash);
+    printf("hash->hash: %s\n", hash->hash);
     if (ssl.hash_func_addr == base64)
     {
         if (((char *)hash->hash)[hash->hashByteSz / 4 - 1] == '\n')
             ((char *)hash->hash)[hash->hashByteSz / 4 - 1] = '\0'; //To remove \n, it's like 'echo -n <node->msg> | ./ft_ssl ...'
-        ft_putstr((char *)hash->hash_32bits);
+        ft_putstr(hash->hash);
     }
-    else if (ssl.hash_func_addr == des && ssl.flags & O)
+    else if (ssl.hash_func_addr == des && ssl.flags & (O | Q))
         hash_64bits_output(hash);
     else if (ssl.hash_func_addr == des)
         classic_output(hash, LONG64_ByteSz);

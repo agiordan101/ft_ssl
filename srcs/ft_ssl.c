@@ -26,6 +26,7 @@ void    ssl_free()
 
     while (hash)
     {
+        // printf("free: %p\n", hash->msg);
         if (hash->name)
             free(hash->name);
         if (hash->msg)
@@ -81,8 +82,9 @@ int     main(int ac, char **av)
         // printf("hash->msg: >%s<\n", hash->msg);
         // printf("hash->name: >%s<\n", hash->name);
 
-        hash->hash = ssl.hash_func_addr(hash->msg, hash->len);
-        hash->hashByteSz = ft_strlen(hash->hash);
+        hash->hash = ssl.hash_func_addr((Mem_8bits **)&hash->msg, hash->len);
+        hash->hashByteSz = ft_strlen((char *)hash->hash);
+        printf("Hash (len=%d): %p\n", hash->hashByteSz, hash);
 
         output(hash);
         hash = hash->next;
