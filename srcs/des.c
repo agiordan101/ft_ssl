@@ -353,20 +353,22 @@ static Mem_8bits        *des_decryption(Mem_8bits *pt, Long_64bits ptByteSz)
         bloc = *plaintext;
         // printf("\nstr plaintext: >%s<\n", (Mem_8bits *)plaintext);
 
-        // printf("hex   bloc: %lx\n", bloc);
+        printf("hex   bloc: %lx\n", bloc);
 
-        bloc = feistel_algorithm(bloc);
-        printf("ciphertext: %lx\n", bloc);
+        ciphertext[i] = feistel_algorithm(bloc);
+        printf("ciphertext: %lx\n", ciphertext[i]);
 
         if (ssl.des.mode == DESCBC)
         {
             // printf("XOR\nbloc  %lx\nvector %lx\n", bloc, i ? *plaintext : ssl.des.vector);
-            ciphertext[i] = bloc ^ (i ? *(plaintext - 1) : ssl.des.vector);
+            ciphertext[i] = ciphertext[i] ^ (i ? *(plaintext - 1) : ssl.des.vector);
             // printf("hex bloc %d: %lx (CBC xor)\n", i, ciphertext[i]);
         }
         plaintext--;
     }
+    printf("ciphertext %d: %lx\n", ptSz - 1, ciphertext[ptSz - 1]);
     des_unpadding(ciphertext + ptSz - 1, &ptSz);
+    printf("ciphertext %d: %lx\n", ptSz - 1, ciphertext[ptSz - 1]);
 
     for (int i = 0; i < ptSz; i++)
         printf("ciphertext %d: %lx\n", i, ciphertext[i]);
@@ -385,7 +387,7 @@ static Mem_8bits        *des_encryption(Mem_8bits *pt, Long_64bits ptByteSz)
     for (int i = 0; i < ptSz; i++)
     {
         bloc = *plaintext;
-        printf("str plaintext: >%s<\n", (Mem_8bits *)plaintext);
+        // printf("str plaintext: >%s<\n", (Mem_8bits *)plaintext);
 
         // Padding with number of missing bytes
         if (i == ptSz - 1)
