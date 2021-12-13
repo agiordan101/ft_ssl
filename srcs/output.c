@@ -148,8 +148,8 @@ void    cipher_output(t_hash *hash)
     // if (ssl.hash_func_addr == base64)
     // {
     //     // WTFFF ???? stop do that
-    //     if (((char *)hash->hash)[hash->hashByteSz / 4 - 1] == '\n')
-    //         ((char *)hash->hash)[hash->hashByteSz / 4 - 1] = '\0'; //To remove \n, it's like 'echo -n <node->msg> | ./ft_ssl ...'
+        // if (((char *)hash->hash)[hash->hashByteSz / 4 - 1] == '\n')
+        //     ((char *)hash->hash)[hash->hashByteSz / 4 - 1] = '\0'; //To remove \n, it's like 'echo -n <node->msg> | ./ft_ssl ...'
     // }
     if (ssl.flags & (O | Q))
         hash_output(hash, hashBlocByteSz);

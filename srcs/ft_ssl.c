@@ -12,6 +12,7 @@
         add -q to usage
         add -P to usage
         shuffle usage
+        des seg fault sans -k
 */
 
 t_ssl    ssl;
