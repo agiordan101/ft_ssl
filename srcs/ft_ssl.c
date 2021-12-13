@@ -1,16 +1,17 @@
 #include "ft_ssl.h"
 
 /*
-    Ne pas reverse le stdin avec -r
-    MD5 au debut sauf en reverse ou stdin
-    -p -q -r alors print STDIN + \n + hash pour la premiere ligne
-    .. -q -r = .. -q car -r s'annule en présence de -q
+    Message digest :
+        Ne pas reverse le stdin avec -r
+        MD5 au debut sauf en reverse ou stdin
+        -p -q -r alors print STDIN + \n + hash pour la premiere ligne
+        .. -q -r = .. -q car -r s'annule en présence de -q
 
-
-    DES("12345678") = DES("12345678\n") Wtf ???
-
-    -nosalt to make
-
+    To do :
+        -nosalt to make
+        add -q to usage
+        add -P to usage
+        shuffle usage
 */
 
 t_ssl    ssl;
@@ -24,19 +25,7 @@ void    ssl_free()
     if (des->password)
         free(des->password);
 
-    while (hash)
-    {
-        // printf("free: %p\n", hash->msg);
-        if (hash->name)
-            free(hash->name);
-        if (hash->msg)
-            free(hash->msg);
-        if (hash->hash)
-            free(hash->hash);
-        tmp = hash;
-        hash = hash->next;
-        free(tmp);
-    }
+    t_hash_free(ssl.hash);
 
     if (ssl.flags & O)
         close(ssl.fd_out);
@@ -76,19 +65,16 @@ int     main(int ac, char **av)
         if ((ssl.fd_out = open(ssl.output_file, O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU | S_IRWXG | S_IRWXO)) == -1)
             open_failed(" in ft_ssl main() function\n", ssl.output_file);
 
-    t_hash *hash = ssl.hash;
-    while (hash)
-    {
-        // printf("hash->msg: >%s<\n", hash->msg);
-        // printf("hash->name: >%s<\n", hash->name);
+    // Base64 decode/encode input/output
+    if (ssl.flags & AI)
+        t_hash_base64_decode_inputs(ssl.hash);
 
-        hash->hash = ssl.hash_func_addr((Mem_8bits **)&hash->msg, hash->len);
-        hash->hashByteSz = ft_strlen((char *)hash->hash);
-        printf("Hash (len=%d): %p\n", hash->hashByteSz, hash);
+    t_hash_hashing(ssl.hash);
 
-        output(hash);
-        hash = hash->next;
-    }
+    if (ssl.flags & AO && !(ssl.hash_func_addr == base64 && ssl.flags & E))
+        t_hash_base64_encode_output(ssl.hash);
+
+    t_hash_output(ssl.hash);
 
     ssl_free();
     return 0;

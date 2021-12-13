@@ -66,13 +66,15 @@ Long_64bits des_padding(Mem_8bits *bloc)
 
 void        des_unpadding(Long_64bits *lastbloc, int *ptSz)
 {
-    Mem_8bits   lastbyte = *lastbloc & 0xff;
+    Mem_8bits   lastbyte = (*lastbloc >> 56) & 0xff;
 
     printf("lastbloc : %lx\tptSz : %d\n", *lastbloc, *ptSz);
     printf("lastbyte : %x\n", lastbyte);
     if (lastbyte == 0x08)
         (*ptSz)--;
     else if (0x01 <= lastbyte && lastbyte <= 0x07)
-        *lastbloc >>= lastbyte * 8;
+        // *lastbloc <<= lastbyte * 8;
+        *lastbloc = *lastbloc & (((Long_64bits)1 << (64 - lastbyte * 8)) - 1);
+    printf("(1 << (64 - lastbyte * 8)) - 1: %lx\n", ((Long_64bits)1 << (64 - lastbyte * 8)) - 1);
     printf("lastbloc : %lx\tptSz : %d (out)\n", *lastbloc, *ptSz);
 }

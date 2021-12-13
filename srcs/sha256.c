@@ -27,7 +27,7 @@ static void                 init_sha(t_sha *sha, Mem_8bits *chunks, Long_64bits 
         0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
         0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
     };
-    ft_memcpy(sha->k, k, 64 * WORD_ByteSz);
+    ft_memcpy(sha->k, k, 64 * WORD32_ByteSz);
 }
 
 static inline Word_32bits   Ch(Word_32bits x, Word_32bits y, Word_32bits z)
@@ -80,7 +80,7 @@ static void hash_chunk(t_sha *sha, Word_32bits *chunk)
     {
         // Initialize words (16 from chunk and 48 made with)
         if (i < 16)
-            endianReverse((Mem_8bits *)&words[i], WORD_ByteSz); // Big endian to little endian
+            endianReverse((Mem_8bits *)&words[i], WORD32_ByteSz); // Big endian to little endian
         else
             words[i] = Sigma1(words[i - 2]) + words[i - 7] + Sigma0(words[i - 15]) + words[i - 16];
 
@@ -105,7 +105,7 @@ static void hash_chunk(t_sha *sha, Word_32bits *chunk)
     sha->hash[7] += h;
 }
 
-Mem_8bits   *sha256(Mem_8bits **plaintext, Long_64bits ptByteSz)
+Mem_8bits   *sha256(Mem_8bits **plaintext, Long_64bits ptByteSz, e_flags way)
 {
     t_sha   sha;
 
@@ -115,16 +115,17 @@ Mem_8bits   *sha256(Mem_8bits **plaintext, Long_64bits ptByteSz)
     // printBits(chunks, CHUNK_ByteSz);
     Word_32bits *chunks = (Word_32bits *)sha.chunks;
     Word_32bits *chunk = chunks;
-    while (chunk < chunks + sha.chunksSz / WORD_ByteSz)
+    while (chunk < chunks + sha.chunksSz / WORD32_ByteSz)
     {
         hash_chunk(&sha, chunk);
-        chunk += CHUNK_ByteSz / WORD_ByteSz;
+        chunk += CHUNK_ByteSz / WORD32_ByteSz;
     }
 
-    // little endian to big endian
+    // Restore right endianness order
     for (Word_32bits *tmp = (Word_32bits *)sha.hash; tmp < sha.hash + SHA256_WordSz; tmp += 1)
-        endianReverse((Mem_8bits *)tmp, WORD_ByteSz);
+        endianReverse((Mem_8bits *)tmp, WORD32_ByteSz);
 
+    (void)way;
     return ft_memdup((Mem_8bits *)sha.hash, SHA256_byteSz);
 }
 

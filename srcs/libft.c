@@ -203,7 +203,9 @@ void    	        ft_printHex(Long_64bits n, int byteSz)
     unsigned char c_16e0;
     unsigned char c_16e1;
 
-    for (int i = 0; i < byteSz; i++)
+    // for (int i = 0; i < byteSz; i++)
+    //     if (ft_strlen(word + i))
+    for (int i = byteSz - 1; i >= 0; i--)
     {
         c_16e0 = hex[word[i] % 16];
         c_16e1 = hex[word[i] / 16];

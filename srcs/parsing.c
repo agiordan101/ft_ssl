@@ -1,10 +1,5 @@
 #include "ft_ssl.h"
 
-inline void  init_hash(t_hash *hash)
-{
-    *hash = (t_hash){0, NULL, NULL, 0, NULL, 0, 0, NULL};
-}
-
 t_hash *     addmsg_front()
 {
     t_hash *tmp;
@@ -12,7 +7,7 @@ t_hash *     addmsg_front()
     tmp = ssl.hash;
     if (!(ssl.hash = (t_hash *)malloc(sizeof(t_hash))))
 		malloc_failed("Unable to malloc new t_hash in parsing addmsg_front() function\n");
-    init_hash(ssl.hash);
+    init_t_hash(ssl.hash);
     ssl.hash->next = tmp;
     return ssl.hash;
 }
@@ -24,7 +19,7 @@ t_hash *     addmsg_back()
 
     if (!(node = (t_hash *)malloc(sizeof(t_hash))))
 		malloc_failed("Unable to malloc new t_hash in parsing addmsg_back() function\n");
-    init_hash(node);
+    init_t_hash(node);
     if (ssl.hash)
     {
         tmp = ssl.hash;
@@ -178,6 +173,10 @@ e_flags strToFlag(char *str)
         return O;
     if (!ft_strcmp(str, "-a"))
         return A;
+    if (!ft_strcmp(str, "-ai"))
+        return AI;
+    if (!ft_strcmp(str, "-ao"))
+        return AO;
     if (!ft_strcmp(str, "-k"))
         return K;
     if (!ft_strcmp(str, "-v"))
@@ -309,5 +308,13 @@ int     parsing(int ac, char **av)
     if (ssl.flags & P_md || !ssl.hash)
         if (stdin_handler())
             return EXIT_FAILURE;
+
+    // Active input decode and output encode
+    if (ssl.flags & A)
+    {
+        ssl.flags += ssl.flags & AI ? 0 : AI;
+        ssl.flags += ssl.flags & AO ? 0 : AO;   
+    }
+
     return 0;
 }

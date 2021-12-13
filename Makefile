@@ -10,6 +10,7 @@ INCS		=	$(addprefix $(INC_PATH), $(INCLUDES))
 
 SRC_PATH	=	./srcs/
 SRC			=	$(NAME).c \
+				t_hash.c \
 				parsing.c \
 				md5.c \
 				sha256.c \

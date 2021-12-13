@@ -366,9 +366,9 @@ static Mem_8bits        *des_decryption(Mem_8bits *pt, Long_64bits ptByteSz)
         }
         plaintext--;
     }
-    printf("ciphertext %d: %lx\n", ptSz - 1, ciphertext[ptSz - 1]);
+    printf("des_unpadding %d: %lx\n", ptSz - 1, ciphertext[ptSz - 1]);
     des_unpadding(ciphertext + ptSz - 1, &ptSz);
-    printf("ciphertext %d: %lx\n", ptSz - 1, ciphertext[ptSz - 1]);
+    printf("des_unpadding %d: %lx\n", ptSz - 1, ciphertext[ptSz - 1]);
 
     for (int i = 0; i < ptSz; i++)
         printf("ciphertext %d: %lx\n", i, ciphertext[i]);
@@ -412,26 +412,26 @@ static Mem_8bits        *des_encryption(Mem_8bits *pt, Long_64bits ptByteSz)
         //     printf(" (CBC xor)\n");
 
         ciphertext[i] = feistel_algorithm(bloc);
-        printf("ciphertext: %lx\n", ciphertext[i]);
+        
+        printf("ciphertext: %lx\n\n", ciphertext[i]);
 
         plaintext++;
     }
 
-    // Padd last bytes ? Already padded ?
-    // Convert to base64 of course   // base64_msg((Mem_8bits **)&ciphertext, ptSz, (Mem_8bits *)hash->hash_32bits);
-    
-    // hash->hash_64bits = (Long_64bits *)ft_memdup((Mem_8bits *)ciphertext, ptSz * LONG64_ByteSz);
-    // hash->hashWordSz = ptSz * 2;
+    // Restore right endianness order
+    for (int i = 0; i < ptSz; i++)
+        endianReverse((Mem_8bits *)(ciphertext + i), LONG64_ByteSz);
 
     return ft_memdup((Mem_8bits *)ciphertext, ptSz * LONG64_ByteSz);
 }
 
-Mem_8bits               *des(Mem_8bits **plaintext, Long_64bits ptByteSz)
+Mem_8bits               *des(Mem_8bits **plaintext, Long_64bits ptByteSz, e_flags way)
 {
     init_vars(&ssl.des);
-
     // printf("hash->msg (len=%ld): >%s<\n", ptByteSz, *plaintext);
-    if (ssl.flags & D)
+    if (way & E)
+        return des_encryption(*plaintext, ptByteSz);
+    else if (way & D)
     {
         set_keys_for_decryption(&ssl.des);
         return des_decryption(*plaintext, ptByteSz);

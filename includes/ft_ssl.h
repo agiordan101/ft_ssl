@@ -14,8 +14,9 @@ typedef unsigned char   Mem_8bits;
 typedef unsigned int    Word_32bits;
 typedef unsigned long   Long_64bits;
 
-# define WORD_ByteSz    sizeof(Word_32bits)      // 4 bytes or 32 bits
-# define LONG64_ByteSz  sizeof(Long_64bits)          // 8 bytes or 64 bits
+# define MEM8_ByteSz    sizeof(Mem_8bits)        // 1 byte  or 8  bits
+# define WORD32_ByteSz  sizeof(Word_32bits)      // 4 bytes or 32 bits
+# define LONG64_ByteSz  sizeof(Long_64bits)      // 8 bytes or 64 bits
 
 # define BUFF_SIZE      42
 # define FILENOTFOUND   1
@@ -28,14 +29,15 @@ typedef unsigned long   Long_64bits;
 # define HEXABASE       "0123456789abcdef"
 
 typedef enum flags {
+    I=64, O=128, A=256, AI=8192, AO=16384,
     // Message Digest
     P_md=1, Q=2, R=4, S_md=8,
     // Cypher
-    D=16, E=32, I=64, O=128,
+    D=16, E=32,
     // Only des
-    A=256, K=512, P_cipher=1024, S_cipher=2048, V=4096
+    K=512, P_cipher=1024, S_cipher=2048, V=4096
 }            e_flags;
-# define AVFLAGS        (P_md + Q + R + D + E + A)
+# define AVFLAGS        (P_md + Q + R + D + E + A + AI + AO)
 # define AVPARAM        (S_md + I + O + K + P_cipher + S_cipher + V)
 
 typedef enum    command {
@@ -131,7 +133,7 @@ void        md_padding(Mem_8bits **data, Long_64bits *byteSz, char reverseByteSz
 */
 
 # define    MD5_WordSz  4
-# define    MD5_byteSz  MD5_WordSz * WORD_ByteSz     // 16 bytes / 128 bits  
+# define    MD5_byteSz  MD5_WordSz * WORD32_ByteSz     // 16 bytes / 128 bits  
 
 typedef struct  s_md5
 {
@@ -142,8 +144,8 @@ typedef struct  s_md5
     Word_32bits hash[MD5_WordSz];
 }               t_md5;
 
-// Mem_8bits   *md5(Mem_8bits **plaintext, Long_64bits ptByteSz);
-Mem_8bits   *md5(Mem_8bits **plaintext, Long_64bits ptByteSz);
+// Mem_8bits   *md5(Mem_8bits **plaintext, Long_64bits ptByteSz, e_flags way);
+Mem_8bits   *md5(Mem_8bits **plaintext, Long_64bits ptByteSz, e_flags way);
 void        md5_t_hash(t_hash *hash);
 
 
@@ -152,7 +154,7 @@ void        md5_t_hash(t_hash *hash);
 */
 
 # define    SHA256_WordSz  8
-# define    SHA256_byteSz  SHA256_WordSz * WORD_ByteSz     // 8 * 4 = 32 bytes / 256 bits  
+# define    SHA256_byteSz  SHA256_WordSz * WORD32_ByteSz     // 8 * 4 = 32 bytes / 256 bits  
 
 typedef struct  s_sha
 {
@@ -167,7 +169,7 @@ typedef struct  s_sha
 // void        sha256_mod256(Mem_8bits **msg, int *len);
 // void        sha256_xor_32bits(Word_32bits *sha1, Word_32bits *sha2, Word_32bits **result);
 
-Mem_8bits   *sha256(Mem_8bits **plaintext, Long_64bits ptByteSz);
+Mem_8bits   *sha256(Mem_8bits **plaintext, Long_64bits ptByteSz, e_flags way);
 void        sha256_t_hash(t_hash *hash);
 void        sha256_xor_8bits(Mem_8bits *sha1, Mem_8bits *sha2, Mem_8bits **result);
 
@@ -192,9 +194,8 @@ Mem_8bits     *pbkdf2_sha256(Mem_8bits *pwd, Mem_8bits *salt, int c);
 
 # define    BASE64  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
-Mem_8bits   *base64(Mem_8bits **plaintext, Long_64bits ptByteSz);
-// void        base64(t_hash *hash);
-// void        base64_msg(Mem_8bits **msg, int byteSz, Mem_8bits *dest);
+Mem_8bits   *base64(Mem_8bits **plaintext, Long_64bits ptByteSz, e_flags way);
+void        t_hash_base64_decode_inputs(t_hash *hash);
 
 
 /*
@@ -218,7 +219,7 @@ typedef struct  s_des
 }               t_des;
 
 // void        des(t_hash *hash);
-Mem_8bits   *des(Mem_8bits **plaintext, Long_64bits ptByteSz);
+Mem_8bits   *des(Mem_8bits **plaintext, Long_64bits ptByteSz, e_flags way);
 Long_64bits des_padding(Mem_8bits *bloc);
 void        des_unpadding(Long_64bits *lastbloc, int *ptSz);
 
@@ -231,7 +232,7 @@ void        des_unpadding(Long_64bits *lastbloc, int *ptSz);
 typedef struct  s_ssl
 {
     char        *hash_func;
-    Mem_8bits   *(*hash_func_addr)(Mem_8bits **plaintext, Long_64bits ptByteSz);
+    Mem_8bits   *(*hash_func_addr)(Mem_8bits **plaintext, Long_64bits ptByteSz, e_flags way);
     e_command   command;
     t_des       des;
 
@@ -243,3 +244,10 @@ typedef struct  s_ssl
 }               t_ssl;
 
 extern t_ssl    ssl;
+
+void    init_t_hash(t_hash *hash);
+void    t_hash_free(t_hash *hash);
+void    t_hash_base64_decode_inputs(t_hash *hash);
+void    t_hash_base64_encode_output(t_hash *hash);
+void    t_hash_hashing(t_hash *hash);
+void    t_hash_output(t_hash *hash);

@@ -144,10 +144,12 @@ static Mem_8bits    *decode(Mem_8bits *plaintext, int ptByteSz)
     return hash;
 }
 
-Mem_8bits           *base64(Mem_8bits **plaintext, Long_64bits ptByteSz)
+Mem_8bits           *base64(Mem_8bits **plaintext, Long_64bits ptByteSz, e_flags way)
 {
     // printf("plaintext: %s\n", plaintext);
-    if (ssl.flags & D)
+    if (way & E)
+        return encode(*plaintext, ptByteSz);
+    else if (way & D)
         return decode(*plaintext, ptByteSz);
     else
         return encode(*plaintext, ptByteSz);
