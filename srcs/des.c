@@ -184,10 +184,10 @@ static void             init_vars(t_des *des)
     ft_memcpy(des->fpt, fpt, 64);
 
     // Verbose here ?
-    // printf("\ncipher->password: %s\n", des->password);
-    // printf("cipher->key: %lx\n", des->key);
-    // printf("cipher->salt: %lx\n", des->salt);
-    // printf("cipher->vector: %lx\n", des->vector);
+    printf("\ncipher->password: %s\n", des->password);
+    printf("cipher->key: %lx\n", des->key);
+    printf("cipher->salt: %lx\n", des->salt);
+    printf("cipher->vector: %lx\n", des->vector);
 }
 
 static Word_32bits      feistel_func(Word_32bits halfblock, Long_64bits subkey)
@@ -353,7 +353,7 @@ static Mem_8bits        *des_decryption(Mem_8bits *pt, Long_64bits ptByteSz)
         bloc = *plaintext;
         // printf("\nstr plaintext: >%s<\n", (Mem_8bits *)plaintext);
 
-        printf("hex   bloc: %lx\n", bloc);
+        // printf("hex   bloc: %lx\n", bloc);
 
         ciphertext[i] = feistel_algorithm(bloc);
         printf("ciphertext: %lx\n", ciphertext[i]);
@@ -366,12 +366,12 @@ static Mem_8bits        *des_decryption(Mem_8bits *pt, Long_64bits ptByteSz)
         }
         plaintext--;
     }
-    printf("des_unpadding %d: %lx\n", ptSz - 1, ciphertext[ptSz - 1]);
+    // printf("des_unpadding %d: %lx\n", ptSz - 1, ciphertext[ptSz - 1]);
     des_unpadding(ciphertext + ptSz - 1, &ptSz);
-    printf("des_unpadding %d: %lx\n", ptSz - 1, ciphertext[ptSz - 1]);
+    // printf("des_unpadding %d: %lx\n", ptSz - 1, ciphertext[ptSz - 1]);
 
-    for (int i = 0; i < ptSz; i++)
-        printf("ciphertext %d: %lx\n", i, ciphertext[i]);
+    // for (int i = 0; i < ptSz; i++)
+    //     printf("ciphertext %d: %lx\n", i, ciphertext[i]);
 
     return ft_memdup((Mem_8bits *)ciphertext, ptSz * LONG64_ByteSz);
 }
@@ -383,17 +383,17 @@ static Mem_8bits        *des_encryption(Mem_8bits *pt, Long_64bits ptByteSz)
     Long_64bits *plaintext = (Long_64bits *)pt;
     Long_64bits bloc;
 
-    printf("\n- DES ECRYPTION -\nptByteSz: %ld\tptSz: %d\n", ptByteSz, ptSz);
+    // printf("\n- DES ECRYPTION -\nptByteSz: %ld\tptSz: %d\n", ptByteSz, ptSz);
     for (int i = 0; i < ptSz; i++)
     {
         bloc = *plaintext;
-        printf("str plaintext: >%s<\n", (Mem_8bits *)plaintext);
+        // printf("str plaintext: >%s<\n", (Mem_8bits *)plaintext);
 
         // Padding with number of missing bytes
         if (i == ptSz - 1)
             bloc = des_padding((Mem_8bits *)&bloc);
 
-        // printf("\nhex vector: %lx\n", i ? ciphertext[i - 1] : ssl.des.vector);
+        printf("\nhex vector: %lx\n", i ? ciphertext[i - 1] : ssl.des.vector);
         printf("hex   bloc: %lx\n", bloc);
 
         // printf("bin vector: ");
@@ -403,9 +403,11 @@ static Mem_8bits        *des_encryption(Mem_8bits *pt, Long_64bits ptByteSz)
 
         if (ssl.des.mode == DESCBC)
         {
+            printf("ssl.des.vector & 0xFF: %d\n", ssl.des.vector & 0xFF);
+            printf("bloc & 0xFF: %d\n", bloc & 0xFF);
             // printf("XOR\nbloc  %lx\nvector %lx\n", bloc, i ? ciphertext[i - 1] : ssl.des.vector);
             bloc ^= i ? ciphertext[i - 1] : ssl.des.vector;
-            // printf("hex   bloc: %lx (CBC xor)\n", bloc);
+            printf("hex   bloc: %lx (CBC xor)\n", bloc);
         }
         //     printf("bin   bloc: ");
         //     printLong(bloc);
@@ -419,8 +421,8 @@ static Mem_8bits        *des_encryption(Mem_8bits *pt, Long_64bits ptByteSz)
     }
 
     // Restore right endianness order
-    for (int i = 0; i < ptSz; i++)
-        endianReverse((Mem_8bits *)(ciphertext + i), LONG64_ByteSz);
+    // for (int i = 0; i < ptSz; i++)
+    //     endianReverse((Mem_8bits *)(ciphertext + i), LONG64_ByteSz);
 
     return ft_memdup((Mem_8bits *)ciphertext, ptSz * LONG64_ByteSz);
 }
@@ -428,7 +430,7 @@ static Mem_8bits        *des_encryption(Mem_8bits *pt, Long_64bits ptByteSz)
 Mem_8bits               *des(Mem_8bits **plaintext, Long_64bits ptByteSz, e_flags way)
 {
     init_vars(&ssl.des);
-    printf("hash->msg (len=%ld): >%s<\n", ptByteSz, *plaintext);
+    // printf("hash->msg (len=%ld): >%s<\n", ptByteSz, *plaintext);
     if (way & E)
         return des_encryption(*plaintext, ptByteSz);
     else if (way & D)

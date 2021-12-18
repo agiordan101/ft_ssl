@@ -59,11 +59,11 @@ Long_64bits des_padding(Mem_8bits *bloc)
     while (++i < LONG64_ByteSz && bloc[i])
         newbloc[i] = bloc[i];
     missing_bytes = 8 - i;
-    printf("missing_bytes: %d\n", missing_bytes);
-    printf("newbloc: %lx\n", *((Long_64bits *)newbloc));
+    // printf("missing_bytes: %d\n", missing_bytes);
+    // printf("newbloc: %lx\n", *((Long_64bits *)newbloc));
     while (i < LONG64_ByteSz)
         newbloc[i++] = missing_bytes;
-    printf("newbloc: %lx\n", *((Long_64bits *)newbloc));
+    // printf("newbloc: %lx\n", *((Long_64bits *)newbloc));
     return *((Long_64bits *)newbloc);
 }
 
@@ -71,13 +71,13 @@ void        des_unpadding(Long_64bits *lastbloc, int *ptSz)
 {
     Mem_8bits   lastbyte = (*lastbloc >> 56) & 0xff;
 
-    printf("lastbloc : %lx\tptSz : %d\n", *lastbloc, *ptSz);
-    printf("lastbyte : %x\n", lastbyte);
+    // printf("lastbloc : %lx\tptSz : %d\n", *lastbloc, *ptSz);
+    // printf("lastbyte : %x\n", lastbyte);
     if (lastbyte == 0x08)
         (*ptSz)--;
     else if (0x01 <= lastbyte && lastbyte <= 0x07)
         // *lastbloc <<= lastbyte * 8;
         *lastbloc = *lastbloc & (((Long_64bits)1 << (64 - lastbyte * 8)) - 1);
-    printf("(1 << (64 - lastbyte * 8)) - 1: %lx\n", ((Long_64bits)1 << (64 - lastbyte * 8)) - 1);
-    printf("lastbloc : %lx\tptSz : %d (out)\n", *lastbloc, *ptSz);
+    // printf("(1 << (64 - lastbyte * 8)) - 1: %lx\n", ((Long_64bits)1 << (64 - lastbyte * 8)) - 1);
+    // printf("lastbloc : %lx\tptSz : %d (out)\n", *lastbloc, *ptSz);
 }
