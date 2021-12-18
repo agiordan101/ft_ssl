@@ -309,12 +309,11 @@ int     parsing(int ac, char **av)
         if (stdin_handler())
             return EXIT_FAILURE;
 
-    // Active input decode and output encode
-    if (ssl.flags & A)
-    {
+    // Active input decode / output encode in respect to encryption/decryption mode
+    if (ssl.flags & A && ssl.flags & D)
         ssl.flags += ssl.flags & AI ? 0 : AI;
+    if (ssl.flags & A && ~ssl.flags & D)
         ssl.flags += ssl.flags & AO ? 0 : AO;   
-    }
 
     return 0;
 }

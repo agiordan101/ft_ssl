@@ -85,6 +85,7 @@ void    hash_output(t_hash *hash, int hashBlocByteSz)
         hash_32bits_output(hash);
     else if (hashBlocByteSz == LONG64_ByteSz)
         hash_64bits_output(hash);
+    printf("\nhashBlocByteSz: %d\n", hashBlocByteSz);
 }
 
 void    classic_output(t_hash *hash, int hashBlocByteSz)
@@ -143,8 +144,17 @@ void    md_output(t_hash *hash)
 
 void    cipher_output(t_hash *hash)
 {
-    int hashBlocByteSz = ssl.hash_func_addr == des ? LONG64_ByteSz : MEM8_ByteSz;
+    int hashBlocByteSz;
 
+    if (ssl.hash_func_addr == des)
+    {
+        if (ssl.flags & D)
+            hashBlocByteSz = MEM8_ByteSz;
+        else
+            hashBlocByteSz = LONG64_ByteSz;
+    }
+    else
+        hashBlocByteSz = MEM8_ByteSz;
     // if (ssl.hash_func_addr == base64)
     // {
     //     // WTFFF ???? stop do that

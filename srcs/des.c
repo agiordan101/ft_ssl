@@ -383,11 +383,11 @@ static Mem_8bits        *des_encryption(Mem_8bits *pt, Long_64bits ptByteSz)
     Long_64bits *plaintext = (Long_64bits *)pt;
     Long_64bits bloc;
 
-    // printf("\n- DES ECRYPTION -\nptByteSz: %ld\tptSz: %d\n", ptByteSz, ptSz);
+    printf("\n- DES ECRYPTION -\nptByteSz: %ld\tptSz: %d\n", ptByteSz, ptSz);
     for (int i = 0; i < ptSz; i++)
     {
         bloc = *plaintext;
-        // printf("str plaintext: >%s<\n", (Mem_8bits *)plaintext);
+        printf("str plaintext: >%s<\n", (Mem_8bits *)plaintext);
 
         // Padding with number of missing bytes
         if (i == ptSz - 1)
@@ -428,7 +428,7 @@ static Mem_8bits        *des_encryption(Mem_8bits *pt, Long_64bits ptByteSz)
 Mem_8bits               *des(Mem_8bits **plaintext, Long_64bits ptByteSz, e_flags way)
 {
     init_vars(&ssl.des);
-    // printf("hash->msg (len=%ld): >%s<\n", ptByteSz, *plaintext);
+    printf("hash->msg (len=%ld): >%s<\n", ptByteSz, *plaintext);
     if (way & E)
         return des_encryption(*plaintext, ptByteSz);
     else if (way & D)

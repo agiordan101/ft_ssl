@@ -59,8 +59,11 @@ Long_64bits des_padding(Mem_8bits *bloc)
     while (++i < LONG64_ByteSz && bloc[i])
         newbloc[i] = bloc[i];
     missing_bytes = 8 - i;
+    printf("missing_bytes: %d\n", missing_bytes);
+    printf("newbloc: %lx\n", *((Long_64bits *)newbloc));
     while (i < LONG64_ByteSz)
         newbloc[i++] = missing_bytes;
+    printf("newbloc: %lx\n", *((Long_64bits *)newbloc));
     return *((Long_64bits *)newbloc);
 }
 

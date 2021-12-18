@@ -11,7 +11,7 @@
         -nosalt to make
         add -q to usage
         add -P to usage
-        shuffle usage
+        shuffle usage right order
         des seg fault sans -k
 */
 
@@ -66,12 +66,13 @@ int     main(int ac, char **av)
         if ((ssl.fd_out = open(ssl.output_file, O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU | S_IRWXG | S_IRWXO)) == -1)
             open_failed(" in ft_ssl main() function\n", ssl.output_file);
 
-    // Base64 decode/encode input/output
+    // Base64 decode input
     if (ssl.flags & AI)
         t_hash_base64_decode_inputs(ssl.hash);
 
     t_hash_hashing(ssl.hash);
 
+    // Base64 encode output
     if (ssl.flags & AO && !(ssl.hash_func_addr == base64 && ssl.flags & E))
         t_hash_base64_encode_output(ssl.hash);
 
