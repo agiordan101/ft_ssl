@@ -85,7 +85,7 @@ void    hash_output(t_hash *hash, int hashBlocByteSz)
         hash_32bits_output(hash);
     else if (hashBlocByteSz == LONG64_ByteSz)
         hash_64bits_output(hash);
-    printf("\nhashBlocByteSz: %d\n", hashBlocByteSz);
+    // printf("\nhashBlocByteSz: %d\n", hashBlocByteSz);
 }
 
 void    classic_output(t_hash *hash, int hashBlocByteSz)
@@ -178,6 +178,6 @@ void    output(t_hash *hash)
     else if (ssl.command & CIPHER)
         cipher_output(hash);
 
-    char c = '\n';
-    c = write(ssl.fd_out, &c, 1);
+    // char c = '\n';
+    // c = write(ssl.fd_out, &c, 1);
 }

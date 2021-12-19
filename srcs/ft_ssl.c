@@ -13,6 +13,11 @@
         add -P to usage
         shuffle usage right order
         des seg fault sans -k
+
+        Problem with \n:
+        
+            ./ft_ssl des-ecb -k 0123456789abcdef Makefile -q -a | ./ft_ssl des-ecb -k 0123456789abcdef -d -a -q > Makefile_encdec && diff Makefile Makefile_encdec
+
 */
 
 t_ssl    ssl;

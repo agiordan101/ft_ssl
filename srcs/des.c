@@ -184,10 +184,10 @@ static void             init_vars(t_des *des)
     ft_memcpy(des->fpt, fpt, 64);
 
     // Verbose here ?
-    printf("\ncipher->password: %s\n", des->password);
-    printf("cipher->key: %lx\n", des->key);
-    printf("cipher->salt: %lx\n", des->salt);
-    printf("cipher->vector: %lx\n", des->vector);
+    // printf("\ncipher->password: %s\n", des->password);
+    // printf("cipher->key: %lx\n", des->key);
+    // printf("cipher->salt: %lx\n", des->salt);
+    // printf("cipher->vector: %lx\n", des->vector);
 }
 
 static Word_32bits      feistel_func(Word_32bits halfblock, Long_64bits subkey)
@@ -356,7 +356,7 @@ static Mem_8bits        *des_decryption(Mem_8bits *pt, Long_64bits ptByteSz)
         // printf("hex   bloc: %lx\n", bloc);
 
         ciphertext[i] = feistel_algorithm(bloc);
-        printf("ciphertext: %lx\n", ciphertext[i]);
+        // printf("ciphertext: %lx\n", ciphertext[i]);
 
         if (ssl.des.mode == DESCBC)
         {
@@ -393,8 +393,8 @@ static Mem_8bits        *des_encryption(Mem_8bits *pt, Long_64bits ptByteSz)
         if (i == ptSz - 1)
             bloc = des_padding((Mem_8bits *)&bloc);
 
-        printf("\nhex vector: %lx\n", i ? ciphertext[i - 1] : ssl.des.vector);
-        printf("hex   bloc: %lx\n", bloc);
+        // printf("\nhex vector: %lx\n", i ? ciphertext[i - 1] : ssl.des.vector);
+        // printf("hex   bloc: %lx\n", bloc);
 
         // printf("bin vector: ");
         // printLong(i ? ciphertext[i - 1] : ssl.des.vector);
@@ -403,11 +403,11 @@ static Mem_8bits        *des_encryption(Mem_8bits *pt, Long_64bits ptByteSz)
 
         if (ssl.des.mode == DESCBC)
         {
-            printf("ssl.des.vector & 0xFF: %d\n", ssl.des.vector & 0xFF);
-            printf("bloc & 0xFF: %d\n", bloc & 0xFF);
+            // printf("ssl.des.vector & 0xFF: %d\n", ssl.des.vector & 0xFF);
+            // printf("bloc & 0xFF: %d\n", bloc & 0xFF);
             // printf("XOR\nbloc  %lx\nvector %lx\n", bloc, i ? ciphertext[i - 1] : ssl.des.vector);
             bloc ^= i ? ciphertext[i - 1] : ssl.des.vector;
-            printf("hex   bloc: %lx (CBC xor)\n", bloc);
+            // printf("hex   bloc: %lx (CBC xor)\n", bloc);
         }
         //     printf("bin   bloc: ");
         //     printLong(bloc);
@@ -415,7 +415,7 @@ static Mem_8bits        *des_encryption(Mem_8bits *pt, Long_64bits ptByteSz)
 
         ciphertext[i] = feistel_algorithm(bloc);
         
-        printf("ciphertext: %lx\n\n", ciphertext[i]);
+        // printf("ciphertext: %lx\n\n", ciphertext[i]);
 
         plaintext++;
     }
