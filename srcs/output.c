@@ -21,7 +21,7 @@ void    print_usage()
     ft_putstr("Cipher flags:\n");
     ft_putstr("\t-a: decode/encode the input/output in base64, depending on the encrypt mode\n");
     ft_putstr("\t-d: decrypt mode\n");
-    ft_putstr("\t-e: encrypt mode\n");
+    ft_putstr("\t-e: encrypt mode (default mode | priority on -d)\n");
     ft_putstr("\t-i: input file for message\n");
     ft_putstr("\t-o: output file for hash\n");
     ft_putstr("\t-p: send password in ascii\n");
@@ -55,6 +55,7 @@ void    file_not_found(t_hash *hash)
 void    hash_64bits_output(t_hash *p)
 {
     Long_64bits *hash = (Long_64bits *)p->hash;
+    // int         bloc64bitsSz = (p->hashByteSz + 7) / 8;
     int         bloc64bitsSz = ((p->hashByteSz + 7) / 8) * 8 / LONG64_ByteSz;
 
     // printf("Hash (len=%d): %lx\n", bloc64bitsSz, hash[0]);
@@ -69,6 +70,7 @@ void    hash_32bits_output(t_hash *p)
 {
     Word_32bits *hash = (Word_32bits *)p->hash;
     int         bloc32bitsSz = p->hashByteSz / WORD32_ByteSz;
+    // int         bloc32bitsSz = (p->hashByteSz + 5) / WORD32_ByteSz; // Beaucoup mieux non ???
 
     for (Word_32bits *tmp = hash; tmp < hash + bloc32bitsSz; tmp += 1)
         ft_printHex(*tmp, WORD32_ByteSz);
@@ -77,10 +79,41 @@ void    hash_32bits_output(t_hash *p)
     // printf("\n");
 }
 
+void    hash_8bits_output(t_hash *p)
+{
+    static int shitret;
+
+    // 64-bytes blocs output is only for base64 format without -A flag
+    if ((ssl.flags & ao || (ssl.hash_func_addr == base64 && ssl.flags & E)) &&\
+        ~ssl.flags & A)
+    {
+        // Print blocs of 64-bytes 
+        Mem_8bits   *hash = p->hash;
+        while (hash < p->hash + p->hashByteSz)
+        {
+            if ((shitret = write(
+                    ssl.fd_out,
+                    hash,
+                    hash + 64 < p->hash + p->hashByteSz ? 64 : p->hash + p->hashByteSz - hash
+                )) < 0)
+                write_failed("write() failed in hash_8bits_output() function (64-bits bloc part).\n");
+            ft_putstr("\n");
+            hash += 64;
+        }
+    }
+    else
+    {
+        // printf("One line:\n");
+        // Print one line
+        if ((shitret = write(ssl.fd_out, p->hash, p->hashByteSz)) < 0)
+            write_failed("write() failed in hash_8bits_output() function (plain part).\n");
+    }
+}
+
 void    hash_output(t_hash *hash, int hashBlocByteSz)
 {
-    if (hashBlocByteSz == MEM8_ByteSz || ssl.flags & AO)
-        ft_putstr(hash->hash);
+    if (hashBlocByteSz == MEM8_ByteSz || ssl.flags & ao) //base64 command  OR  des flag D  OR  a | ao flags (base64 output format)
+        hash_8bits_output(hash);
     else if (hashBlocByteSz == WORD32_ByteSz)
         hash_32bits_output(hash);
     else if (hashBlocByteSz == LONG64_ByteSz)
@@ -144,17 +177,18 @@ void    md_output(t_hash *hash)
 
 void    cipher_output(t_hash *hash)
 {
-    int hashBlocByteSz;
+    int hashBlocByteSz = MEM8_ByteSz;
 
-    if (ssl.hash_func_addr == des)
-    {
-        if (ssl.flags & D)
-            hashBlocByteSz = MEM8_ByteSz;
-        else
-            hashBlocByteSz = LONG64_ByteSz;
-    }
-    else
-        hashBlocByteSz = MEM8_ByteSz;
+    // if (ssl.hash_func_addr == des)
+    // {
+    //     if (ssl.flags & D)
+    //         hashBlocByteSz = MEM8_ByteSz;
+    //     else
+    //         hashBlocByteSz = LONG64_ByteSz;
+    // }
+    // else
+    //     hashBlocByteSz = MEM8_ByteSz;
+
     // if (ssl.hash_func_addr == base64)
     // {
     //     // WTFFF ???? stop do that

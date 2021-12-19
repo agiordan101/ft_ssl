@@ -172,11 +172,13 @@ e_flags strToFlag(char *str)
     if (!ft_strcmp(str, "-o"))
         return O;
     if (!ft_strcmp(str, "-a"))
-        return A;
+        return a;
     if (!ft_strcmp(str, "-ai"))
-        return AI;
+        return ai;
     if (!ft_strcmp(str, "-ao"))
-        return AO;
+        return ao;
+    if (!ft_strcmp(str, "-A"))
+        return A;
     if (!ft_strcmp(str, "-k"))
         return K;
     if (!ft_strcmp(str, "-v"))
@@ -310,10 +312,11 @@ int     parsing(int ac, char **av)
             return EXIT_FAILURE;
 
     // Active input decode / output encode in respect to encryption/decryption mode
-    if (ssl.flags & A && ssl.flags & D)
-        ssl.flags += ssl.flags & AI ? 0 : AI;
-    if (ssl.flags & A && ~ssl.flags & D)
-        ssl.flags += ssl.flags & AO ? 0 : AO;   
+    if (ssl.flags & a)
+        if (ssl.flags & D)
+            ssl.flags += ssl.flags & ai ? 0 : ai;
+        else
+            ssl.flags += ssl.flags & ao ? 0 : ao;   
 
     return 0;
 }

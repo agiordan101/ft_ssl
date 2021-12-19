@@ -26,7 +26,7 @@ static inline void  bin_to_base64(Mem_8bits *bin, int byteSz)
         bin[i] = (Mem_8bits)base[bin[i]];
 }
 
-static void         clean_base64(Mem_8bits *msg, int *len)
+static void         clean_base64(Mem_8bits *msg, Long_64bits *len)
 {
     int         newlen = 0;
 
@@ -66,11 +66,11 @@ static inline void  split_3to4bytes(Mem_8bits b1, Mem_8bits b2, Mem_8bits b3, Me
     res[3] = b3 & 0b00111111;
 }
 
-static Mem_8bits    *encode(Mem_8bits *plaintext, int ptByteSz)
+static Mem_8bits    *encode(Mem_8bits *plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz)
 {
-    int         hashByteSz = get_len_encoded(ptByteSz);
+    *hashByteSz = get_len_encoded(ptByteSz);
     Mem_8bits   bytecode[4];
-    Mem_8bits   *hash = ft_memnew(hashByteSz);
+    Mem_8bits   *hash = ft_memnew(*hashByteSz);
     Mem_8bits   *hash_tmp = hash;
 
     // printf("plaintext  (len=%d): >%s<\n", ptByteSz, plaintext);
@@ -117,15 +117,16 @@ static Mem_8bits    *encode(Mem_8bits *plaintext, int ptByteSz)
     return hash;
 }
 
-static Mem_8bits    *decode(Mem_8bits *plaintext, int ptByteSz)
+static Mem_8bits    *decode(Mem_8bits *plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz)
 {
-    int         hashByteSz = get_len_decoded(plaintext, ptByteSz);
+    *hashByteSz = get_len_decoded(plaintext, ptByteSz);
     Mem_8bits   bytecode[4];
-    Mem_8bits   *hash = ft_memnew(hashByteSz);
+    Mem_8bits   *hash = ft_memnew(*hashByteSz);
     Mem_8bits   *hash_tmp = hash;
 
-    // printf("plaintext  (len=%d): >%s<\n", ptByteSz, plaintext);
+    // printf("plaintext encode (len=%d): >%s<\n", ptByteSz, plaintext);
     clean_base64(plaintext, &ptByteSz);
+    // printf("plaintext decode (len=%d): >%s<\n", ptByteSz, plaintext);
 
     Mem_8bits   *pt_end = plaintext + ptByteSz;
     for (Mem_8bits *pt_tmp = plaintext; pt_tmp < pt_end; pt_tmp += 4)
@@ -144,13 +145,13 @@ static Mem_8bits    *decode(Mem_8bits *plaintext, int ptByteSz)
     return hash;
 }
 
-Mem_8bits           *base64(Mem_8bits **plaintext, Long_64bits ptByteSz, e_flags way)
+Mem_8bits           *base64(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way)
 {
     // printf("plaintext: %s\n", plaintext);
     if (way & E)
-        return encode(*plaintext, ptByteSz);
+        return encode(*plaintext, ptByteSz, hashByteSz);
     else if (way & D)
-        return decode(*plaintext, ptByteSz);
+        return decode(*plaintext, ptByteSz, hashByteSz);
     else
-        return encode(*plaintext, ptByteSz);
+        return encode(*plaintext, ptByteSz, hashByteSz);
 }

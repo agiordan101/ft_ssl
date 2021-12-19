@@ -340,9 +340,9 @@ static Long_64bits      feistel_algorithm(Long_64bits plaintext)
     return plaintext;
 }
 
-static Mem_8bits        *des_decryption(Mem_8bits *pt, Long_64bits ptByteSz)
+static Mem_8bits        *des_decryption(Mem_8bits *pt, Long_64bits ptByteSz, Long_64bits *hashByteSz)
 {
-    int         ptSz = (ptByteSz + 7) / 8;
+    int         ptSz = (ptByteSz + 7) / 8; // Count of 64-bits bloc
     Long_64bits ciphertext[ptSz];
     Long_64bits *plaintext = (Long_64bits *)pt + ptSz - 1;
     Long_64bits bloc;
@@ -373,12 +373,13 @@ static Mem_8bits        *des_decryption(Mem_8bits *pt, Long_64bits ptByteSz)
     // for (int i = 0; i < ptSz; i++)
     //     printf("ciphertext %d: %lx\n", i, ciphertext[i]);
 
-    return ft_memdup((Mem_8bits *)ciphertext, ptSz * LONG64_ByteSz);
+    *hashByteSz = ptSz * LONG64_ByteSz;
+    return ft_memdup((Mem_8bits *)ciphertext, *hashByteSz);
 }
 
-static Mem_8bits        *des_encryption(Mem_8bits *pt, Long_64bits ptByteSz)
+static Mem_8bits        *des_encryption(Mem_8bits *pt, Long_64bits ptByteSz, Long_64bits *hashByteSz)
 {
-    int         ptSz = (ptByteSz + 8) / 8;
+    int         ptSz = (ptByteSz + 8) / 8; // Count of 64-bits bloc (Add one if last bloc is full)
     Long_64bits ciphertext[ptSz];
     Long_64bits *plaintext = (Long_64bits *)pt;
     Long_64bits bloc;
@@ -424,20 +425,21 @@ static Mem_8bits        *des_encryption(Mem_8bits *pt, Long_64bits ptByteSz)
     // for (int i = 0; i < ptSz; i++)
     //     endianReverse((Mem_8bits *)(ciphertext + i), LONG64_ByteSz);
 
-    return ft_memdup((Mem_8bits *)ciphertext, ptSz * LONG64_ByteSz);
+    *hashByteSz = ptSz * LONG64_ByteSz;
+    return ft_memdup((Mem_8bits *)ciphertext, *hashByteSz);
 }
 
-Mem_8bits               *des(Mem_8bits **plaintext, Long_64bits ptByteSz, e_flags way)
+Mem_8bits               *des(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way)
 {
     init_vars(&ssl.des);
     // printf("hash->msg (len=%ld): >%s<\n", ptByteSz, *plaintext);
     if (way & E)
-        return des_encryption(*plaintext, ptByteSz);
+        return des_encryption(*plaintext, ptByteSz, hashByteSz);
     else if (way & D)
     {
         set_keys_for_decryption(&ssl.des);
-        return des_decryption(*plaintext, ptByteSz);
+        return des_decryption(*plaintext, ptByteSz, hashByteSz);
     }
     else
-        return des_encryption(*plaintext, ptByteSz);
+        return des_encryption(*plaintext, ptByteSz, hashByteSz);
 }

@@ -77,7 +77,7 @@ static void hash_chunk(t_md5 *md5, Word_32bits *chunk)
     md5->hash[3] += d;
 }
 
-Mem_8bits   *md5(Mem_8bits **plaintext, Long_64bits ptByteSz, e_flags way)
+Mem_8bits   *md5(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way)
 {
     t_md5   md5;
 
@@ -98,5 +98,6 @@ Mem_8bits   *md5(Mem_8bits **plaintext, Long_64bits ptByteSz, e_flags way)
     //     endianReverse((Mem_8bits *)(ciphertext + i), LONG64_ByteSz);
 
     (void)way;
-    return ft_memdup((Mem_8bits *)md5.hash, MD5_byteSz);
+    *hashByteSz = MD5_byteSz;
+    return ft_memdup((Mem_8bits *)md5.hash, *hashByteSz);
 }

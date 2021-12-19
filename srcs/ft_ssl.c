@@ -14,10 +14,23 @@
         shuffle usage right order
         des seg fault sans -k
 
-        Problem with \n:
-        
-            ./ft_ssl des-ecb -k 0123456789abcdef Makefile -q -a | ./ft_ssl des-ecb -k 0123456789abcdef -d -a -q > Makefile_encdec && diff Makefile Makefile_encdec
 
+
+    Success ->
+
+        - DES-ECB encryption ascii output:
+            ./ft_ssl des-ecb -k 0123456789abcdef -i Makefile -q | openssl des-ecb -K 0123456789abcdef -out Makefile_encdec -d && diff Makefile Makefile_encdec
+
+        - DES-ECB encryption base64 output:
+            ./ft_ssl des-ecb -k 0123456789abcdef -i Makefile -q -a | openssl des-ecb -K 0123456789abcdef -out Makefile_encdec -a -d && diff Makefile Makefile_encdec
+
+    Failed ->
+
+        - DES-ECB decryption ascii input:
+            openssl des-ecb -K 0123456789abcdef -in Makefile | ./ft_ssl des-ecb -k 0123456789abcdef -d -o Makefile_encdec && diff Makefile Makefile_encdec
+
+        - DES-ECB decryption base64 input:
+            openssl des-ecb -K 0123456789abcdef -in Makefile -a | ./ft_ssl des-ecb -k 0123456789abcdef -a -d -o Makefile_encdec && diff Makefile Makefile_encdec
 */
 
 t_ssl    ssl;
@@ -47,6 +60,7 @@ void    malloc_failed(char *errormsg)
 {
     ft_putstr("[MALLOC FAILED] ");
     ft_putstr(errormsg);
+    perror(NULL);
     freexit(EXIT_FAILURE);
 }
 
@@ -55,6 +69,17 @@ void    open_failed(char *errormsg, char *file)
     ft_putstdout("[OPEN FAILED] Unable to open file=");
     ft_putstdout(file);
     ft_putstdout(errormsg);
+    perror(NULL);
+    freexit(EXIT_FAILURE);
+}
+
+void    write_failed(char *errormsg)
+{
+    ft_putstdout("[WRITE FAILED] fd= ");
+    ft_putnbr(1, ssl.fd_out);
+    ft_putstdout("\n");
+    ft_putstdout(errormsg);
+    perror(NULL);
     freexit(EXIT_FAILURE);
 }
 
@@ -72,13 +97,13 @@ int     main(int ac, char **av)
             open_failed(" in ft_ssl main() function\n", ssl.output_file);
 
     // Base64 decode input
-    if (ssl.flags & AI)
+    if (ssl.flags & ai)
         t_hash_base64_decode_inputs(ssl.hash);
 
     t_hash_hashing(ssl.hash);
 
     // Base64 encode output
-    if (ssl.flags & AO && !(ssl.hash_func_addr == base64 && ssl.flags & E))
+    if (ssl.flags & ao && !(ssl.hash_func_addr == base64 && ssl.flags & E))
         t_hash_base64_encode_output(ssl.hash);
 
     t_hash_output(ssl.hash);

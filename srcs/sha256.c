@@ -105,7 +105,7 @@ static void hash_chunk(t_sha *sha, Word_32bits *chunk)
     sha->hash[7] += h;
 }
 
-Mem_8bits   *sha256(Mem_8bits **plaintext, Long_64bits ptByteSz, e_flags way)
+Mem_8bits   *sha256(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way)
 {
     t_sha   sha;
 
@@ -126,7 +126,8 @@ Mem_8bits   *sha256(Mem_8bits **plaintext, Long_64bits ptByteSz, e_flags way)
         endianReverse((Mem_8bits *)tmp, WORD32_ByteSz);
 
     (void)way;
-    return ft_memdup((Mem_8bits *)sha.hash, SHA256_byteSz);
+    *hashByteSz = SHA256_byteSz;
+    return ft_memdup((Mem_8bits *)sha.hash, *hashByteSz);
 }
 
 /*

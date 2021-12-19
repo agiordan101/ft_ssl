@@ -127,12 +127,7 @@ inline void	ft_putstr(char *s)
 {
     int ret = write(ssl.fd_out, s, ft_strlen(s));
     if (ret < 0)
-    {
-        ret = write(1, "write() failed in ft_putstr(), fd= ", 36);
-        ft_putnbr(1, ssl.fd_out);
-        ft_putstdout("\n");
-        freexit(EXIT_FAILURE);
-    }
+        write_failed("write() failed in ft_putstr()");
 }
 
 void    	ft_putnbr(int fd, int n)
@@ -211,13 +206,7 @@ void    	        ft_printHex(Long_64bits n, int byteSz)
         c_16e1 = hex[word[i] / 16];
         if (write(ssl.fd_out, &c_16e1, 1) == -1 ||\
             write(ssl.fd_out, &c_16e0, 1) == -1)
-        {
-            ft_putstdout("write() in ft_printHex() has failed (fd = ");
-            ft_putnbr(1, ssl.fd_out);
-            ft_putstdout("):\n");
-            perror(NULL);
-            freexit(EXIT_FAILURE);
-        }
+            write_failed("write() failed in ft_printHex()");
     }
 }
 

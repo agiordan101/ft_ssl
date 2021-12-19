@@ -29,7 +29,7 @@ typedef unsigned long   Long_64bits;
 # define HEXABASE       "0123456789abcdef"
 
 typedef enum flags {
-    I=64, O=128, A=256, AI=8192, AO=16384,
+    I=64, O=128, a=256, ai=8192, ao=16384, A=32768,
     // Message Digest
     P_md=1, Q=2, R=4, S_md=8,
     // Cypher
@@ -63,6 +63,7 @@ int         parsing(int ac, char **av);
 void        freexit(int failure);
 void        malloc_failed(char *errormsg);
 void        open_failed(char *errormsg, char *file);
+void        write_failed(char *errormsg);
 
 void	    ft_bzero(void *s, size_t n);
 void	    *ft_memcpy(void *dest, const void *src, size_t n);
@@ -144,8 +145,8 @@ typedef struct  s_md5
     Word_32bits hash[MD5_WordSz];
 }               t_md5;
 
-// Mem_8bits   *md5(Mem_8bits **plaintext, Long_64bits ptByteSz, e_flags way);
-Mem_8bits   *md5(Mem_8bits **plaintext, Long_64bits ptByteSz, e_flags way);
+// Mem_8bits   *md5(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
+Mem_8bits   *md5(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
 void        md5_t_hash(t_hash *hash);
 
 
@@ -169,7 +170,7 @@ typedef struct  s_sha
 // void        sha256_mod256(Mem_8bits **msg, int *len);
 // void        sha256_xor_32bits(Word_32bits *sha1, Word_32bits *sha2, Word_32bits **result);
 
-Mem_8bits   *sha256(Mem_8bits **plaintext, Long_64bits ptByteSz, e_flags way);
+Mem_8bits   *sha256(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
 void        sha256_t_hash(t_hash *hash);
 void        sha256_xor_8bits(Mem_8bits *sha1, Mem_8bits *sha2, Mem_8bits **result);
 
@@ -194,7 +195,7 @@ Mem_8bits     *pbkdf2_sha256(Mem_8bits *pwd, Mem_8bits *salt, int c);
 
 # define    BASE64  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
-Mem_8bits   *base64(Mem_8bits **plaintext, Long_64bits ptByteSz, e_flags way);
+Mem_8bits   *base64(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
 void        t_hash_base64_decode_inputs(t_hash *hash);
 
 
@@ -219,7 +220,7 @@ typedef struct  s_des
 }               t_des;
 
 // void        des(t_hash *hash);
-Mem_8bits   *des(Mem_8bits **plaintext, Long_64bits ptByteSz, e_flags way);
+Mem_8bits   *des(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
 Long_64bits des_padding(Mem_8bits *bloc);
 void        des_unpadding(Long_64bits *lastbloc, int *ptSz);
 
@@ -232,7 +233,7 @@ void        des_unpadding(Long_64bits *lastbloc, int *ptSz);
 typedef struct  s_ssl
 {
     char        *hash_func;
-    Mem_8bits   *(*hash_func_addr)(Mem_8bits **plaintext, Long_64bits ptByteSz, e_flags way);
+    Mem_8bits   *(*hash_func_addr)(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
     e_command   command;
     t_des       des;
 
