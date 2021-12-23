@@ -80,4 +80,7 @@ void        des_unpadding(Long_64bits *lastbloc, int *ptSz)
         *lastbloc = *lastbloc & (((Long_64bits)1 << (64 - lastbyte * 8)) - 1);
     // printf("(1 << (64 - lastbyte * 8)) - 1: %lx\n", ((Long_64bits)1 << (64 - lastbyte * 8)) - 1);
     // printf("lastbloc : %lx\tptSz : %d (out)\n", *lastbloc, *ptSz);
+
+    // Return count of removed bytes
+    // return ;
 }

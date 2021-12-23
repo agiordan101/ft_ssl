@@ -103,9 +103,13 @@ void    hash_8bits_output(t_hash *p)
     }
     else
     {
+        // Find paddding bytes to not print
+        int     n_padByte = 0;
+        while (p->hash[p->hashByteSz - 1 - n_padByte] <= 0x08)
+            n_padByte++;
         // printf("One line:\n");
         // Print one line
-        if ((shitret = write(ssl.fd_out, p->hash, p->hashByteSz)) < 0)
+        if ((shitret = write(ssl.fd_out, p->hash, p->hashByteSz - n_padByte)) < 0)
             write_failed("write() failed in hash_8bits_output() function (plain part).\n");
     }
 }

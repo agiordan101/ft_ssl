@@ -18,7 +18,7 @@ typedef unsigned long   Long_64bits;
 # define WORD32_ByteSz  sizeof(Word_32bits)      // 4 bytes or 32 bits
 # define LONG64_ByteSz  sizeof(Long_64bits)      // 8 bytes or 64 bits
 
-# define BUFF_SIZE      42
+# define BUFF_SIZE      420
 # define FILENOTFOUND   1
 
 # define BIGENDIAN      0

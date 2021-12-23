@@ -30,13 +30,13 @@ static void         clean_base64(Mem_8bits *msg, Long_64bits *len)
 {
     int         newlen = 0;
 
-    // printf("clean msg (len=%d): %s\n", *len, msg);
+    // printf("clean msg (len=%d): >%s<\n", *len, msg);
     for (int i = 0; i < *len; i++)
         if (base64_to_bin(msg[i]) != -1)
             msg[newlen++] = msg[i];
 
     ft_bzero(msg + newlen, *len - newlen);
-    // printf("msg clean (len=%d): %s\n", newlen, msg);
+    // printf("msg clean (len=%d): >%s<\n", newlen, msg);
     *len = newlen;
 }
 
@@ -47,12 +47,18 @@ static inline int   get_len_encoded(int len)
 
 static inline int   get_len_decoded(Mem_8bits *msg, int len)
 {
+    // printf("msg: >%s<\nlast byte: >%c<\n", msg, msg[len - 1]);
     if (msg[len - 1] == '=')
     {
+        // printf("msg: >%s<\nlast byte: >%c<\n", msg, msg[len - 2]);
         if (msg[--len - 1] == '=')
+        {
+            // printf("last last byte = '='\n");
             return (int)(--len / 4) * 3 + 1;
+        }
         return (int)(len / 4) * 3 + 2;
     }
+    // printf("No '=' found\n");
     return (int)(len / 4) * 3;
 }
 
@@ -119,14 +125,14 @@ static Mem_8bits    *encode(Mem_8bits *plaintext, Long_64bits ptByteSz, Long_64b
 
 static Mem_8bits    *decode(Mem_8bits *plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz)
 {
+    // printf("plaintext encode (len=%d): >%s<\n", ptByteSz, plaintext);
+    clean_base64(plaintext, &ptByteSz);
+    // printf("plaintext decode (len=%d): >%s<\n", ptByteSz, plaintext);
+
     *hashByteSz = get_len_decoded(plaintext, ptByteSz);
     Mem_8bits   bytecode[4];
     Mem_8bits   *hash = ft_memnew(*hashByteSz);
     Mem_8bits   *hash_tmp = hash;
-
-    // printf("plaintext encode (len=%d): >%s<\n", ptByteSz, plaintext);
-    clean_base64(plaintext, &ptByteSz);
-    // printf("plaintext decode (len=%d): >%s<\n", ptByteSz, plaintext);
 
     Mem_8bits   *pt_end = plaintext + ptByteSz;
     for (Mem_8bits *pt_tmp = plaintext; pt_tmp < pt_end; pt_tmp += 4)

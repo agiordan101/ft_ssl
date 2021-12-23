@@ -24,6 +24,13 @@
         - DES-ECB encryption base64 output:
             ./ft_ssl des-ecb -k 0123456789abcdef -i Makefile -q -a | openssl des-ecb -K 0123456789abcdef -out Makefile_encdec -a -d && diff Makefile Makefile_encdec
 
+
+        - DES-ECB encryption/decryption ascii:
+            ./ft_ssl des-ecb -k 0123456789abcdef -i Makefile -q | ./ft_ssl des-ecb -k 0123456789abcdef -o Makefile_encdec -d && diff Makefile Makefile_encdec
+
+        - DES-ECB encryption/decryption base64:
+            ./ft_ssl des-ecb -k 0123456789abcdef -i Makefile -q -a -A | ./ft_ssl des-ecb -k 0123456789abcdef -o Makefile_encdec -a -A -d && diff Makefile Makefile_encdec
+
     Failed ->
 
         - DES-ECB decryption ascii input:
@@ -31,6 +38,18 @@
 
         - DES-ECB decryption base64 input:
             openssl des-ecb -K 0123456789abcdef -in Makefile -a | ./ft_ssl des-ecb -k 0123456789abcdef -a -d -o Makefile_encdec && diff Makefile Makefile_encdec
+
+        - DES-ECB encryption/decryption base64:
+            ./ft_ssl des-ecb -k 0123456789abcdef -i Makefile -q -a | ./ft_ssl des-ecb -k 0123456789abcdef -o Makefile_encdec -a -d && diff Makefile Makefile_encdec
+
+
+
+    Probleme : dans le parsing le read bloque à 8192 bytes du stdin de temps en temps, pk ??
+
+        openssl des-ecb -K 0123456789abcdef -in srcs/des.c -a -A | ./ft_ssl des-ecb -k 0123456789abcdef -a -A -d -o unitests_out && diff srcs/des.c unitests_out
+
+
+
 */
 
 t_ssl    ssl;

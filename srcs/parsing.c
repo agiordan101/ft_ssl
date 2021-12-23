@@ -232,30 +232,27 @@ int     hash_func_handler(char *str)
 
 int     stdin_handler()
 {
-    t_hash    *node;
-    char        buff[BUFF_SIZE];
-    int         ret = BUFF_SIZE;
-    char        *tmp;
-
-    if (!(node = addmsg_front()))
-        return EXIT_FAILURE;
+    t_hash  *node = addmsg_front();
+    char    *tmp;
+    char    buff[BUFF_SIZE];
+    int     ret = BUFF_SIZE;
 
     while (ret == BUFF_SIZE)
     {
-        if ((ret = read(0, buff, BUFF_SIZE)) == -1)
+        if ((ret = read(stdin, buff, BUFF_SIZE)) == -1)
             return EXIT_FAILURE;
 
         tmp = node->msg;
-        // if (!(node->msg = (char *)malloc(sizeof(char) * (node->len + ret + 1))))
-		//     malloc_failed("Unable to malloc msg in parsing stdin_handler() function\n");
-        // node->msg[node->len + ret] = '\0';
         node->msg = ft_strnew(node->len + ret);
         ft_memcpy(node->msg, tmp, node->len);
         ft_memcpy(node->msg + node->len, buff, ret);
         if (tmp)
             free(tmp);
         node->len += ret;
+        printf("read ret %d, len = %d bytes\n", ret, node->len);
     }
+    printf("stdin handler read %d bytes: >%s<\n", node->len, node->msg);
+    // exit(0);
 
     // Pre-computing for output part
     node->stdin = 1;
