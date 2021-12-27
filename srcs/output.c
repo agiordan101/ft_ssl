@@ -215,6 +215,8 @@ void    output(t_hash *hash)
         md_output(hash);
     else if (ssl.command & CIPHER)
         cipher_output(hash);
+    else
+        ft_putstdout("This command doesn't handle an output.");
 
     // char c = '\n';
     // c = write(ssl.fd_out, &c, 1);

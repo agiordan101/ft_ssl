@@ -48,7 +48,7 @@
 
         openssl des-ecb -K 0123456789abcdef -in srcs/des.c -a -A | ./ft_ssl des-ecb -k 0123456789abcdef -a -A -d -o unitests_out && diff srcs/des.c unitests_out
 
-
+    Attention -a et -a -A ne sortent pas la meme chose (Seulement un \n qui difere)
 
 */
 

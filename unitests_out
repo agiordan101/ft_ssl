@@ -347,7 +347,7 @@ static Mem_8bits        *des_decryption(Mem_8bits *pt, Long_64bits ptByteSz, Lon
     Long_64bits *plaintext = (Long_64bits *)pt + ptSz - 1;
     Long_64bits bloc;
 
-    printf("\n- DES DECRYPTION -\nptByteSz: %ld\tptSz: %d\n", ptByteSz, ptSz);
+    // printf("\n- DES DECRYPTION -\nptByteSz: %ld\tptSz: %d\n", ptByteSz, ptSz);
     for (int i = ptSz - 1; i >= 0; i--)
     {
         bloc = *plaintext;
@@ -366,9 +366,9 @@ static Mem_8bits        *des_decryption(Mem_8bits *pt, Long_64bits ptByteSz, Lon
         }
         plaintext--;
     }
-    printf("des_unpadding %d: %lx\n", ptSz - 1, ciphertext[ptSz - 1]);
+    // printf("des_unpadding %d: %lx\n", ptSz - 1, ciphertext[ptSz - 1]);
     des_unpadding(ciphertext + ptSz - 1, &ptSz);
-    printf("des_unpadding %d: %lx\n", ptSz - 1, ciphertext[ptSz - 1]);
+    // printf("des_unpadding %d: %lx\n", ptSz - 1, ciphertext[ptSz - 1]);
 
     // for (int i = 0; i < ptSz; i++)
     //     printf("ciphertext %d: %lx\n", i, ciphertext[i]);

@@ -69,5 +69,3 @@ void    printHex(void *p, int size)
             printf("%x ", (unsigned int)mem[i]);
     puts("");
 }
-
-

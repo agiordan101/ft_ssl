@@ -65,9 +65,6 @@ int     file_handler(t_hash *node, char *file)
     else
     {
         node->len = get_file_len(file);
-        // if (!(node->msg = (char *)malloc(sizeof(char) * (node->len + 1))))
-		//     malloc_failed("Unable to malloc msg in parsing file_handler() function\n");
-        // node->msg[node->len] = '\0';
         node->msg = ft_strnew(node->len);
 
         if (read(fd, node->msg, node->len) == -1)
@@ -237,9 +234,9 @@ int     stdin_handler()
     char    buff[BUFF_SIZE];
     int     ret = BUFF_SIZE;
 
-    while (ret == BUFF_SIZE)
+    while (ret != 0)
     {
-        if ((ret = read(stdin, buff, BUFF_SIZE)) == -1)
+        if ((ret = read(0, buff, BUFF_SIZE)) == -1)
             return EXIT_FAILURE;
 
         tmp = node->msg;
@@ -249,9 +246,9 @@ int     stdin_handler()
         if (tmp)
             free(tmp);
         node->len += ret;
-        printf("read ret %d, len = %d bytes\n", ret, node->len);
+        // printf("read ret %d, len = %d bytes\n", ret, node->len);
     }
-    printf("stdin handler read %d bytes: >%s<\n", node->len, node->msg);
+    // printf("stdin handler read %d bytes: >%s<\n", node->len, node->msg);
     // exit(0);
 
     // Pre-computing for output part

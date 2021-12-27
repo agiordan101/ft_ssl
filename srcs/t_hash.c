@@ -31,11 +31,11 @@ inline void t_hash_base64_decode_inputs(t_hash *hash)
 
     while (hash)
     {
-        printf("\nt_hash_base64_decode_inputs (len=%d): >%s<\n", hash->len, hash->msg);
+        // printf("\nt_hash_base64_decode_inputs (len=%d): >%s<\n", hash->len, hash->msg);
         tmp = hash->msg;
         hash->msg = base64((Mem_8bits **)&hash->msg, hash->len, (Long_64bits *)&hash->len, D);
         // hash->len = ft_strlen(hash->msg);
-        printf("t_hash_base64_decode_inputs (len=%d): >%s<\n", hash->len, hash->msg);
+        // printf("t_hash_base64_decode_inputs (len=%d): >%s<\n", hash->len, hash->msg);
 
         free(tmp);
         hash = hash->next;
@@ -71,13 +71,15 @@ inline void t_hash_hashing(t_hash *hash)
 {
     while (hash)
     {
-        // printf("hash->msg: >%s<\n", hash->msg);
-        // printf("hash->name: >%s<\n", hash->name);
-        // exit(0);
-        hash->hash = ssl.hash_func_addr((Mem_8bits **)&hash->msg, hash->len, (Long_64bits *)&hash->hashByteSz, ssl.flags);
-        // hash->hashByteSz = ft_strlen((char *)hash->hash);
-        // printf("Hash (len=%d): %p\n", hash->hashByteSz, hash);
-
+        if (!hash->error)
+        {
+            // printf("hash->msg: >%s<\n", hash->msg);
+            // printf("hash->name: >%s<\n", hash->name);
+            // exit(0);
+            hash->hash = ssl.hash_func_addr((Mem_8bits **)&hash->msg, hash->len, (Long_64bits *)&hash->hashByteSz, ssl.flags);
+            // hash->hashByteSz = ft_strlen((char *)hash->hash);
+            // printf("Hash (len=%d): %p\n", hash->hashByteSz, hash);
+        }
         hash = hash->next;
     }
 }
