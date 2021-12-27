@@ -19,7 +19,6 @@ typedef unsigned long   Long_64bits;
 # define LONG64_ByteSz  sizeof(Long_64bits)      // 8 bytes or 64 bits
 
 # define BUFF_SIZE      420
-# define FILENOTFOUND   1
 
 # define BIGENDIAN      0
 # define LITTLEENDIAN   1
@@ -28,17 +27,24 @@ typedef unsigned long   Long_64bits;
 # define INTMAXLESS1    (Word_32bits)pow(2, 32) - 1
 # define HEXABASE       "0123456789abcdef"
 
-typedef enum flags {
-    I=64, O=128, a=256, ai=8192, ao=16384, A=32768,
-    // Message Digest
-    P_md=1, Q=2, R=4, S_md=8,
-    // Cypher
-    D=16, E=32,
-    // Only des
-    K=512, P_cipher=1024, S_cipher=2048, V=4096
-}            e_flags;
-# define AVFLAGS        (P_md + Q + R + D + E + A + AI + AO)
-# define AVPARAM        (S_md + I + O + K + P_cipher + S_cipher + V)
+typedef enum    error {
+    FILENOTFOUND = 1 << 1,
+    DONOTHASH = 1 << 2
+}               e_error;
+
+typedef enum    flags {
+    i_=1<<1, o=1<<2, q=1<<3, a=1<<4, ai=1<<5, ao=1<<6, A=1<<7,
+
+    // Only Message Digest
+    p_md=1<<8, r=1<<9, s_md=1<<10,
+
+    // Only Cypher
+    d=1<<11, e=1<<12,
+        // Only des
+        k_des=1<<13, p_des=1<<14, s_des=1<<15, v_des=1<<16, P_des=1<<17
+}               e_flags;
+# define AVFLAGS        (p_md + q + r + d + e + A + ai + ao + P_des)
+# define AVPARAM        (s_md + i_ + o + k_des + p_des + s_des + v_des)
 
 typedef enum    command {
     MD=1, CIPHER=2, STANDARD=4
@@ -54,7 +60,7 @@ typedef struct  s_hash
     Mem_8bits       *hash;      // Hashed bytecode
     int             hashByteSz; // Byte size
 
-    int             error;      // FILENOTFOUND or 0
+    e_error         error;      // Others behavors
     struct s_hash *next;
 }               t_hash;
 

@@ -24,10 +24,12 @@ void    print_usage()
     ft_putstr("\t-e: encrypt mode (default mode | priority on -d)\n");
     ft_putstr("\t-i: input file for message\n");
     ft_putstr("\t-o: output file for hash\n");
+    ft_putstr("\t-k: send the key in hex\n");
     ft_putstr("\t-p: send password in ascii\n");
     ft_putstr("\t-s: send the salt in hex\n");
     ft_putstr("\t-v: send initialization vector in hex\n");
-    // ft_putstr("\t-q: quiet mode\n");
+    ft_putstr("\t-P: print the vector/key and exit\n");
+    ft_putstr("\t-q: quiet mode\n");
     // ft_putstr("\t-r: reverse the format of the output\n");
 
     // ft_ssl 3rd project
@@ -84,7 +86,7 @@ void    hash_8bits_output(t_hash *p)
     static int shitret;
 
     // 64-bytes blocs output is only for base64 format without -A flag
-    if ((ssl.flags & ao || (ssl.hash_func_addr == base64 && ssl.flags & E)) &&\
+    if ((ssl.flags & ao || (ssl.hash_func_addr == base64 && ssl.flags & e)) &&\
         ~ssl.flags & A)
     {
         // Print blocs of 64-bytes 
@@ -116,7 +118,7 @@ void    hash_8bits_output(t_hash *p)
 
 void    hash_output(t_hash *hash, int hashBlocByteSz)
 {
-    if (hashBlocByteSz == MEM8_ByteSz || ssl.flags & ao) //base64 command  OR  des flag D  OR  a | ao flags (base64 output format)
+    if (hashBlocByteSz == MEM8_ByteSz || ssl.flags & ao) //base64 command  OR  des flag d  OR  a | ao flags (base64 output format)
         hash_8bits_output(hash);
     else if (hashBlocByteSz == WORD32_ByteSz)
         hash_32bits_output(hash);
@@ -162,16 +164,16 @@ void    md_output(t_hash *hash)
 {
     if (hash->stdin)
     {
-        if (ssl.flags & Q && ssl.flags & P_md)
+        if (ssl.flags & q && ssl.flags & p_md)
             md_stdin_quiet_output(hash);
-        else if (ssl.flags & Q)
+        else if (ssl.flags & q)
             hash_output(hash, WORD32_ByteSz);
         else
             md_stdin_output(hash);
     }
-    else if (ssl.flags & Q)
+    else if (ssl.flags & q)
         hash_output(hash, WORD32_ByteSz);
-    else if (ssl.flags & R)
+    else if (ssl.flags & r)
         md_reversed_output(hash);
     else
         classic_output(hash, WORD32_ByteSz);
@@ -185,7 +187,7 @@ void    cipher_output(t_hash *hash)
 
     // if (ssl.hash_func_addr == des)
     // {
-    //     if (ssl.flags & D)
+    //     if (ssl.flags & d)
     //         hashBlocByteSz = MEM8_ByteSz;
     //     else
     //         hashBlocByteSz = LONG64_ByteSz;
@@ -199,7 +201,7 @@ void    cipher_output(t_hash *hash)
         // if (((char *)hash->hash)[hash->hashByteSz / 4 - 1] == '\n')
         //     ((char *)hash->hash)[hash->hashByteSz / 4 - 1] = '\0'; //To remove \n, it's like 'echo -n <node->msg> | ./ft_ssl ...'
     // }
-    if (ssl.flags & (O | Q))
+    if (ssl.flags & (o | q))
         hash_output(hash, hashBlocByteSz);
     else
         classic_output(hash, hashBlocByteSz);

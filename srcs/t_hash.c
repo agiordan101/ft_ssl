@@ -33,7 +33,7 @@ inline void t_hash_base64_decode_inputs(t_hash *hash)
     {
         // printf("\nt_hash_base64_decode_inputs (len=%d): >%s<\n", hash->len, hash->msg);
         tmp = hash->msg;
-        hash->msg = base64((Mem_8bits **)&hash->msg, hash->len, (Long_64bits *)&hash->len, D);
+        hash->msg = base64((Mem_8bits **)&hash->msg, hash->len, (Long_64bits *)&hash->len, d);
         // hash->len = ft_strlen(hash->msg);
         // printf("t_hash_base64_decode_inputs (len=%d): >%s<\n", hash->len, hash->msg);
 
@@ -58,7 +58,7 @@ inline void t_hash_base64_encode_output(t_hash *hash)
 
         // printf("\nt_hash_base64_encode_output (len=%d): >%s<\n", hash->hashByteSz, hash->hash);
         tmp = hash->hash;
-        hash->hash = base64(&hash->hash, hash->hashByteSz, (Long_64bits *)&hash->hashByteSz, E);
+        hash->hash = base64(&hash->hash, hash->hashByteSz, (Long_64bits *)&hash->hashByteSz, e);
         // hash->hashByteSz = ft_strlen(hash->hash);
         // printf("t_hash_base64_encode_output (len=%d): >%s<\n", hash->hashByteSz, hash->hash);
 

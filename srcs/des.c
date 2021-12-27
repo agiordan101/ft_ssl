@@ -436,9 +436,18 @@ Mem_8bits               *des(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_6
     init_vars(&ssl.des);
     // printf("hash->msg (len=%ld): >%s<\n", ptByteSz, *plaintext);
     // exit(0);
-    if (way & E)
+    if (way & P_des)
+    {
+        ft_putstdout("salt=");
+        ft_printHex(ssl.des.salt, LONG64_ByteSz);
+        ft_putstdout("\nkey=");
+        ft_printHex(ssl.des.key, LONG64_ByteSz);
+        ft_putstdout("\n");
+        freexit(EXIT_SUCCESS);
+    }
+    else if (way & e)
         return des_encryption(*plaintext, ptByteSz, hashByteSz);
-    else if (way & D)
+    else if (way & d)
     {
         set_keys_for_decryption(&ssl.des);
         return des_decryption(*plaintext, ptByteSz, hashByteSz);

@@ -8,45 +8,16 @@
         .. -q -r = .. -q car -r s'annule en présence de -q
 
     To do :
-        -nosalt to make
-        add -q to usage
-        add -P to usage
+        pbkdf2 à faire
+        -nosalt             Do not use salt in the KDF
+        -iter +int          Specify the iteration count and force use of PBKDF2
+        -help               Display this summary and exit
         shuffle usage right order
-        des seg fault sans -k
 
-
-
-    Success ->
-
-        - DES-ECB encryption ascii output:
-            ./ft_ssl des-ecb -k 0123456789abcdef -i Makefile -q | openssl des-ecb -K 0123456789abcdef -out Makefile_encdec -d && diff Makefile Makefile_encdec
-
-        - DES-ECB encryption base64 output:
-            ./ft_ssl des-ecb -k 0123456789abcdef -i Makefile -q -a | openssl des-ecb -K 0123456789abcdef -out Makefile_encdec -a -d && diff Makefile Makefile_encdec
-
-
-        - DES-ECB encryption/decryption ascii:
-            ./ft_ssl des-ecb -k 0123456789abcdef -i Makefile -q | ./ft_ssl des-ecb -k 0123456789abcdef -o Makefile_encdec -d && diff Makefile Makefile_encdec
-
-        - DES-ECB encryption/decryption base64:
-            ./ft_ssl des-ecb -k 0123456789abcdef -i Makefile -q -a -A | ./ft_ssl des-ecb -k 0123456789abcdef -o Makefile_encdec -a -A -d && diff Makefile Makefile_encdec
-
-    Failed ->
-
-        - DES-ECB decryption ascii input:
-            openssl des-ecb -K 0123456789abcdef -in Makefile | ./ft_ssl des-ecb -k 0123456789abcdef -d -o Makefile_encdec && diff Makefile Makefile_encdec
-
-        - DES-ECB decryption base64 input:
-            openssl des-ecb -K 0123456789abcdef -in Makefile -a | ./ft_ssl des-ecb -k 0123456789abcdef -a -d -o Makefile_encdec && diff Makefile Makefile_encdec
-
-        - DES-ECB encryption/decryption base64:
-            ./ft_ssl des-ecb -k 0123456789abcdef -i Makefile -q -a | ./ft_ssl des-ecb -k 0123456789abcdef -o Makefile_encdec -a -d && diff Makefile Makefile_encdec
-
-
-
-    Probleme : dans le parsing le read bloque à 8192 bytes du stdin de temps en temps, pk ??
-
-        openssl des-ecb -K 0123456789abcdef -in srcs/des.c -a -A | ./ft_ssl des-ecb -k 0123456789abcdef -a -A -d -o unitests_out && diff srcs/des.c unitests_out
+    -> Probleme de openssl avec stdin ou stdout
+        bad decrypt
+        139951214458048:error:02012020:system library:fflush:Broken pipe:crypto/bio/bss_file.c:316:fflush()
+        139951214458048:error:20074002:BIO routines:file_ctrl:system lib:crypto/bio/bss_file.c:318:
 
     Attention -a et -a -A ne sortent pas la meme chose (Seulement un \n qui difere)
 
@@ -65,7 +36,7 @@ void    ssl_free()
 
     t_hash_free(ssl.hash);
 
-    if (ssl.flags & O)
+    if (ssl.flags & o)
         close(ssl.fd_out);
 }
 
@@ -111,7 +82,7 @@ int     main(int ac, char **av)
         freexit(ret);
 
     // Set output file descriptor (STDOUT as default)
-    if (ssl.flags & O)
+    if (ssl.flags & o)
         if ((ssl.fd_out = open(ssl.output_file, O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU | S_IRWXG | S_IRWXO)) == -1)
             open_failed(" in ft_ssl main() function\n", ssl.output_file);
 
@@ -122,7 +93,7 @@ int     main(int ac, char **av)
     t_hash_hashing(ssl.hash);
 
     // Base64 encode output
-    if (ssl.flags & ao && !(ssl.hash_func_addr == base64 && ssl.flags & E))
+    if (ssl.flags & ao && !(ssl.hash_func_addr == base64 && ssl.flags & e))
         t_hash_base64_encode_output(ssl.hash);
 
     t_hash_output(ssl.hash);

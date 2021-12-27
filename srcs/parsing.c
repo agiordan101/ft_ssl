@@ -89,7 +89,7 @@ int     string_handler(t_hash *node, char *av_next)
 
 int     s_handler(char *av_next, int *i)
 {
-    if (ssl.flags & S_md)
+    if (ssl.flags & s_md)
     {
         (*i)--; // Cancel -s as a flag parameter
         return file_handler(NULL, "-s");
@@ -102,38 +102,46 @@ Key_64bits  parse_keys(char *av_next)
 {
     Key_64bits  key = ft_strtoHex(av_next);
 
-    // if (!(key & 0xff00000000000000))
-    // {
-    //     ft_putstr("hex string is too short, padding with zero bytes to length\n");
-    //     while (!(key & 0xff00000000000000))
-    //         key <<= 8;
-    // }
+    // Zeros at the beginning of -k parameter have to stay here
+    int str_zero_count, hex_zero_count = 0;
+    while (av_next[str_zero_count] == '0') str_zero_count++;
+
+    // Count missing half-byte left to remove them (Same as padding zero bytes to length, right)
+    while (!(key & (0xf000000000000000 >> (hex_zero_count * 4)))) hex_zero_count++;
+
+    // No padding if the right number of zero bytes left is here
+    if (hex_zero_count > str_zero_count)
+    {
+        ft_putstr("hex string is too short, padding with zero bytes to length\n");
+        key <<= (hex_zero_count - str_zero_count) * 4;
+    }
+    // printf("parse_keys: %lx\n", key);
     return key;
 }
 
 int     param_handler(e_flags flag, char *av_next, int *i)
 {
-    // printf("V flag condition %d\n", flag & V);
-    // printf("I flag condition %d\n", flag & I);
-    if (flag & S_md)
+    // printf("v_des flag condition %d\n", flag & v_des);
+    // printf("i_ flag condition %d\n", flag & i_);
+    if (flag & s_md)
     {
         if (s_handler(av_next, i))
             return EXIT_FAILURE;
     }
-    else if (flag & I)
+    else if (flag & i_)
     {
         if (file_handler(NULL, av_next))
             return EXIT_FAILURE;
     }
-    else if (flag & O)
+    else if (flag & o)
         ssl.output_file = av_next;
-    else if (flag & K)
+    else if (flag & k_des)
         ssl.des.key = parse_keys(av_next);
-    else if (flag & P_cipher)
+    else if (flag & p_des)
         ssl.des.password = (Mem_8bits *)ft_strdup(av_next);
-    else if (flag & S_cipher)
+    else if (flag & s_des)
         ssl.des.salt = parse_keys(av_next);
-    else if (flag & V)
+    else if (flag & v_des)
         ssl.des.vector = parse_keys(av_next);
     (*i)++;
     return 0;
@@ -141,33 +149,34 @@ int     param_handler(e_flags flag, char *av_next, int *i)
 
 e_flags strToFlag(char *str)
 {
-    if (!ft_strcmp(str, "-p"))
-    {
-        if (ssl.command & MD)
-            return P_md;
-        else if (ssl.command & CIPHER)
-            return P_cipher;
-    }
-    if (!ft_strcmp(str, "-q"))
-        return Q;
-    if (!ft_strcmp(str, "-r"))
-        return R;
     if (!ft_strcmp(str, "-s"))
     {
         if (ssl.command & MD)
-            return S_md;
+            return s_md;
         else if (ssl.command & CIPHER)
-            return S_cipher;
+            return s_des;
     }
-
+    if (!ft_strcmp(str, "-p"))
+    {
+        if (ssl.command & MD)
+            return p_md;
+        else if (ssl.command & CIPHER)
+            return p_des;
+    }
+    if (!ft_strcmp(str, "-P"))
+        return P_des;
+    if (!ft_strcmp(str, "-q"))
+        return q;
+    if (!ft_strcmp(str, "-r"))
+        return r;
     if (!ft_strcmp(str, "-d"))
-        return D;
+        return d;
     if (!ft_strcmp(str, "-e"))
-        return E;
+        return e;
     if (!ft_strcmp(str, "-i"))
-        return I;
+        return i_;
     if (!ft_strcmp(str, "-o"))
-        return O;
+        return o;
     if (!ft_strcmp(str, "-a"))
         return a;
     if (!ft_strcmp(str, "-ai"))
@@ -177,9 +186,9 @@ e_flags strToFlag(char *str)
     if (!ft_strcmp(str, "-A"))
         return A;
     if (!ft_strcmp(str, "-k"))
-        return K;
+        return k_des;
     if (!ft_strcmp(str, "-v"))
-        return V;
+        return v_des;
     return 0;
 }
 
@@ -234,7 +243,7 @@ int     stdin_handler()
     char    buff[BUFF_SIZE];
     int     ret = BUFF_SIZE;
 
-    while (ret != 0)
+    while (ret)
     {
         if ((ret = read(0, buff, BUFF_SIZE)) == -1)
             return EXIT_FAILURE;
@@ -253,14 +262,14 @@ int     stdin_handler()
 
     // Pre-computing for output part
     node->stdin = 1;
-    if (ssl.flags & P_md)
+    if (ssl.flags & p_md)
     {
         tmp = ft_strdup(node->msg);
         if (tmp[node->len - 1] == '\n')
             tmp[node->len - 1] = '\0'; //To remove \n, it's like 'echo -n <node->msg> | ./ft_ssl ...'
 
-        // Q will not print name, but when Q, R and P_md are True, stdin content without quote is required
-        if (ssl.flags & Q)
+        // q will not print name, but when q, r and p_md are True, stdin content without quote is required. Yes, I know, it's sucks
+        if (ssl.flags & q)
             node->name = tmp;
         else
         {
@@ -301,13 +310,14 @@ int     parsing(int ac, char **av)
                 return EXIT_FAILURE;
         }
 
-    if (ssl.flags & P_md || !ssl.hash)
+    // Read on stdin if no hash found or p_md flags is provided
+    if (ssl.flags & p_md || !ssl.hash)
         if (stdin_handler())
-            return EXIT_FAILURE;
+            return EXIT_FAILURE;        
 
     // Active input decode / output encode in respect to encryption/decryption mode
     if (ssl.flags & a)
-        if (ssl.flags & D)
+        if (ssl.flags & d)
             ssl.flags += ssl.flags & ai ? 0 : ai;
         else
             ssl.flags += ssl.flags & ao ? 0 : ao;   
