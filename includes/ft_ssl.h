@@ -41,9 +41,9 @@ typedef enum    flags {
     // Only Cypher
     d=1<<11, e=1<<12,
         // Only des
-        k_des=1<<13, p_des=1<<14, s_des=1<<15, v_des=1<<16, P_des=1<<17
+        k_des=1<<13, p_des=1<<14, s_des=1<<15, v_des=1<<16, P_des=1<<17, nopad=1<<18
 }               e_flags;
-# define AVFLAGS        (p_md + q + r + d + e + A + ai + ao + P_des)
+# define AVFLAGS        (p_md + q + r + d + e + A + ai + ao + P_des + nopad)
 # define AVPARAM        (s_md + i_ + o + k_des + p_des + s_des + v_des)
 
 typedef enum    command {

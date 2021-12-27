@@ -347,6 +347,11 @@ static Mem_8bits        *des_decryption(Mem_8bits *pt, Long_64bits ptByteSz, Lon
     Long_64bits *plaintext = (Long_64bits *)pt + ptSz - 1;
     Long_64bits bloc;
 
+    // if (ssl.flags & nopad && ptByteSz % 8)
+    // {
+    //     ft_putstdout("Data not multiple of block length\n");
+    //     freexit(EXIT_FAILURE);
+    // }
     // printf("\n- DES DECRYPTION -\nptByteSz: %ld\tptSz: %d\n", ptByteSz, ptSz);
     for (int i = ptSz - 1; i >= 0; i--)
     {
@@ -379,11 +384,17 @@ static Mem_8bits        *des_decryption(Mem_8bits *pt, Long_64bits ptByteSz, Lon
 
 static Mem_8bits        *des_encryption(Mem_8bits *pt, Long_64bits ptByteSz, Long_64bits *hashByteSz)
 {
-    int         ptSz = (ptByteSz + 8) / 8; // Count of 64-bits bloc (Add one if last bloc is full)
+    // ptSz is the count of 64-bits bloc (Padding: Add one bloc if the lastest is full)
+    int         ptSz = (ptByteSz + (ssl.flags & nopad ? 7 : 8)) / 8;
     Long_64bits ciphertext[ptSz];
     Long_64bits *plaintext = (Long_64bits *)pt;
     Long_64bits bloc;
 
+    if (ssl.flags & nopad && ptByteSz % 8)
+    {
+        ft_putstdout("Data not multiple of block length\n");
+        freexit(EXIT_FAILURE);
+    }
     // printf("\n- DES ECRYPTION -\nptByteSz: %ld\tptSz: %d\n", ptByteSz, ptSz);
     for (int i = 0; i < ptSz; i++)
     {

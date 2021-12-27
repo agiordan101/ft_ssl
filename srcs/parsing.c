@@ -189,6 +189,8 @@ e_flags strToFlag(char *str)
         return k_des;
     if (!ft_strcmp(str, "-v"))
         return v_des;
+    if (!ft_strcmp(str, "-nopad"))
+        return nopad;
     return 0;
 }
 

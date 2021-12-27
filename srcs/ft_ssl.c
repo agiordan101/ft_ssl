@@ -14,6 +14,7 @@
         -help               Display this summary and exit
         shuffle usage right order
 
+
     -> Probleme de openssl avec stdin ou stdout
         bad decrypt
         139951214458048:error:02012020:system library:fflush:Broken pipe:crypto/bio/bss_file.c:316:fflush()

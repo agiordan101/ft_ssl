@@ -76,11 +76,17 @@ void        des_unpadding(Long_64bits *lastbloc, int *ptSz)
     if (lastbyte == 0x08)
         (*ptSz)--;
     else if (0x01 <= lastbyte && lastbyte <= 0x07)
-        // *lastbloc <<= lastbyte * 8;
         *lastbloc = *lastbloc & (((Long_64bits)1 << (64 - lastbyte * 8)) - 1);
-    // printf("(1 << (64 - lastbyte * 8)) - 1: %lx\n", ((Long_64bits)1 << (64 - lastbyte * 8)) - 1);
-    // printf("lastbloc : %lx\tptSz : %d (out)\n", *lastbloc, *ptSz);
-
-    // Return count of removed bytes
-    // return ;
+    else if (~ssl.flags & nopad)
+    {
+        ft_putstdout("No padding found in decrypted data.\n");
+        freexit(EXIT_FAILURE);
+    }
+    else
+        return ;
+    if (ssl.flags & nopad)
+    {
+        ft_putstdout("-nopad is conflicting with padding found in decrypted data.\n");
+        freexit(EXIT_FAILURE);
+    }
 }

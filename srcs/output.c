@@ -29,7 +29,8 @@ void    print_usage()
     ft_putstr("\t-s: send the salt in hex\n");
     ft_putstr("\t-v: send initialization vector in hex\n");
     ft_putstr("\t-P: print the vector/key and exit\n");
-    ft_putstr("\t-q: quiet mode\n");
+    ft_putstr("\t-q: qui et mode\n");
+    ft_putstr("\t-nopad: disable standard block padding\n");
     // ft_putstr("\t-r: reverse the format of the output\n");
 
     // ft_ssl 3rd project
