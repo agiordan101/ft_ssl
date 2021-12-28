@@ -11,7 +11,6 @@
         pbkdf2 à faire
         -nosalt             Do not use salt in the KDF
         -iter +int          Specify the iteration count and force use of PBKDF2
-        -help               Display this summary and exit
         shuffle usage right order
 
 
@@ -57,7 +56,7 @@ void    malloc_failed(char *errormsg)
 
 void    open_failed(char *errormsg, char *file)
 {
-    ft_putstdout("[OPEN FAILED] Unable to open file=");
+    ft_putstdout("[OPEN FAILED] Unable to open file: ");
     ft_putstdout(file);
     ft_putstdout(errormsg);
     perror(NULL);
@@ -82,6 +81,9 @@ int     main(int ac, char **av)
     if ((ret = parsing(ac, av)))
         freexit(ret);
 
+    if (ssl.flags & help)
+        print_usage_exit();
+
     // Set output file descriptor (STDOUT as default)
     if (ssl.flags & o)
         if ((ssl.fd_out = open(ssl.output_file, O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU | S_IRWXG | S_IRWXO)) == -1)
@@ -93,7 +95,7 @@ int     main(int ac, char **av)
 
     t_hash_hashing(ssl.hash);
 
-    // Base64 encode output
+    // Base64 encode output (Do not encode if command is already base64 in encryption mode)
     if (ssl.flags & ao && !(ssl.hash_func_addr == base64 && ssl.flags & e))
         t_hash_base64_encode_output(ssl.hash);
 

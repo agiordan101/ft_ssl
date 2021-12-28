@@ -33,7 +33,7 @@ typedef enum    error {
 }               e_error;
 
 typedef enum    flags {
-    i_=1<<1, o=1<<2, q=1<<3, a=1<<4, ai=1<<5, ao=1<<6, A=1<<7,
+    i_=1<<1, o=1<<2, q=1<<3, a=1<<4, ai=1<<5, ao=1<<6, A=1<<7, help=1<<19,
 
     // Only Message Digest
     p_md=1<<8, r=1<<9, s_md=1<<10,
@@ -43,7 +43,7 @@ typedef enum    flags {
         // Only des
         k_des=1<<13, p_des=1<<14, s_des=1<<15, v_des=1<<16, P_des=1<<17, nopad=1<<18
 }               e_flags;
-# define AVFLAGS        (p_md + q + r + d + e + A + ai + ao + P_des + nopad)
+# define AVFLAGS        (p_md + q + r + d + e + A + ai + ao + P_des + nopad + help)
 # define AVPARAM        (s_md + i_ + o + k_des + p_des + s_des + v_des)
 
 typedef enum    command {
@@ -55,12 +55,12 @@ typedef struct  s_hash
     char            stdin;      // stdin or not
     char            *name;      // stdin / file name / -s string arg // Malloc
     char            *msg;       // Content to hash // Malloc
-    int             len;        // Length of content
+    int             len;        // Length of plaintext
     
     Mem_8bits       *hash;      // Hashed bytecode
     int             hashByteSz; // Byte size
 
-    e_error         error;      // Others behavors
+    e_error         error;      // Others behavior
     struct s_hash *next;
 }               t_hash;
 
@@ -98,7 +98,7 @@ Mem_8bits   *ft_strHexToBin(Mem_8bits *str, int byteSz);
 void        output(t_hash *hash);
 void        key_output(Mem_8bits *p);
 void        md_hash_output(t_hash *p);      // Temporally
-void        print_usage();
+void        print_usage_exit();
 
 
 /*
@@ -193,8 +193,6 @@ typedef unsigned long   Key_64bits;
 # define KEY_bitSz          KEY_byteSz * 8
 # define KEYDISCARD_byteSz  KEY_byteSz - 1
 
-Mem_8bits     *pbkdf2_sha256(Mem_8bits *pwd, Mem_8bits *salt, int c);
-
 /*
     BASE64 Data --------------------------------------
 */
@@ -202,12 +200,12 @@ Mem_8bits     *pbkdf2_sha256(Mem_8bits *pwd, Mem_8bits *salt, int c);
 # define    BASE64  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
 Mem_8bits   *base64(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
-void        t_hash_base64_decode_inputs(t_hash *hash);
-
 
 /*
     DES Data --------------------------------------
 */
+
+# define PBKDF2_iter    3
 
 typedef enum    desmode {
     DESECB=1, DESCBC=2
@@ -225,11 +223,11 @@ typedef struct  s_des
     char        fpt[KEY_bitSz];     // Final   permutation table
 }               t_des;
 
-// void        des(t_hash *hash);
+Key_64bits  pbkdf2_sha256(Mem_8bits *pwd, Key_64bits *salt, int c);
+
 Mem_8bits   *des(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
 Long_64bits des_padding(Mem_8bits *bloc);
 void        des_unpadding(Long_64bits *lastbloc, int *ptSz);
-
 
 
 /*

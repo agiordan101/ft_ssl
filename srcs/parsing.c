@@ -191,6 +191,8 @@ e_flags strToFlag(char *str)
         return v_des;
     if (!ft_strcmp(str, "-nopad"))
         return nopad;
+    if (!ft_strcmp(str, "-help"))
+        return help;
     return 0;
 }
 
@@ -214,14 +216,14 @@ int     hash_func_handler(char *str)
         ssl.hash_func_addr = base64;
         ssl.command = CIPHER;
     }
-    else if (!ft_strcmp(str, "des") || !ft_strcmp(str, "des-ecb"))
+    else if (!ft_strcmp(str, "des-ecb"))
     {
         ssl.hash_func = "DES-ECB";
         ssl.hash_func_addr = des;
         ssl.command = CIPHER;
         ssl.des.mode = DESECB;
     }
-    else if (!ft_strcmp(str, "des-cbc"))
+    else if (!ft_strcmp(str, "des") || !ft_strcmp(str, "des-cbc"))
     {
         ssl.hash_func = "DES-CBC";
         ssl.hash_func_addr = des;
@@ -290,10 +292,7 @@ int     parsing(int ac, char **av)
     int     ret = 0;
 
     if (ac == 1 || hash_func_handler(ft_lower(av[1])))
-    {
-        print_usage();
-        return EXIT_FAILURE;
-    }
+        print_usage_exit();
 
     if (ac > 2)
         for (int i = 2; i < ac; i++)

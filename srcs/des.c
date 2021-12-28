@@ -151,7 +151,7 @@ static void             init_vars(t_des *des)
         // A password is asked if it's not provided
         if (!des->password)
             ask_password(des);
-        // des->key = pbkdf2_sha256(des->password, des->salt, 3);
+        // des->key = pbkdf2_sha256(des->password, des->salt, PBKDF2_iter);
     }
 
     // Key scheldule
@@ -445,8 +445,7 @@ static Mem_8bits        *des_encryption(Mem_8bits *pt, Long_64bits ptByteSz, Lon
 Mem_8bits               *des(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way)
 {
     init_vars(&ssl.des);
-    // printf("hash->msg (len=%ld): >%s<\n", ptByteSz, *plaintext);
-    // exit(0);
+
     if (way & P_des)
     {
         ft_putstdout("salt=");

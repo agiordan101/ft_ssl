@@ -2,39 +2,42 @@
 
 // ---------------------- VERBOSE output ---------------------------
 
-void    print_usage()
+void    print_usage_exit()
 {
     ft_putstr("usage: ft_ssl <algorithm> [flags] [file | string]\n\n");
+    ft_putstr("Global flags:\n");
+    ft_putstr("\t-help\tDisplay this summary and exit\n");
+    ft_putstr("\t-i\tinput file for plaintext\n");
+    ft_putstr("\t-o\toutput file for hash\n");
+    ft_putstr("\t-q\tquiet mode\n");
 
     // ft_ssl 1st project
-    ft_putstr("\nMessage Digest commands:\n\tmd5\n\tsha256\n\n");
+    ft_putstr("\nMessage Digest commands:\n\tmd5\n\tsha256\n");
     ft_putstr("Message Digest flags:\n");
-    ft_putstr("\t-p: echo STDIN to STDOUT and append the checksum to STDOUT\n");
-    ft_putstr("\t-q: quiet mode\n");
-    ft_putstr("\t-r: reverse the format of the output\n");
-    ft_putstr("\t-s: print the sum of the given string\n");
-    ft_putstr("\t-i: input file for message\n");
-    ft_putstr("\t-o: output file for hash\n");
+    ft_putstr("\t-p\techo STDIN to STDOUT and append the checksum to STDOUT\n");
+    ft_putstr("\t-r\treverse the format of the output\n");
+    ft_putstr("\t-s\tprint the sum of the given string\n");
 
     // ft_ssl 2nd project
-    ft_putstr("\nCipher commands:\n\tbase64\n\tdes\n\tdes-ecb\n\tdes-cbc\n\n");
+    ft_putstr("\nCipher commands:\n\tbase64\n\tdes\t(Default as des-cbc)\n\tdes-ecb\n\tdes-cbc\n");
     ft_putstr("Cipher flags:\n");
-    ft_putstr("\t-a: decode/encode the input/output in base64, depending on the encrypt mode\n");
-    ft_putstr("\t-d: decrypt mode\n");
-    ft_putstr("\t-e: encrypt mode (default mode | priority on -d)\n");
-    ft_putstr("\t-i: input file for message\n");
-    ft_putstr("\t-o: output file for hash\n");
-    ft_putstr("\t-k: send the key in hex\n");
-    ft_putstr("\t-p: send password in ascii\n");
-    ft_putstr("\t-s: send the salt in hex\n");
-    ft_putstr("\t-v: send initialization vector in hex\n");
-    ft_putstr("\t-P: print the vector/key and exit\n");
-    ft_putstr("\t-q: qui et mode\n");
-    ft_putstr("\t-nopad: disable standard block padding\n");
+    ft_putstr("\t-e\tencrypt mode (default mode) (-e has priority over -d)\n");
+    ft_putstr("\t-d\tdecrypt mode\n");
+    ft_putstr("\t-a\tdecode/encode the input/output in base64, depending on the encrypt mode\n");
+    ft_putstr("\t-ai\tdecode the input in base64\n");
+    ft_putstr("\t-ao\tencode the output in base64\n");
+    ft_putstr("\t-A\tUsed with -[a | ai | ao] to specify base64 buffer as a single line\n");
+    ft_putstr("\t-k\tsend the key in hex\n");
+    ft_putstr("\t-p\tsend password in ascii\n");
+    ft_putstr("\t-s\tsend the salt in hex\n");
+    ft_putstr("\t-v\tsend initialization vector in hex\n");
+    ft_putstr("\t-P\tprint the vector/key and exit\n");
+    ft_putstr("\t-nopad\tdisable standard block padding\n");
     // ft_putstr("\t-r: reverse the format of the output\n");
 
     // ft_ssl 3rd project
     ft_putstr("\nStandard commands:\n\tNot yet...\n");
+    freexit(EXIT_SUCCESS);
 }
 
 void    file_not_found(t_hash *hash)
@@ -48,12 +51,24 @@ void    file_not_found(t_hash *hash)
 
 // ---------------------- DATA output ---------------------------
 
-// void    key_output(Mem_8bits *p)
-// {
-//     Word_32bits *key = (Word_32bits *)p;
-//     for (Word_32bits *tmp = key; tmp && tmp < key + KEY_byteSz / WORD32_ByteSz; tmp += 1)
-//         ft_printHex(*tmp, WORD32_ByteSz);
-// }
+void    hash_64bytesbloc_output(t_hash *p)
+{
+    Mem_8bits   *hash = p->hash;
+    static int  shitret;
+
+    // Print blocs of 64-bytes 
+    while (hash < p->hash + p->hashByteSz)
+    {
+        if ((shitret = write(
+                ssl.fd_out,
+                hash,
+                hash + 64 < p->hash + p->hashByteSz ? 64 : p->hash + p->hashByteSz - hash
+            )) < 0)
+            write_failed("write() failed in hash_8bits_output() function (64-bits bloc part).\n");
+        ft_putstr("\n");
+        hash += 64;
+    }
+}
 
 void    hash_64bits_output(t_hash *p)
 {
@@ -89,31 +104,17 @@ void    hash_8bits_output(t_hash *p)
     // 64-bytes blocs output is only for base64 format without -A flag
     if ((ssl.flags & ao || (ssl.hash_func_addr == base64 && ssl.flags & e)) &&\
         ~ssl.flags & A)
-    {
-        // Print blocs of 64-bytes 
-        Mem_8bits   *hash = p->hash;
-        while (hash < p->hash + p->hashByteSz)
-        {
-            if ((shitret = write(
-                    ssl.fd_out,
-                    hash,
-                    hash + 64 < p->hash + p->hashByteSz ? 64 : p->hash + p->hashByteSz - hash
-                )) < 0)
-                write_failed("write() failed in hash_8bits_output() function (64-bits bloc part).\n");
-            ft_putstr("\n");
-            hash += 64;
-        }
-    }
+        hash_64bytesbloc_output(p);
     else
     {
-        // Find paddding bytes to not print
+        // Find number of padding bytes, to not print them
         int     n_padByte = 0;
         while (p->hash[p->hashByteSz - 1 - n_padByte] <= 0x08)
             n_padByte++;
-        // printf("One line:\n");
         // Print one line
         if ((shitret = write(ssl.fd_out, p->hash, p->hashByteSz - n_padByte)) < 0)
             write_failed("write() failed in hash_8bits_output() function (plain part).\n");
+        // ft_putstr("\n");
     }
 }
 

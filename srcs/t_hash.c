@@ -48,21 +48,12 @@ inline void t_hash_base64_encode_output(t_hash *hash)
 
     while (hash)
     {
-        // printf("\nt_hash_base64_encode_output           :");
-        // for (int i = 0; i < hash->hashByteSz / 8; i++)
-        //     printf("%lx", ((Long_64bits *)hash->hash)[i]);
-
-        // printf("\nhash->hash: %lx\n", *((Long_64bits *)hash->hash));
-
-        // endianReverse(hash->hash, hash->hashByteSz);
-
-        // printf("\nt_hash_base64_encode_output (len=%d): >%s<\n", hash->hashByteSz, hash->hash);
-        tmp = hash->hash;
-        hash->hash = base64(&hash->hash, hash->hashByteSz, (Long_64bits *)&hash->hashByteSz, e);
-        // hash->hashByteSz = ft_strlen(hash->hash);
-        // printf("t_hash_base64_encode_output (len=%d): >%s<\n", hash->hashByteSz, hash->hash);
-
-        free(tmp);
+        if (!hash->error)
+        {
+            tmp = hash->hash;
+            hash->hash = base64(&hash->hash, hash->hashByteSz, (Long_64bits *)&hash->hashByteSz, e);
+            free(tmp);
+        }
         hash = hash->next;
     }
 }

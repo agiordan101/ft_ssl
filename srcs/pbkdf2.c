@@ -1,18 +1,23 @@
-// #include "ft_ssl.h"
+#include "ft_ssl.h"
+
+Key_64bits  pbkdf2_sha256(Mem_8bits *pwd, Key_64bits *salt, int c)
+/*
+    Desired output length: KEY_byteSz = 8 bytes / 64 bits
+
+    Algorithm:
+
+    key = (U1 ^ U2 ^ ... ^ Uc) & 0xffffffffffffffff
+
+    U1 = sha256(pwd, salt)
+    U2 = sha256(pwd, U1)
+    ...
+    Uc = sha256(pwd, Uc-1)
+*/
+{
+    return *salt;
+}
 
 // Mem_8bits     *pbkdf2_sha256(Mem_8bits *pwd, Mem_8bits *salt, int c)
-// /*
-//     Desired output length: KEY_byteSz = 8 bytes / 64 bits
-
-//     Algorithm:
-
-//     key = (U1 ^ U2 ^ ... ^ Uc) & 0xffffffffffffffff
-
-//     U1 = sha256(pwd, salt)
-//     U2 = sha256(pwd, U1)
-//     ...
-//     Uc = sha256(pwd, Uc-1)
-// */
 // {
 //     // printf("\nPBKDF2 START\n");
 
