@@ -151,7 +151,10 @@ static void             init_vars(t_des *des)
         // A password is asked if it's not provided
         if (!des->password)
             ask_password(des);
-        // des->key = pbkdf2_sha256(des->password, des->salt, PBKDF2_iter);
+
+        des->key = pbkdf2_sha256(des->password, des->salt, PBKDF2_iter);
+        printf("cipher->key: %lx\n", des->key);
+        exit(0);
     }
 
     // Key scheldule

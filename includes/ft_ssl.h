@@ -177,8 +177,11 @@ typedef struct  s_sha
 // void        sha256_xor_32bits(Word_32bits *sha1, Word_32bits *sha2, Word_32bits **result);
 
 Mem_8bits   *sha256(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
-void        sha256_t_hash(t_hash *hash);
+// void        sha256_t_hash(t_hash *hash);
+
 void        sha256_xor_8bits(Mem_8bits *sha1, Mem_8bits *sha2, Mem_8bits **result);
+void        sha256_print(Mem_8bits *sha);
+
 
 
 /*
@@ -205,7 +208,7 @@ Mem_8bits   *base64(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *ha
     DES Data --------------------------------------
 */
 
-# define PBKDF2_iter    3
+# define PBKDF2_iter    1
 
 typedef enum    desmode {
     DESECB=1, DESCBC=2
@@ -223,7 +226,9 @@ typedef struct  s_des
     char        fpt[KEY_bitSz];     // Final   permutation table
 }               t_des;
 
-Key_64bits  pbkdf2_sha256(Mem_8bits *pwd, Key_64bits *salt, int c);
+Mem_8bits   *pbkdf2_sha256_hmac(Mem_8bits *key, int keyByteSz, Mem_8bits *msg, int msgByteSz);
+Mem_8bits   *pbkdf2_sha256_prfxors(Mem_8bits *pwd, int pwdByteSz, Key_64bits salt, int c, Word_32bits bloci);
+Key_64bits  pbkdf2_sha256(Mem_8bits *pwd, Key_64bits salt, int c);
 
 Mem_8bits   *des(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
 Long_64bits des_padding(Mem_8bits *bloc);

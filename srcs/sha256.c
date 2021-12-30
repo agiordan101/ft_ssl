@@ -139,3 +139,11 @@ inline void sha256_xor_8bits(Mem_8bits *sha1, Mem_8bits *sha2, Mem_8bits **resul
     for (uint i = 0; i < SHA256_byteSz; i++)
         (*result)[i] = sha1[i] ^ sha2[i];
 }
+
+inline void sha256_print(Mem_8bits *sha)
+{
+    printf("\nSHA256 HASH (len=%ld) >%s<\n", SHA256_byteSz, sha);
+    for (Word_32bits *tmp = (Word_32bits *)sha; tmp < (Word_32bits *)sha + SHA256_WordSz; tmp += 1)
+        ft_printHex(*tmp, WORD32_ByteSz);
+    printf("\n");
+}

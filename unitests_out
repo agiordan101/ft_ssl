@@ -465,4 +465,3 @@ Mem_8bits               *des(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_6
     else
         return des_encryption(*plaintext, ptByteSz, hashByteSz);
 }
- 
