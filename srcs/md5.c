@@ -98,6 +98,7 @@ Mem_8bits   *md5(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashB
     //     endianReverse((Mem_8bits *)(ciphertext + i), LONG64_ByteSz);
 
     (void)way;
-    *hashByteSz = MD5_byteSz;
-    return ft_memdup((Mem_8bits *)md5.hash, *hashByteSz);
+    if (hashByteSz)
+        *hashByteSz = MD5_byteSz;
+    return ft_memdup((Mem_8bits *)md5.hash, MD5_byteSz);
 }

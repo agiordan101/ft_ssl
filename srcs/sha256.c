@@ -126,8 +126,9 @@ Mem_8bits   *sha256(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *ha
         endianReverse((Mem_8bits *)tmp, WORD32_ByteSz);
 
     (void)way;
-    *hashByteSz = SHA256_byteSz;
-    return ft_memdup((Mem_8bits *)sha.hash, *hashByteSz);
+    if (hashByteSz)
+        *hashByteSz = SHA256_byteSz;
+    return ft_memdup((Mem_8bits *)sha.hash, SHA256_byteSz);
 }
 
 /*

@@ -102,7 +102,7 @@ void                endianReverse(Mem_8bits *mem, Long_64bits byteSz)
 //     }
 //     // printf("bit_permutations: %s\n", plaintext);
 //     printBits(ptperm, KEY_byteSz);
-//     printHex(ptperm, KEY_byteSz);
+//     printMemHex(ptperm, KEY_byteSz);
 
 //     printf("Answer:\n");
 //     printBits(parse_key(ft_strdup("14A7D67818CA18AD")), KEY_byteSz);

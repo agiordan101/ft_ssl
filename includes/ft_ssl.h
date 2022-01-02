@@ -119,7 +119,7 @@ Long_64bits     bits_permutations(Long_64bits mem, char *ptable, int bitLen);
 // Debug function, not used in this project
 void        printByte(char byte);
 void        printBits(void *p, int size);
-void        printHex(void *p, int size);
+void        printMemHex(void *p, int size);
 void        printWord(Word_32bits word);
 void        printLong(Long_64bits l);
 

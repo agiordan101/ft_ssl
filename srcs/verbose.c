@@ -57,15 +57,19 @@ void    printBits(void *p, int size)
 }
 
 // Debug function, not used in this project
-void    printHex(void *p, int size)
+void    printMemHex(void *p, int size)
 {
-    char *mem = (char *)p;
+    unsigned char *mem = (char *)p;
 
-    printf("Print memory hex >%s<\n", mem);
+    printf("\nPrint mem HEX >%s<\n", mem);
     for (int i = 0; i < size; i++)
+    {
         if (mem[i] < 0x10)
-            printf("0%x ", (unsigned int)mem[i]);
+            printf("0%x", mem[i]);
         else
-            printf("%x ", (unsigned int)mem[i]);
+            printf("%x", mem[i]);
+        if ((i + 1) % 4 == 0)
+            printf(" ");
+    }
     puts("");
 }
