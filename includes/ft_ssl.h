@@ -266,3 +266,4 @@ void    t_hash_output(t_hash *hash);
 
 
 size_t hmac_sha256(const void* key, const size_t keylen, const void* data, const size_t datalen, void* out, const size_t outlen);
+void PKCS5_PBKDF2_HMAC(unsigned char *password, size_t plen, unsigned char *salt, size_t slen, const unsigned long iteration_count, const unsigned long key_length, unsigned char *output);

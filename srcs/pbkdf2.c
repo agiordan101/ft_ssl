@@ -89,12 +89,12 @@ Mem_8bits   *pbkdf2_sha256_prfxors(Mem_8bits *pwd, int pwdByteSz, Mem_8bits *sal
     
     // printMemHex(salt, KEY_byteSz, "salt");
     // printMemHex((Mem_8bits *)&bloci, WORD32_ByteSz, "bloci_32bits_Big_Endian");
-    // printMemHex(sha_prev, SHA256_byteSz, "U0");
+    printMemHex(sha_prev, SHA256_byteSz, "U0");
 
     for (int i = 0; i < c; i++)
     {
         sha_curr = pbkdf2_sha256_hmac(pwd, pwdByteSz, sha_prev, SHA256_byteSz);
-        // printMemHex(sha_curr, SHA256_byteSz, "sha256 hmac result");
+        printMemHex(sha_curr, SHA256_byteSz, "sha256 hmac result");
 
         // XOR current sha with dynamic var sha_xor
         if (i)
@@ -105,7 +105,7 @@ Mem_8bits   *pbkdf2_sha256_prfxors(Mem_8bits *pwd, int pwdByteSz, Mem_8bits *sal
         ft_memcpy(sha_prev, sha_curr, SHA256_byteSz);
         free(sha_curr);
 
-        // printMemHex(sha_xor, SHA256_byteSz, "Ui");
+        printMemHex(sha_xor, SHA256_byteSz, "Ui");
     }
     free(sha_prev);
     return sha_xor;
