@@ -119,7 +119,7 @@ Long_64bits     bits_permutations(Long_64bits mem, char *ptable, int bitLen);
 // Debug function, not used in this project
 void        printByte(char byte);
 void        printBits(void *p, int size);
-void        printMemHex(void *p, int size);
+void        printMemHex(void *p, int size, char *msg);
 void        printWord(Word_32bits word);
 void        printLong(Long_64bits l);
 
@@ -208,7 +208,7 @@ Mem_8bits   *base64(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *ha
     DES Data --------------------------------------
 */
 
-# define PBKDF2_iter    1
+# define PBKDF2_iter    3
 
 typedef enum    desmode {
     DESECB=1, DESCBC=2
@@ -227,7 +227,7 @@ typedef struct  s_des
 }               t_des;
 
 Mem_8bits   *pbkdf2_sha256_hmac(Mem_8bits *key, int keyByteSz, Mem_8bits *msg, int msgByteSz);
-Mem_8bits   *pbkdf2_sha256_prfxors(Mem_8bits *pwd, int pwdByteSz, Key_64bits salt, int c, Word_32bits bloci);
+Mem_8bits   *pbkdf2_sha256_prfxors(Mem_8bits *pwd, int pwdByteSz, Mem_8bits *salt, int c, Word_32bits bloci);
 Key_64bits  pbkdf2_sha256(Mem_8bits *pwd, Key_64bits salt, int c);
 
 Mem_8bits   *des(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
@@ -261,3 +261,8 @@ void    t_hash_base64_decode_inputs(t_hash *hash);
 void    t_hash_base64_encode_output(t_hash *hash);
 void    t_hash_hashing(t_hash *hash);
 void    t_hash_output(t_hash *hash);
+
+// Not my code, for debugging:
+
+
+size_t hmac_sha256(const void* key, const size_t keylen, const void* data, const size_t datalen, void* out, const size_t outlen);

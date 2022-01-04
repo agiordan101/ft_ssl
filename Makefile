@@ -21,7 +21,8 @@ SRC			=	$(NAME).c \
 				padding.c \
 				libft.c \
 				output.c \
-				verbose.c
+				verbose.c \
+				hmac_sha256_gh.c
 
 BIN_PATH	=	./bins/
 BIN			=	$(SRC:.c=.o)

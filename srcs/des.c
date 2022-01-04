@@ -152,19 +152,38 @@ static void             init_vars(t_des *des)
         if (!des->password)
             ask_password(des);
 
-        Mem_8bits *msg = ft_memdup((Mem_8bits *)&des->salt, KEY_byteSz);
-        endianReverse(msg, KEY_byteSz);
+        /*          HMAC VERIFICATION           */
 
-        Mem_8bits *hmac = pbkdf2_sha256_hmac(
-            des->password, ft_strlen(des->password),
-            msg, KEY_byteSz
-        );
-        printf("\n\npbkdf2_sha256_hmac result (len=%d/%ld) >%s<\n", ft_strlen(hmac), SHA256_byteSz, hmac);
-        printMemHex(hmac, SHA256_byteSz);
-        exit(0);
+        // Mem_8bits *msg = ft_memdup((Mem_8bits *)&des->salt, KEY_byteSz);
+        // endianReverse(msg, KEY_byteSz);
 
-        des->key = pbkdf2_sha256(des->password, des->salt, PBKDF2_iter);
-        printf("cipher->key: %lx\n", des->key);
+        // Mem_8bits *hmac = pbkdf2_sha256_hmac(
+        //     des->password, ft_strlen(des->password),
+        //     msg, KEY_byteSz
+        // );
+        // // printf("\n\npbkdf2_sha256_hmac result (len=%d/%ld) >%s<\n", ft_strlen(hmac), SHA256_byteSz, hmac);
+        // printMemHex(hmac, SHA256_byteSz, "pbkdf2_sha256_hmac result");
+
+        // printf("\nGITHUB HMAC :\n");
+        // hmac = ft_memnew(SHA256_byteSz);
+        // hmac_sha256(des->password, ft_strlen(des->password), msg, KEY_byteSz, hmac, SHA256_byteSz);
+        // printMemHex(hmac, SHA256_byteSz, "hmac result");
+
+        /*            PBKDF2 VERIFICATION           */
+
+        // des->key = pbkdf2_sha256(des->password, des->salt, PBKDF2_iter);
+        for (int i = 0; i < 10; i++)
+        {
+            des->key = pbkdf2_sha256(des->password, des->salt, i);
+
+        }
+        printf("--- cipher->key ---> %lx\n", des->key);
+
+        // for (int i = 0; i < 10; i++)
+        // {
+        //     des->key = pbkdf2_sha256(des->password, des->salt, i);
+        //     // printf("--- cipher->key ---> %lx\n", des->key);
+        // }
         exit(0);
     }
 

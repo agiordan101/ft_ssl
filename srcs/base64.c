@@ -74,9 +74,9 @@ static inline void  split_3to4bytes(Mem_8bits b1, Mem_8bits b2, Mem_8bits b3, Me
 
 static Mem_8bits    *encode(Mem_8bits *plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz)
 {
-    *hashByteSz = get_len_encoded(ptByteSz);
+    int         hashlen = get_len_encoded(ptByteSz);
     Mem_8bits   bytecode[4];
-    Mem_8bits   *hash = ft_memnew(*hashByteSz);
+    Mem_8bits   *hash = ft_memnew(hashlen);
     Mem_8bits   *hash_tmp = hash;
 
     // printf("plaintext  (len=%d): >%s<\n", ptByteSz, plaintext);
@@ -118,8 +118,9 @@ static Mem_8bits    *encode(Mem_8bits *plaintext, Long_64bits ptByteSz, Long_64b
             bytecode[3] = '=';
         ft_memcpy(hash_tmp, (char *)bytecode, 4);
     }
-
-    // printf("hash end   (len=%d): >%s<\n", hashByteSz, hash);
+    // printf("hash end   (len=%d): >%s<\n", hashlen, hash);
+    if (hashByteSz)
+        *hashByteSz = hashlen;
     return hash;
 }
 
@@ -129,9 +130,9 @@ static Mem_8bits    *decode(Mem_8bits *plaintext, Long_64bits ptByteSz, Long_64b
     clean_base64(plaintext, &ptByteSz);
     // printf("plaintext decode (len=%d): >%s<\n", ptByteSz, plaintext);
 
-    *hashByteSz = get_len_decoded(plaintext, ptByteSz);
+    int hashlen = get_len_decoded(plaintext, ptByteSz);
     Mem_8bits   bytecode[4];
-    Mem_8bits   *hash = ft_memnew(*hashByteSz);
+    Mem_8bits   *hash = ft_memnew(hashlen);
     Mem_8bits   *hash_tmp = hash;
 
     Mem_8bits   *pt_end = plaintext + ptByteSz;
@@ -147,7 +148,9 @@ static Mem_8bits    *decode(Mem_8bits *plaintext, Long_64bits ptByteSz, Long_64b
         // printBits(hash_tmp, 3);
         hash_tmp += 3;
     }
-    // printf("hash end   (len=%d): >%s<\n", hashByteSz, hash);
+    if (hashByteSz)
+        *hashByteSz = hashlen;
+    // printf("hash end   (len=%d): >%s<\n", hashlen, hash);
     return hash;
 }
 

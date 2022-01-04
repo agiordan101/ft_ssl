@@ -151,7 +151,21 @@ static void             init_vars(t_des *des)
         // A password is asked if it's not provided
         if (!des->password)
             ask_password(des);
-        // des->key = pbkdf2_sha256(des->password, des->salt, PBKDF2_iter);
+
+        Mem_8bits *msg = ft_memdup((Mem_8bits *)&des->salt, KEY_byteSz);
+        endianReverse(msg, KEY_byteSz);
+
+        Mem_8bits *hmac = pbkdf2_sha256_hmac(
+            des->password, ft_strlen(des->password),
+            msg, KEY_byteSz
+        );
+        printf("\n\npbkdf2_sha256_hmac result (len=%d/%ld) >%s<\n", ft_strlen(hmac), SHA256_byteSz, hmac);
+        printMemHex(hmac, SHA256_byteSz);
+        exit(0);
+
+        des->key = pbkdf2_sha256(des->password, des->salt, PBKDF2_iter);
+        printf("cipher->key: %lx\n", des->key);
+        exit(0);
     }
 
     // Key scheldule
@@ -438,8 +452,9 @@ static Mem_8bits        *des_encryption(Mem_8bits *pt, Long_64bits ptByteSz, Lon
     // for (int i = 0; i < ptSz; i++)
     //     endianReverse((Mem_8bits *)(ciphertext + i), LONG64_ByteSz);
 
-    *hashByteSz = ptSz * LONG64_ByteSz;
-    return ft_memdup((Mem_8bits *)ciphertext, *hashByteSz);
+    if (hashByteSz)
+        *hashByteSz = ptSz * LONG64_ByteSz;
+    return ft_memdup((Mem_8bits *)ciphertext, ptSz * LONG64_ByteSz);
 }
 
 Mem_8bits               *des(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way)
