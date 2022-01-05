@@ -33,7 +33,7 @@ Mem_8bits   *XOR_concat_hash(Mem_8bits *key, Mem_8bits *pad, Mem_8bits *to_conca
     // printMemHex(pad, SHA256_byteSz, "Padding to XOR");
     // printf("XOR:\n");
     sha256_xor_8bits(key, pad, &key);
-    // printMemHex(key, SHA256_byteSz, "XOR");
+    printMemHex(key, SHA256_byteSz, "XOR");
 
     // printf("Concat:\n");
     ft_memcpy(concat, key, SHA256_byteSz);

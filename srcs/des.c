@@ -177,7 +177,7 @@ static void             init_vars(t_des *des)
         printf("\n\t[GITHUB PBKDF2]\n");
 
         Mem_8bits *out = ft_memnew(KEY_byteSz);
-        PKCS5_PBKDF2_HMAC(des->password, ft_strlen(des->password), msg, KEY_byteSz, 1, KEY_byteSz, out);
+        PKCS5_PBKDF2_HMAC(des->password, ft_strlen(des->password), msg, KEY_byteSz, 2, KEY_byteSz, out);
         printMemHex(out, KEY_byteSz, "PBKDF2 github result");
 
         // for (int i = 0; i < 10; i++)

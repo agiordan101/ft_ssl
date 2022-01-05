@@ -256,6 +256,7 @@ void sha2_update( sha2_context *ctx, const unsigned char *input, size_t ilen )
 
     if( left && ilen >= fill )
     {
+        printf("sha2_process because left=%d\tilen = %d\tfill = %d\n", left, ilen, fill);
         memcpy( (void *) (ctx->buffer + left),
                 (void *) input, fill );
         sha2_process( ctx, ctx->buffer );
@@ -266,6 +267,7 @@ void sha2_update( sha2_context *ctx, const unsigned char *input, size_t ilen )
 
     while( ilen >= 64 )
     {
+        printf("sha2_process because ilen >= 64 / left=%d\tilen = %d\tfill = %d\n", left, ilen, fill);
         sha2_process( ctx, input );
         input += 64;
         ilen  -= 64;
@@ -275,6 +277,7 @@ void sha2_update( sha2_context *ctx, const unsigned char *input, size_t ilen )
     {
         memcpy( (void *) (ctx->buffer + left),
                 (void *) input, ilen );
+        printMemHex(ctx->buffer, ilen + left, "ctx buff");
     }
 }
 
@@ -305,8 +308,11 @@ void sha2_finish( sha2_context *ctx, unsigned char output[32] )
     last = ctx->total[0] & 0x3F;
     padn = ( last < 56 ) ? ( 56 - last ) : ( 120 - last );
 
+    printf("\nsha2_finish :\n");
+    // printMemHex((Mem_8bits *)ctx->buffer, 64, "ctx->buffer");
     sha2_update( ctx, (unsigned char *) sha2_padding, padn );
     sha2_update( ctx, msglen, 8 );
+    // printMemHex((Mem_8bits *)ctx->buffer, 64, "ctx->buffer after padding and msglen");
 
     PUT_ULONG_BE( ctx->state[0], output,  0 );
     PUT_ULONG_BE( ctx->state[1], output,  4 );
@@ -359,9 +365,13 @@ void sha2_hmac_starts( sha2_context *ctx, const unsigned char *key, size_t keyle
         ctx->ipad[i] = (unsigned char)( ctx->ipad[i] ^ key[i] );
         ctx->opad[i] = (unsigned char)( ctx->opad[i] ^ key[i] );
     }
+    printf("ipad and opad XOR with key done.\n");
+    printMemHex(ctx->ipad, 64, "ctx->ipad");
+    printMemHex(ctx->opad, 64, "ctx->opad");
 
     sha2_starts( ctx, is224 );
     sha2_update( ctx, ctx->ipad, 64 );
+    printMemHex(ctx->ipad, 64, "ctx->ipad update in sha2_hmac_start()");
 
     memset( sum, 0, sizeof( sum ) );
 }
@@ -371,6 +381,7 @@ void sha2_hmac_starts( sha2_context *ctx, const unsigned char *key, size_t keyle
  */
 void sha2_hmac_update( sha2_context *ctx, const unsigned char *input, size_t ilen )
 {
+    printMemHex(input, ilen, "sha2_hmac_update with");
     sha2_update( ctx, input, ilen );
 }
 
@@ -386,10 +397,20 @@ void sha2_hmac_finish( sha2_context *ctx, unsigned char output[32] )
     hlen = ( is224 == 0 ) ? 32 : 28;
 
     sha2_finish( ctx, tmpbuf );
+    printf("\nfinish ihash.\n");
+
+    printf("\nBegin ohash :\n");
     sha2_starts( ctx, is224 );
+    
+    printf("\nUpdate with opad and tmpbuf :\n");
+    printMemHex(ctx->opad, 64, "ctx->opad");
     sha2_update( ctx, ctx->opad, 64 );
+    
+    printMemHex(tmpbuf, hlen, "tmpbuf");
     sha2_update( ctx, tmpbuf, hlen );
+    
     sha2_finish( ctx, output );
+    printMemHex((Mem_8bits *)output, 32, "output in sha2_hmac_finish");
 
     memset( tmpbuf, 0, sizeof( tmpbuf ) );
 }
@@ -443,6 +464,7 @@ void PKCS5_PBKDF2_HMAC(unsigned char *password, size_t plen,
 	unsigned long counter = 1;
 	unsigned long generated_key_length = 0;
 	while (generated_key_length < key_length) {
+
 		// U1 ends up in md1 and work
 		unsigned char c[4];
 		c[0] = (counter >> 24) & 0xff;
@@ -450,27 +472,35 @@ void PKCS5_PBKDF2_HMAC(unsigned char *password, size_t plen,
 		c[2] = (counter >> 8) & 0xff;
 		c[3] = (counter >> 0) & 0xff;
 
+        printMemHex(c, 4, "counter");
+        printMemHex(salt, KEY_byteSz, "salt");
+
 		sha2_hmac_starts(&ctx, password, plen, 0);
 		sha2_hmac_update(&ctx, salt, slen);
 		sha2_hmac_update(&ctx, c, 4);
 		sha2_hmac_finish(&ctx, md1);
+        printMemHex(md1, md_size, "md1 (Salt | i_32bits_BE))");
+
 		memcpy(work, md1, md_size);
-    printMemHex(work, 32, "U0");
+        printMemHex(work, 32, "U0");
+        exit(0);
 
 		unsigned long ic = 1;
 		for (ic = 1; ic < iteration_count; ic++) {
+
+            printf("\nITERATION %d\n\n", ic);
 			// U2 ends up in md1
 			sha2_hmac_starts(&ctx, password, plen, 0);
 			sha2_hmac_update(&ctx, md1, md_size);
 			sha2_hmac_finish(&ctx, md1);
-      printMemHex(md1, 32, "hmac");
+            printMemHex(md1, 32, "hmac");
 
 			// U1 xor U2
 			unsigned long i = 0;
 			for (i = 0; i < md_size; i++) {
 				work[i] ^= md1[i];
 			}
-      printMemHex(work, 32, "Ui");
+            printMemHex(work, 32, "Ui");
 			// and so on until iteration_count
 		}
 
