@@ -40,6 +40,16 @@ void    print_usage_exit()
     freexit(EXIT_SUCCESS);
 }
 
+void    pbkdf2_iter_error()
+{
+    ft_putstr("ft_ssl: ");
+    ft_putstr(ssl.hash_func);
+    ft_putstr(": Non-positive number \"");
+    ft_putnbr(ssl.fd_out, ssl.pbkdf2_iter);
+    ft_putstr("\" for -iter\n");
+    freexit(EXIT_SUCCESS);
+}
+
 void    file_not_found(t_hash *hash)
 {
     ft_putstr("ft_ssl: ");

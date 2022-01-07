@@ -501,6 +501,7 @@ void PKCS5_PBKDF2_HMAC(unsigned char *password, size_t plen,
             printf("\nITERATION %d\n\n", ic);
 			// U2 ends up in md1
 			sha2_hmac_starts(&ctx, password, plen, 0);
+            exit(0);
 			sha2_hmac_update(&ctx, md1, md_size);
 			sha2_hmac_finish(&ctx, md1);
             printMemHex(md1, 32, "hmac");

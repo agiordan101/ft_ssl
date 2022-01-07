@@ -41,10 +41,12 @@ typedef enum    flags {
     // Only Cypher
     d=1<<11, e=1<<12,
         // Only des
-        k_des=1<<13, p_des=1<<14, s_des=1<<15, v_des=1<<16, P_des=1<<17, nopad=1<<18
+        k_des=1<<13, p_des=1<<14, s_des=1<<15, v_des=1<<16, P_des=1<<17, nopad=1<<18,
+    // Only PBKDF2
+    pbkdf2_iter=1<<20,
 }               e_flags;
 # define AVFLAGS        (p_md + q + r + d + e + A + ai + ao + P_des + nopad + help)
-# define AVPARAM        (s_md + i_ + o + k_des + p_des + s_des + v_des)
+# define AVPARAM        (s_md + i_ + o + k_des + p_des + s_des + v_des + pbkdf2_iter)
 
 typedef enum    command {
     MD=1, CIPHER=2, STANDARD=4
@@ -71,6 +73,7 @@ void        malloc_failed(char *errormsg);
 void        open_failed(char *errormsg, char *file);
 void        write_failed(char *errormsg);
 
+int     	ft_atoi(const char *str);
 void	    ft_bzero(void *s, size_t n);
 void	    *ft_memcpy(void *dest, const void *src, size_t n);
 Mem_8bits   *ft_memnew(int byteSz);
@@ -94,11 +97,12 @@ void    	ft_putnbr(int fd, int n);
 void        ft_printHex(Long_64bits n, int byteSz);
 Mem_8bits   *ft_strHexToBin(Mem_8bits *str, int byteSz);
 
-
 void        output(t_hash *hash);
 void        key_output(Mem_8bits *p);
 void        md_hash_output(t_hash *p);      // Temporally
 void        print_usage_exit();
+void        pbkdf2_iter_error();
+
 
 
 /*
@@ -243,11 +247,12 @@ typedef struct  s_ssl
     char        *hash_func;
     Mem_8bits   *(*hash_func_addr)(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
     e_command   command;
-    t_des       des;
-
     e_flags     flags;
-    t_hash      *hash;
 
+    t_des       des;
+    int         pbkdf2_iter;
+
+    t_hash      *hash;
     char        *output_file;
     int         fd_out;
 }               t_ssl;

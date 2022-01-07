@@ -143,6 +143,12 @@ int     param_handler(e_flags flag, char *av_next, int *i)
         ssl.des.salt = parse_keys(av_next);
     else if (flag & v_des)
         ssl.des.vector = parse_keys(av_next);
+    else if (flag & pbkdf2_iter)
+    {
+        ssl.pbkdf2_iter = ft_atoi(av_next);
+        if (ssl.pbkdf2_iter <= 0)
+            pbkdf2_iter_error();
+    }
     (*i)++;
     return 0;
 }
@@ -191,6 +197,8 @@ e_flags strToFlag(char *str)
         return v_des;
     if (!ft_strcmp(str, "-nopad"))
         return nopad;
+    if (!ft_strcmp(str, "-iter"))
+        return pbkdf2_iter;
     if (!ft_strcmp(str, "-help"))
         return help;
     return 0;

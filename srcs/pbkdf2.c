@@ -56,13 +56,14 @@ Mem_8bits           *pbkdf2_sha256_hmac(Mem_8bits *key, int keyByteSz, Mem_8bits
         ipad[i] ^= keypad[i];
         opad[i] ^= keypad[i];
     }
+    // printMemHex(ipad, CHUNK_ByteSz, "K ^ ipad");
+    // printMemHex(opad, CHUNK_ByteSz, "K ^ opad");
 
     Mem_8bits *sha256_res = concat_and_hash(ipad, msg, msgByteSz);
     Mem_8bits *hmac_res = concat_and_hash(opad, sha256_res, SHA256_byteSz);
-    // // printMemHex(sha256_res, SHA256_byteSz, "ihash");
     free(sha256_res);
 
-    // printMemHex(hmac_res, SHA256_byteSz, "hmac result");
+    // printMemHex(hmac_res, SHA256_byteSz, "hmac result (ohash)");
     return hmac_res;
 }
 
@@ -80,6 +81,7 @@ static Mem_8bits    *pbkdf2_sha256_prfxors(Mem_8bits *pwd, int pwdByteSz, Key_64
 
     // U1 = PRF(password, U0)
     sha_xor = pbkdf2_sha256_hmac(pwd, pwdByteSz, sha_prev, KEY_byteSz + WORD32_ByteSz);
+    ft_memcpy(sha_prev, sha_xor, SHA256_byteSz);
 
     for (int i = 1; i < c; i++)
     {
@@ -124,9 +126,7 @@ Key_64bits  pbkdf2_sha256(Mem_8bits *pwd, Key_64bits salt, int c)
 {
     // T1 = F(Password, Salt, c, i) = U1 ^ U2 ^ ... ^ Uc
     Mem_8bits *key = pbkdf2_sha256_prfxors(pwd, ft_strlen(pwd), salt, c, 1);
-
     endianReverse(key, KEY_byteSz);
-    // printMemHex(key, SHA256_byteSz, "PBKDF2 out");
 
     // DK = T1 & (1 << 65 - 1)
     return *((Key_64bits *)key);
