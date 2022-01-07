@@ -1,4 +1,4 @@
-echo "For each command line, this script will not display anything if there is no error"
+echo "For each command line, this script will display duplicate things or nothing if there is no error"
 echo "ft_ssl encrypt / openssl decrypt ->"
 echo "1:"
 ./ft_ssl des-cbc -k 0123456789abcdef -v fedcba4242abcdef -i $1 -q | openssl des-cbc -K 0123456789abcdef -iv fedcba4242abcdef -out unitests_out -d && diff $1 unitests_out

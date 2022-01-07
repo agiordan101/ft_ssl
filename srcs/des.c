@@ -131,7 +131,6 @@ static void             init_vars(t_des *des)
     // Vector is only for CBC mode, ft_ssl failed if it's not provided
     if (des->vector)
     {
-        endianReverse((Mem_8bits *)&des->vector, KEY_byteSz);
         if (des->mode != DESCBC)
             ft_putstr("warning: iv not used by this cipher\n");
     }
@@ -170,7 +169,7 @@ static void             init_vars(t_des *des)
         // des->key = pbkdf2_sha256(des->password, des->salt, PBKDF2_iter);
         des->key = pbkdf2_sha256(des->password, des->salt, ssl.flags & pbkdf2_iter ? ssl.pbkdf2_iter : PBKDF2_iter);
         // printf("--- cipher->key ---> %lx\n", des->key);
-        
+
         // printf("\n\t[GITHUB PBKDF2]\n");
         // Mem_8bits *msg = ft_memdup((Mem_8bits *)&des->salt, KEY_byteSz);
         // endianReverse(msg, KEY_byteSz);
@@ -476,20 +475,30 @@ Mem_8bits               *des(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_6
 
     if (way & P_des)
     {
+        ssl.fd_out = 1;
         ft_putstdout("salt=");
-        ft_printHex(ssl.des.salt, LONG64_ByteSz);
+        ft_printHex(ssl.des.salt, KEY_byteSz);
         ft_putstdout("\nkey=");
-        ft_printHex(ssl.des.key, LONG64_ByteSz);
+        ft_printHex(ssl.des.key, KEY_byteSz);
+        if (ssl.des.mode == DESCBC)
+        {
+            ft_putstdout("\niv=");
+            ft_printHex(ssl.des.vector, KEY_byteSz);
+        }
         ft_putstdout("\n");
         freexit(EXIT_SUCCESS);
     }
-    else if (way & e)
-        return des_encryption(*plaintext, ptByteSz, hashByteSz);
-    else if (way & d)
-    {
-        set_keys_for_decryption(&ssl.des);
-        return des_decryption(*plaintext, ptByteSz, hashByteSz);
-    }
     else
-        return des_encryption(*plaintext, ptByteSz, hashByteSz);
+    {
+        endianReverse((Mem_8bits *)&ssl.des.vector, KEY_byteSz); // Do this now to print iv/vector exactly like openssl with P_des flag
+        if (way & e)
+            return des_encryption(*plaintext, ptByteSz, hashByteSz);
+        else if (way & d)
+        {
+            set_keys_for_decryption(&ssl.des);
+            return des_decryption(*plaintext, ptByteSz, hashByteSz);
+        }
+        else
+            return des_encryption(*plaintext, ptByteSz, hashByteSz);
+    }
 }

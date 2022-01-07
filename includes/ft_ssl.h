@@ -92,6 +92,7 @@ char        *ft_hextoStr(Long_64bits nbr);
 char        *ft_hexToBin(Long_64bits n, int byteSz);
 
 void	    ft_putstr(char *s);
+void    	ft_putstrfd(int fd, char *s);
 void    	ft_putstdout(char *s);
 void    	ft_putnbr(int fd, int n);
 void        ft_printHex(Long_64bits n, int byteSz);
@@ -212,7 +213,7 @@ Mem_8bits   *base64(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *ha
     DES Data --------------------------------------
 */
 
-# define PBKDF2_iter    3
+# define PBKDF2_iter    10000
 
 typedef enum    desmode {
     DESECB=1, DESCBC=2

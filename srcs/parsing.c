@@ -112,7 +112,7 @@ Key_64bits  parse_keys(char *av_next)
     // No padding if the right number of zero bytes left is here
     if (hex_zero_count > str_zero_count)
     {
-        ft_putstr("hex string is too short, padding with zero bytes to length\n");
+        ft_putstrfd(2, "hex string is too short, padding with zero bytes to length\n");
         key <<= (hex_zero_count - str_zero_count) * 4;
     }
     // printf("parse_keys: %lx\n", key);

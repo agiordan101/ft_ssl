@@ -146,6 +146,13 @@ inline void	ft_putstdout(char *s)
     int ret = write(1, s, ft_strlen(s));
 }
 
+inline void	ft_putstrfd(int fd, char *s)
+{
+    int ret = write(fd, s, ft_strlen(s));
+    if (ret < 0)
+        write_failed("write() failed in ft_putstr()");
+}
+
 inline void	ft_putstr(char *s)
 {
     int ret = write(ssl.fd_out, s, ft_strlen(s));

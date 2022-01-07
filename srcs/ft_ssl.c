@@ -8,9 +8,7 @@
         .. -q -r = .. -q car -r s'annule en présence de -q
 
     To do :
-        pbkdf2 à faire
         -nosalt             Do not use salt in the KDF
-        -iter +int          Specify the iteration count and force use of PBKDF2
         shuffle usage right order
 
 
@@ -21,7 +19,12 @@
 
     Attention -a et -a -A ne sortent pas la meme chose (Seulement un \n qui difere)
 
-    Attention aux redirection !! Ecrire ce qu'il faut sur la sortie d'erreur
+    Attention aux redirection !! Ne pas perturber le hash
+    Les messages sur la sortie d'erreur
+    Les hash sur le ssl.fd_out
+
+    Ajouter le magic number "Salted__" à l'affichage d'un hash en ascii lorsqu'un sel est utilisé (Uniquement utilisé dans pbkdf2 pour l'instant)
+    Skip le magic number lors de la lecture d'un hash en ascii
 
 */
 
