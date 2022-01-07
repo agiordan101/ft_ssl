@@ -179,6 +179,7 @@ void    md_output(t_hash *hash)
         md_reversed_output(hash);
     else
         classic_output(hash, WORD32_ByteSz);
+    ft_putstr("\n");
 }
 
 // ---------------------- CIPHER output ---------------------------
@@ -221,7 +222,4 @@ void    output(t_hash *hash)
         cipher_output(hash);
     else
         ft_putstdout("This command doesn't handle an output.");
-
-    // char c = '\n';
-    // c = write(ssl.fd_out, &c, 1);
 }

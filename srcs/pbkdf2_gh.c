@@ -242,6 +242,7 @@ void sha2_update( sha2_context *ctx, const unsigned char *input, size_t ilen )
     size_t fill;
     unsigned long left;
 
+    printf("sha2_update ...\n");
     if( ilen <= 0 )
         return;
 
@@ -256,28 +257,32 @@ void sha2_update( sha2_context *ctx, const unsigned char *input, size_t ilen )
 
     if( left && ilen >= fill )
     {
-        printf("sha2_process because left=%d\tilen = %d\tfill = %d\n", left, ilen, fill);
+        printf("sha2_process because left && ilen >= fill ----- left=%d\tilen = %d\tfill = %d\n", left, ilen, fill);
         memcpy( (void *) (ctx->buffer + left),
                 (void *) input, fill );
+        printMemHex(ctx->buffer, left + fill, "sha2 process of");
         sha2_process( ctx, ctx->buffer );
         input += fill;
         ilen  -= fill;
         left = 0;
+        printMemHex(ctx->state, SHA256_byteSz, "sha2 result");
     }
 
     while( ilen >= 64 )
     {
-        printf("sha2_process because ilen >= 64 / left=%d\tilen = %d\tfill = %d\n", left, ilen, fill);
+        printf("sha2_process because ilen >= 64 ----- left=%d\tilen = %d\tfill = %d\n", left, ilen, fill);
+        printMemHex(input, ilen, "sha2 process of ");
         sha2_process( ctx, input );
         input += 64;
         ilen  -= 64;
+        printMemHex(ctx->state, SHA256_byteSz, "sha2 result");
     }
 
     if( ilen > 0 )
     {
         memcpy( (void *) (ctx->buffer + left),
                 (void *) input, ilen );
-        printMemHex(ctx->buffer, ilen + left, "ctx buff");
+        printMemHex(ctx->buffer, ilen + left, "sha2_update ctx->buffer");
     }
 }
 
@@ -308,8 +313,8 @@ void sha2_finish( sha2_context *ctx, unsigned char output[32] )
     last = ctx->total[0] & 0x3F;
     padn = ( last < 56 ) ? ( 56 - last ) : ( 120 - last );
 
-    printf("\nsha2_finish :\n");
-    // printMemHex((Mem_8bits *)ctx->buffer, 64, "ctx->buffer");
+    printf("\nsha2_finish (process sha2 of ctx->buffer) :\n");
+    printMemHex((Mem_8bits *)ctx->buffer, 64, "ctx->buffer");
     sha2_update( ctx, (unsigned char *) sha2_padding, padn );
     sha2_update( ctx, msglen, 8 );
     // printMemHex((Mem_8bits *)ctx->buffer, 64, "ctx->buffer after padding and msglen");
@@ -324,6 +329,8 @@ void sha2_finish( sha2_context *ctx, unsigned char output[32] )
 
     if( ctx->is224 == 0 )
         PUT_ULONG_BE( ctx->state[7], output, 28 );
+    printMemHex((Mem_8bits *)output, 32, "sha2 finish resulting hash");
+    // exit(0);
 }
 
 /*
@@ -356,6 +363,7 @@ void sha2_hmac_starts( sha2_context *ctx, const unsigned char *key, size_t keyle
         keylen = ( is224 ) ? 28 : 32;
         key = sum;
     }
+    printMemHex(key, keylen, "Init key");
 
     memset( ctx->ipad, 0x36, 64 );
     memset( ctx->opad, 0x5C, 64 );
@@ -365,13 +373,14 @@ void sha2_hmac_starts( sha2_context *ctx, const unsigned char *key, size_t keyle
         ctx->ipad[i] = (unsigned char)( ctx->ipad[i] ^ key[i] );
         ctx->opad[i] = (unsigned char)( ctx->opad[i] ^ key[i] );
     }
-    printf("ipad and opad XOR with key done.\n");
+    printf("sha2_hmac_starts\nipad and opad XOR with key done.\n");
     printMemHex(ctx->ipad, 64, "ctx->ipad");
     printMemHex(ctx->opad, 64, "ctx->opad");
 
     sha2_starts( ctx, is224 );
     sha2_update( ctx, ctx->ipad, 64 );
-    printMemHex(ctx->ipad, 64, "ctx->ipad update in sha2_hmac_start()");
+    // printMemHex(ctx->buffer, 64, "ctx->ipad update in sha2_hmac_start()");
+    printf("Prepare sha2 to hash ipad\n");
 
     memset( sum, 0, sizeof( sum ) );
 }
@@ -381,7 +390,7 @@ void sha2_hmac_starts( sha2_context *ctx, const unsigned char *key, size_t keyle
  */
 void sha2_hmac_update( sha2_context *ctx, const unsigned char *input, size_t ilen )
 {
-    printMemHex(input, ilen, "sha2_hmac_update with");
+    printMemHex(input, ilen, "sha2 update");
     sha2_update( ctx, input, ilen );
 }
 
@@ -395,9 +404,10 @@ void sha2_hmac_finish( sha2_context *ctx, unsigned char output[32] )
 
     is224 = ctx->is224;
     hlen = ( is224 == 0 ) ? 32 : 28;
+    printf("sha2_hmac_finish\n");
 
     sha2_finish( ctx, tmpbuf );
-    printf("\nfinish ihash.\n");
+    printf("\nsha2 finish.\n");
 
     printf("\nBegin ohash :\n");
     sha2_starts( ctx, is224 );
@@ -472,8 +482,8 @@ void PKCS5_PBKDF2_HMAC(unsigned char *password, size_t plen,
 		c[2] = (counter >> 8) & 0xff;
 		c[3] = (counter >> 0) & 0xff;
 
-        printMemHex(c, 4, "counter");
-        printMemHex(salt, KEY_byteSz, "salt");
+        // printMemHex(c, 4, "counter");
+        // printMemHex(salt, KEY_byteSz, "salt");
 
 		sha2_hmac_starts(&ctx, password, plen, 0);
 		sha2_hmac_update(&ctx, salt, slen);
@@ -483,7 +493,7 @@ void PKCS5_PBKDF2_HMAC(unsigned char *password, size_t plen,
 
 		memcpy(work, md1, md_size);
         printMemHex(work, 32, "U0");
-        exit(0);
+        // exit(0);
 
 		unsigned long ic = 1;
 		for (ic = 1; ic < iteration_count; ic++) {

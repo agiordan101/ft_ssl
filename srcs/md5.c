@@ -94,8 +94,8 @@ Mem_8bits   *md5(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashB
     }
 
     // Restore right endianness order
-    // for (int i = 0; i < ptSz; i++)
-    //     endianReverse((Mem_8bits *)(ciphertext + i), LONG64_ByteSz);
+    for (int i = 0; i < MD5_WordSz; i++)
+        endianReverse((Mem_8bits *)(md5.hash + i), WORD32_ByteSz);
 
     (void)way;
     if (hashByteSz)

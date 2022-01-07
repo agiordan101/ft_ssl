@@ -174,18 +174,18 @@ static void             init_vars(t_des *des)
         des->key = pbkdf2_sha256(des->password, des->salt, 1);
         // printf("--- cipher->key ---> %lx\n", des->key);
         
-        printf("\n\t[GITHUB PBKDF2]\n");
+        // printf("\n\t[GITHUB PBKDF2]\n");
 
-        Mem_8bits *out = ft_memnew(KEY_byteSz);
-        PKCS5_PBKDF2_HMAC(des->password, ft_strlen(des->password), msg, KEY_byteSz, 2, KEY_byteSz, out);
-        printMemHex(out, KEY_byteSz, "PBKDF2 github result");
+        // Mem_8bits *out = ft_memnew(KEY_byteSz);
+        // PKCS5_PBKDF2_HMAC(des->password, ft_strlen(des->password), msg, KEY_byteSz, 1, KEY_byteSz, out);
+        // printMemHex(out, KEY_byteSz, "PBKDF2 github result");
 
         // for (int i = 0; i < 10; i++)
         // {
         //     des->key = pbkdf2_sha256(des->password, des->salt, i);
         //     // printf("--- cipher->key ---> %lx\n", des->key);
         // }
-        exit(0);
+        // exit(0);
     }
 
     // Key scheldule

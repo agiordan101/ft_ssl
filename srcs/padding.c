@@ -46,6 +46,7 @@ void        md_padding(Mem_8bits **data, Long_64bits *byteSz, char reverseByteSz
     // Overwrite the last 8 bytes of last chunk with input message bits size
     ft_memcpy(*data + extend_byteSz - LONG64_ByteSz, byteSz_mem, LONG64_ByteSz);
 
+    // printMemHex(*data, extend_byteSz, "md padding");
     *byteSz = extend_byteSz;
 }
 
