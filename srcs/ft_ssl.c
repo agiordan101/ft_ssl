@@ -26,6 +26,8 @@
     Ajouter le magic number "Salted__" à l'affichage d'un hash en ascii lorsqu'un sel est utilisé (Uniquement utilisé dans pbkdf2 pour l'instant)
     Skip le magic number lors de la lecture d'un hash en ascii
 
+    REMETTRE LES FLAGS DE COMPILATION DANS LE MAKEFILE PTN
+
 */
 
 t_ssl    ssl;
