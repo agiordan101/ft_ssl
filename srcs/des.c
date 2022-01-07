@@ -154,8 +154,8 @@ static void             init_vars(t_des *des)
 
         /*          HMAC VERIFICATION           */
 
-        Mem_8bits *msg = ft_memdup((Mem_8bits *)&des->salt, KEY_byteSz);
-        endianReverse(msg, KEY_byteSz);
+        // Mem_8bits *msg = ft_memdup((Mem_8bits *)&des->salt, KEY_byteSz);
+        // endianReverse(msg, KEY_byteSz);
 
         // Mem_8bits *hmac = pbkdf2_sha256_hmac(
         //     des->password, ft_strlen(des->password),
@@ -171,8 +171,8 @@ static void             init_vars(t_des *des)
         /*            PBKDF2 VERIFICATION           */
 
         // des->key = pbkdf2_sha256(des->password, des->salt, PBKDF2_iter);
-        des->key = pbkdf2_sha256(des->password, des->salt, 1);
-        // printf("--- cipher->key ---> %lx\n", des->key);
+        des->key = pbkdf2_sha256(des->password, des->salt, 2);
+        printf("--- cipher->key ---> %lx\n", des->key);
         
         // printf("\n\t[GITHUB PBKDF2]\n");
 
@@ -180,12 +180,6 @@ static void             init_vars(t_des *des)
         // PKCS5_PBKDF2_HMAC(des->password, ft_strlen(des->password), msg, KEY_byteSz, 1, KEY_byteSz, out);
         // printMemHex(out, KEY_byteSz, "PBKDF2 github result");
 
-        // for (int i = 0; i < 10; i++)
-        // {
-        //     des->key = pbkdf2_sha256(des->password, des->salt, i);
-        //     // printf("--- cipher->key ---> %lx\n", des->key);
-        // }
-        // exit(0);
     }
 
     // Key scheldule

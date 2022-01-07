@@ -1,71 +1,47 @@
 #include "ft_ssl.h"
 
-static Mem_8bits    *hmac_init_key_SHA256_byteSz(Mem_8bits *key, int keyByteSz)
+static inline Mem_8bits *hmac_init_key_SHA256_byteSz(Mem_8bits *key, int keyByteSz, Mem_8bits *keypad)
 {
-    Mem_8bits *tmp;
-
-    // Create new key
     if (keyByteSz > SHA256_byteSz)
     {
         // Hash old key to have keyByteSz = SHA256_ByteSz
-        tmp = ft_memdup(key, keyByteSz);    // Duplicate before sha256
-        key = sha256(&tmp, keyByteSz, (Long_64bits *)&keyByteSz, e);
+        Mem_8bits *tmp = ft_memdup(key, keyByteSz);    // Duplicate before sha256
+        key = sha256(&tmp, keyByteSz, NULL, 0);
+        ft_memcpy(keypad, key, SHA256_byteSz);
+        free(tmp);
+        free(key);
     }
     else
     {
         // Pad old key with zeros until keyByteSz = SHA256_ByteSz
-        tmp = key;
-        key = ft_memnew(SHA256_byteSz);
-        ft_memcpy(key, tmp, keyByteSz);
+        ft_bzero(keypad, SHA256_byteSz);
+        ft_memcpy(keypad, key, keyByteSz);
     }
     return key;
 }
 
-Mem_8bits   *XOR_concat_hash(Mem_8bits *key, Mem_8bits *pad, Mem_8bits *to_concat, int to_concatByteSz)
+static Mem_8bits    *concat_and_hash(Mem_8bits *keyxor, Mem_8bits *to_concat, int to_concatByteSz)
 {
-    // // // key / pad length: SHA256_byteSz (Not anymore)
-    // key / pad length: CHUNK_byteSz
-    int         pad_byteSz = CHUNK_ByteSz;
-    int         concatByteSz = pad_byteSz + to_concatByteSz;
-    Mem_8bits   *concat = ft_memnew(concatByteSz);   // Need to be malloc for sha256() padding.
-    Mem_8bits   *hash_ret;
+    /*
+        Concat key xored with a msg and hash the result
+        key / ipad / opad length: CHUNK_byteSz (Depending on PRF block size: sha256 -> chunks of 512bits)
+    */
+    int         concatByteSz = CHUNK_ByteSz + to_concatByteSz;
+    Mem_8bits   *concat = ft_memnew(concatByteSz);   // Need to be malloc for sha256() function
 
-    // printf("\n\t[XOR_concat_hash begin]\n");
-    // // printMemHex(key, SHA256_byteSz, "Key to XOR");
-    // printMemHex(pad, pad_byteSz, "Padding");
-    // printMemHex(to_concat, to_concatByteSz, "to_concat");
-    // sha256_xor_8bits(key, pad, &key);
-    // // printMemHex(key, SHA256_byteSz, "K ^ pad");
-    // ft_memcpy(concat, key, SHA256_byteSz);
-    // ft_memcpy(concat + SHA256_byteSz, to_concat, to_concatByteSz);
-    // // printMemHex(concat, concatByteSz, "K ^ pad || concat");
-
-    ft_memcpy(concat, pad, pad_byteSz);
-    ft_memcpy(concat + pad_byteSz, to_concat, to_concatByteSz);
+    ft_memcpy(concat, keyxor, CHUNK_ByteSz);
+    ft_memcpy(concat + CHUNK_ByteSz, to_concat, to_concatByteSz);
     // printMemHex(concat, concatByteSz, "K ^ pad || concat");
 
-    hash_ret = sha256((Mem_8bits **)&concat, concatByteSz, NULL, 0);
-    // printMemHex(hash_ret, SHA256_byteSz, "h(K ^ pad || concat)");
-    // printf("\n\t[XOR_concat_hash end]\n");
+    Mem_8bits *hash_ret = sha256((Mem_8bits **)&concat, concatByteSz, NULL, 0);
     free(concat);
-    (void)key;
+    // printMemHex(hash_ret, SHA256_byteSz, "h(K ^ pad || concat)");
     return hash_ret;
 }
 
-Mem_8bits   *pbkdf2_sha256_hmac(Mem_8bits *key, int keyByteSz, Mem_8bits *msg, int msgByteSz)
+Mem_8bits           *pbkdf2_sha256_hmac(Mem_8bits *key, int keyByteSz, Mem_8bits *msg, int msgByteSz)
 {
-    // static Mem_8bits    ipad[SHA256_byteSz] = {
-    //     0x36, 0x36, 0x36, 0x36, 0x36, 0x36, 0x36, 0x36,
-    //     0x36, 0x36, 0x36, 0x36, 0x36, 0x36, 0x36, 0x36,
-    //     0x36, 0x36, 0x36, 0x36, 0x36, 0x36, 0x36, 0x36,
-    //     0x36, 0x36, 0x36, 0x36, 0x36, 0x36, 0x36, 0x36
-    // };
-    // static Mem_8bits    opad[SHA256_byteSz] = {
-    //     0x5c, 0x5c, 0x5c, 0x5c, 0x5c, 0x5c, 0x5c, 0x5c,
-    //     0x5c, 0x5c, 0x5c, 0x5c, 0x5c, 0x5c, 0x5c, 0x5c,
-    //     0x5c, 0x5c, 0x5c, 0x5c, 0x5c, 0x5c, 0x5c, 0x5c,
-    //     0x5c, 0x5c, 0x5c, 0x5c, 0x5c, 0x5c, 0x5c, 0x5c
-    // };
+    Mem_8bits   keypad[CHUNK_ByteSz];
     Mem_8bits   ipad[CHUNK_ByteSz];
     Mem_8bits   opad[CHUNK_ByteSz];
     for (int i = 0; i < CHUNK_ByteSz; i++)
@@ -74,60 +50,48 @@ Mem_8bits   *pbkdf2_sha256_hmac(Mem_8bits *key, int keyByteSz, Mem_8bits *msg, i
         opad[i] = 0x5C;
     }
 
-    // printf("\n[pbkdf2_sha256_hmac begin]\n");
-    // // printMemHex(key, keyByteSz, "Key");
-    // // printMemHex(msg, msgByteSz, "Msg");
-
-    key = hmac_init_key_SHA256_byteSz(key, keyByteSz);  // Malloc a key
-    // printMemHex(key, SHA256_byteSz, "Init key");
-
+    hmac_init_key_SHA256_byteSz(key, keyByteSz, keypad);  // Malloc a key
     for (int i = 0; i < keyByteSz; i++)
     {
-        ipad[i] ^= key[i];
-        opad[i] ^= key[i];
+        ipad[i] ^= keypad[i];
+        opad[i] ^= keypad[i];
     }
 
-    Mem_8bits *sha256_res = XOR_concat_hash(ft_memdup(key, SHA256_byteSz), ipad, msg, msgByteSz);
-    Mem_8bits *hmac_res = XOR_concat_hash(key, opad, sha256_res, SHA256_byteSz);
+    Mem_8bits *sha256_res = concat_and_hash(ipad, msg, msgByteSz);
+    Mem_8bits *hmac_res = concat_and_hash(opad, sha256_res, SHA256_byteSz);
     // // printMemHex(sha256_res, SHA256_byteSz, "ihash");
     free(sha256_res);
-    free(key);
 
     // printMemHex(hmac_res, SHA256_byteSz, "hmac result");
-    // printf("\n[pbkdf2_sha256_hmac end]\n");
     return hmac_res;
 }
 
-Mem_8bits   *pbkdf2_sha256_prfxors(Mem_8bits *pwd, int pwdByteSz, Mem_8bits *salt, int c, Word_32bits bloci)
+static Mem_8bits    *pbkdf2_sha256_prfxors(Mem_8bits *pwd, int pwdByteSz, Key_64bits salt, int c, Word_32bits bloci)
 {
+    Mem_8bits   sha_prev[SHA256_byteSz];
     Mem_8bits   *sha_curr;
     Mem_8bits   *sha_xor;
-    Mem_8bits   *sha_prev = ft_memnew(SHA256_byteSz);
 
-    // Set U0 = Salt || bloci_32bits_Big_Endian
+    // Set U0 = Salt_64bits_Big_Endian || bloci_32bits_Big_Endian
+    endianReverse((Mem_8bits *)&salt, KEY_byteSz);
     endianReverse((Mem_8bits *)&bloci, WORD32_ByteSz);
-    ft_memcpy(sha_prev, salt, KEY_byteSz);
+    ft_memcpy(sha_prev, (Mem_8bits *)&salt, KEY_byteSz);
     ft_memcpy(sha_prev + KEY_byteSz, (Mem_8bits *)&bloci, WORD32_ByteSz);
-    sha_xor = pbkdf2_sha256_hmac(pwd, pwdByteSz, sha_prev, KEY_byteSz + WORD32_ByteSz);
 
-    // // printMemHex(salt, KEY_byteSz, "salt");
-    // // printMemHex((Mem_8bits *)&bloci, WORD32_ByteSz, "bloci_32bits_Big_Endian");
-    // printMemHex(sha_prev, SHA256_byteSz, "U0");
+    // U1 = PRF(password, U0)
+    sha_xor = pbkdf2_sha256_hmac(pwd, pwdByteSz, sha_prev, KEY_byteSz + WORD32_ByteSz);
 
     for (int i = 1; i < c; i++)
     {
+        // Un = PRF(password, Un-1)
         sha_curr = pbkdf2_sha256_hmac(pwd, pwdByteSz, sha_prev, SHA256_byteSz);
-        // // printMemHex(sha_curr, SHA256_byteSz, "sha256 hmac result");
 
         // XOR current sha with dynamic var sha_xor
         sha256_xor_8bits(sha_xor, sha_curr, &sha_xor);
 
         ft_memcpy(sha_prev, sha_curr, SHA256_byteSz);
         free(sha_curr);
-
-        // printMemHex(sha_xor, SHA256_byteSz, "Ui");
     }
-    free(sha_prev);
     return sha_xor;
 }
 
@@ -139,35 +103,31 @@ Key_64bits  pbkdf2_sha256(Mem_8bits *pwd, Key_64bits salt, int c)
     Algorithm:
 
         DK = PBKDF2(PRF, Password, Salt, c, dkLen)
-        DK = T1 || T2 || ... || Tdklen/hlen
+        DK = T1 || T2 || ... || Tdklen/hlen             (Concatenation)
 
         With:
             dklen = Output key size of pbkdf2
-            hlen = hash_func output hash size
-            Ti = F(Password, Salt, c, i)
-            Ti = U1 ^ U2 ^ ... ^ Uc
+            hlen = PRF output hash size
+            Ti = F(Password, Salt, c, i) = U1 ^ U2 ^ ... ^ Uc
 
             With:
-                U1 = PRF(Password, Salt || INT_32_BE(i))
+                U1 = PRF(Password, 64_bits_BE(Salt) || 32_bits_BE(i))
                 U2 = PRF(Password, U1)
                 ...
                 Uc = PRF(Password, Uc-1)
     
     With sha256 as pseudo random function (PRF),
-    hash output length is greater than the desired key length: 256 > 64 (bits)
+    Hash output length is greater than the desired key length: 256 > 64 (bits)
     Conclusion: T1 || T2 || ... || Tdklen/hlen  =>  T1 & (1 << 65 - 1)
 
 */
 {
-    Mem_8bits *salt_bytestream = ft_memdup((Mem_8bits *)&salt, KEY_byteSz);
-    endianReverse(salt_bytestream, KEY_byteSz);
-
-    // // printMemHex(pwd, SHA256_byteSz, "pwd");
-    // // printMemHex(salt_bytestream, KEY_byteSz, "salt");
-    
-    Mem_8bits *key = pbkdf2_sha256_prfxors(pwd, ft_strlen(pwd), salt_bytestream, c, 1);
+    // T1 = F(Password, Salt, c, i) = U1 ^ U2 ^ ... ^ Uc
+    Mem_8bits *key = pbkdf2_sha256_prfxors(pwd, ft_strlen(pwd), salt, c, 1);
 
     endianReverse(key, KEY_byteSz);
     // printMemHex(key, SHA256_byteSz, "PBKDF2 out");
+
+    // DK = T1 & (1 << 65 - 1)
     return *((Key_64bits *)key);
 }

@@ -21,7 +21,6 @@
 
     Attention -a et -a -A ne sortent pas la meme chose (Seulement un \n qui difere)
 
-
     Attention aux redirection !! Ecrire ce qu'il faut sur la sortie d'erreur
 
 */
