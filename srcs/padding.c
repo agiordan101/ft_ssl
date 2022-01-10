@@ -80,14 +80,14 @@ void        des_unpadding(Long_64bits *lastbloc, int *ptSz)
         *lastbloc = *lastbloc & (((Long_64bits)1 << (64 - lastbyte * 8)) - 1);
     else if (~ssl.flags & nopad)
     {
-        ft_putstrfd(STDERR, "./ft_ssl: Bad decrypt: No padding found in decrypted data.\n");
+        ft_putstderr("./ft_ssl: Bad decrypt: No padding found in decrypted data.\n");
         freexit(EXIT_FAILURE);
     }
     else
         return ;
     if (ssl.flags & nopad)
     {
-        ft_putstrfd(STDERR, "./ft_ssl: -nopad is conflicting with padding found in decrypted data.\n");
+        ft_putstderr("./ft_ssl: -nopad is conflicting with padding found in decrypted data.\n");
         freexit(EXIT_FAILURE);
     }
 }

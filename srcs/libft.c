@@ -1,23 +1,55 @@
 #include "ft_ssl.h"
 
-inline int	ft_strlen(char *p)
-{
-    unsigned long long *str = (unsigned long long *)p;
-	int	count = 0;
+// About memory (void *) ------------------------------------------------------------------
 
-    if (str)
-        while (1)
-            if ((++count && !(*str & 0x00000000000000FF)) ||\
-                (++count && !(*str & 0x000000000000FF00)) ||\
-                (++count && !(*str & 0x0000000000FF0000)) ||\
-                (++count && !(*str & 0x00000000FF000000)) ||\
-                (++count && !(*str & 0x000000FF00000000)) ||\
-                (++count && !(*str & 0x0000FF0000000000)) ||\
-                (++count && !(*str & 0x00FF000000000000)) ||\
-                (++count && !(*str++ & 0xFF00000000000000)))
-                return (count - 1);
-    return 0;
+inline void	ft_bzero(void *s, size_t n)
+{
+	size_t  i;
+    char    *cast = (char *)s;
+
+	i = 0;
+	while (i < n)
+		cast[i++] = '\0';
 }
+
+inline void	*ft_memcpy(void *dest, const void *src, size_t n)
+{
+	char	*castsrc = (char *)src;
+	char	*castdest = (char *)dest;
+	size_t	i = -1;
+
+	while (++i < n)
+		castdest[i] = castsrc[i];
+	return (castdest);
+}
+
+inline Mem_8bits *ft_memnew(int byteSz)
+{
+    Mem_8bits   *mem;
+
+    if (!(mem = (Mem_8bits *)malloc(sizeof(Mem_8bits) * (byteSz + 1))))
+        malloc_failed("Unable to malloc new memory space in ft_memnew() function\n");
+    ft_bzero(mem, byteSz + 1);
+    return mem;
+}
+
+inline Mem_8bits *ft_memdup(void *mem, int byteSz)
+{
+    Mem_8bits   *dup = ft_memnew(byteSz);
+
+    ft_memcpy(dup, mem, byteSz);
+    return dup;
+}
+
+inline char     *ft_memjoin(void *mem1, int byteSz1, void *mem2, int byteSz2)
+{
+    char    *memjoin = ft_memnew(byteSz1 + byteSz2);
+    ft_memcpy(memjoin, mem1, byteSz1);
+    ft_memcpy(memjoin + byteSz1, mem2, byteSz2);
+    return memjoin;
+}
+
+// About string (char *) ------------------------------------------------------------------
 
 inline int	ft_atoi(const char *str)
 {
@@ -42,62 +74,31 @@ inline int	ft_atoi(const char *str)
 	return ((int)(nb * sign));
 }
 
-inline void	ft_bzero(void *s, size_t n)
+inline int	ft_strlen(char *p)
 {
-	size_t  i;
-    char    *cast = (char *)s;
+    unsigned long long *str = (unsigned long long *)p;
+	int	count = 0;
 
-	i = 0;
-	while (i < n)
-		cast[i++] = '\0';
+    if (str)
+        while (1)
+            if ((++count && !(*str & 0x00000000000000FF)) ||\
+                (++count && !(*str & 0x000000000000FF00)) ||\
+                (++count && !(*str & 0x0000000000FF0000)) ||\
+                (++count && !(*str & 0x00000000FF000000)) ||\
+                (++count && !(*str & 0x000000FF00000000)) ||\
+                (++count && !(*str & 0x0000FF0000000000)) ||\
+                (++count && !(*str & 0x00FF000000000000)) ||\
+                (++count && !(*str++ & 0xFF00000000000000)))
+                return (count - 1);
+    return 0;
 }
 
-inline void	*ft_memcpy(void *dest, const void *src, size_t n)
-{
-	char	*castsrc = (char *)src;
-	char	*castdest = (char *)dest;
-	size_t	i = -1;
-
-	while (++i < n)
-		castdest[i] = castsrc[i];
-	// size_t	i = 0;
-	// while (i < n)
-	// {
-	// 	castdest[i] = castsrc[i];
-	// 	i++;
-	// }
-	return (castdest);
-}
-
-inline Mem_8bits *ft_memnew(int byteSz)
-{
-    Mem_8bits   *mem;
-
-    if (!(mem = (Mem_8bits *)malloc(sizeof(Mem_8bits) * (byteSz + 1))))
-        malloc_failed("Unable to malloc new memory space in ft_memnew() function\n");
-    ft_bzero(mem, byteSz + 1);
-    return mem;
-}
-
-inline Mem_8bits *ft_memdup(Mem_8bits *mem, int byteSz)
-{
-    Mem_8bits   *dup = ft_memnew(byteSz);
-
-    ft_memcpy(dup, mem, byteSz);
-    return dup;
-}
-
-// inline char     *ft_strnew(int len)
-// {
-//     return ft_memnew(len);
-// }
-
-inline char     *ft_strdup(char *src)
+inline char *ft_strdup(char *src)
 {
     return ft_memdup(src, ft_strlen(src));
 }
 
-inline char     *ft_strinsert(char *str1, char *toinsert, char *str2)
+inline char *ft_strinsert(char *str1, char *toinsert, char *str2)
 {
     int     str1len = ft_strlen(str1);
     int     toinsertlen = ft_strlen(toinsert);
@@ -112,14 +113,6 @@ inline char     *ft_strinsert(char *str1, char *toinsert, char *str2)
     ft_memcpy(concat + str1len + toinsertlen, str2, str2len);
     // return ft_strdup((char *)&concat);
     return concat;
-}
-
-inline char     *ft_memjoin(void *mem1, int byteSz1, void *mem2, int byteSz2)
-{
-    char    *memjoin = ft_memnew(byteSz1 + byteSz2);
-    ft_memcpy(memjoin, mem1, byteSz1);
-    ft_memcpy(memjoin + byteSz1, mem2, byteSz2);
-    return memjoin;
 }
 
 inline int	ft_strcmp(const char *s1, const char *s2)
@@ -151,23 +144,25 @@ inline char	*ft_lower(char *str)
 	return str;
 }
 
-inline void	ft_putstdout(char *s)
+// Display functions ------------------------------------------------------------------
+
+inline void	ft_putstderr(char *s)
 {
-    int ret = write(1, s, ft_strlen(s));
+    int ret = write(STDERR, s, ft_strlen(s));
+    if (ret < 0)
+        freexit(EXIT_FAILURE);
 }
 
 inline void	ft_putstrfd(int fd, char *s)
 {
     int ret = write(fd, s, ft_strlen(s));
     if (ret < 0)
-        write_failed("write() failed in ft_putstrfd()");
+        write_failed("write() failed in ft_putstrfd()", fd);
 }
 
 inline void	ft_putstr(char *s)
 {
-    int ret = write(ssl.fd_out, s, ft_strlen(s));
-    if (ret < 0)
-        write_failed("write() failed in ft_putstr()");
+    ft_putstrfd(ssl.fd_out, s);
 }
 
 void    	ft_putnbr(int fd, int n)
@@ -188,6 +183,8 @@ void    	ft_putnbr(int fd, int n)
         c = write(fd, &c, 1);
     }
 }
+
+// About hexadecimal conversions ------------------------------------------------------------------
 
 inline Long_64bits  ft_strtoHex(char *str)
 {
@@ -219,101 +216,12 @@ void    	        ft_printHex(Long_64bits n, int byteSz)
     unsigned char c_16e0;
     unsigned char c_16e1;
 
-    // for (int i = 0; i < byteSz; i++)
-    //     if (ft_strlen(word + i))
     for (int i = byteSz - 1; i >= 0; i--)
     {
         c_16e0 = hex[word[i] % 16];
         c_16e1 = hex[word[i] / 16];
         if (write(ssl.fd_out, &c_16e1, 1) == -1 ||\
             write(ssl.fd_out, &c_16e0, 1) == -1)
-            write_failed("write() failed in ft_printHex()");
+            write_failed("write() failed in ft_printHex()", ssl.fd_out);
     }
 }
-
-
-// char                *ft_hexToBin(Long_64bits n, int byteSz)
-// {
-//     char          *bin;
-//     unsigned char hex[16] = HEXABASE;
-//     unsigned char *num = (unsigned char *)&n;
-
-//     // if (!(bin = (char *)malloc(sizeof(char) * (byteSz * 2 + 1))))
-//     //     malloc_failed("Unable to malloc string in libft ft_hexToBin function\n");
-//     // bin[byteSz * 2] = '\0';
-//     bin = ft_memnew(byteSz * 2);
-//     for (int i = 0; i < byteSz; i++)
-//     {
-//         bin[byteSz - i * 2] = hex[num[i] / 16];
-//         if (i + 1 < byteSz)
-//             bin[byteSz - i * 2 + 1] = hex[num[i] % 16];
-//     }
-//     return bin;
-// }
-
-// Mem_8bits           *ft_strHexToBin(Mem_8bits *str, int byteSz)
-// {
-//     // endianReverse(str, LONG64_byteSz);
-//     // printLong(*((Long_64bits *)str));
-//     printf("%s\n", str);
-//     Long_64bits tmp = ft_strtoHex(str);
-//     printf("%lx\n", tmp);
-//     printLong(tmp);
-
-
-//     printBits(&tmp, KEY_byteSz);
-//     ft_printHex(tmp, KEY_byteSz);
-//     printf("tmp: %lx\n", tmp);
-
-//     int         bin_i = 0;
-//     Mem_8bits   *bin = (Mem_8bits *)&tmp;
-//     endianReverse(bin, KEY_byteSz);
-//     // printBits(bin, KEY_byteSz);
-
-//     int         out_i = 0;
-//     Mem_8bits   out[KEY_byteSz];
-//     ft_bzero(out, KEY_byteSz);
-
-//     // Skip zero bytes at the beginning
-//     while (bin_i < KEY_byteSz && !bin[bin_i])
-//         bin_i++;
-//     printf("After zero bytes skipped, bin_i=%d\n", bin_i);
-
-//     // Is first non-null byte upper than 0x0f ? (To remove zero of byte left-side)
-//     if (bin[bin_i] & 0b11110000)
-//     {
-//         while (bin_i < KEY_byteSz)
-//         {
-//             out[out_i++] = bin[bin_i++];
-//             printf("out[%d]=%x\tbin_i=%d\n", out_i - 1, out[out_i - 1], bin_i);
-//         }
-//     }
-//     else
-//     {
-//         // Skip first 0 (4 bits)
-//         out[out_i++] = bin[bin_i++] << 4;
-
-//         // printf("out[0]=%x\n", out[0]);
-//         // printf("out_i=%d\n", out_i-1);
-//         // printf("bin_i=%d\n\n", bin_i);
-//         while (bin_i < KEY_byteSz)
-//         {
-//             out[(int)(out_i / 2)] += out_i % 2 ? bin[bin_i] >> 4 : bin[bin_i] & 0b00001111;
-//             // printf("out[%d]=%x\n", (int)(out_i / 2), out[(int)(out_i / 2)]);
-//             // printf("out_i=%d\n", out_i);
-//             // printf("bin_i=%d\n\n", bin_i);
-//             out_i++;
-
-//             out[(int)(out_i / 2)] += out_i % 2 ? bin[bin_i++] & 0b11110000 : bin[bin_i++] << 4;
-//             // printf("out[%d]=%x\n", (int)(out_i / 2), out[(int)(out_i / 2)]);
-//             // printf("out_i=%d\n", out_i);
-//             // printf("bin_i=%d\n\n", bin_i);
-//             out_i++;
-//         }
-//         out_i = out_i % 2 ? (out_i - out_i % 2) / 2 + 1 : out_i / 2;
-//     }
-//     printBits(out, out_i);
-//     // exit(0);
-//     bin = ft_strdup(out);
-//     return bin;
-// }

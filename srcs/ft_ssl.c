@@ -85,33 +85,6 @@ void    freexit(int exit_state)
     exit(exit_state);
 }
 
-void    malloc_failed(char *errormsg)
-{
-    ft_putstrfd(STDERR, "[MALLOC FAILED] ");
-    ft_putstrfd(STDERR, errormsg);
-    perror(NULL);
-    freexit(EXIT_FAILURE);
-}
-
-void    open_failed(char *errormsg, char *file)
-{
-    ft_putstrfd(STDERR, "[OPEN FAILED] Unable to open file: ");
-    ft_putstrfd(STDERR, file);
-    ft_putstrfd(STDERR, errormsg);
-    perror(NULL);
-    freexit(EXIT_FAILURE);
-}
-
-void    write_failed(char *errormsg)
-{
-    ft_putstrfd(STDERR, "[WRITE FAILED] fd= ");
-    ft_putnbr(2, ssl.fd_out);
-    ft_putstrfd(STDERR, "\n");
-    ft_putstrfd(STDERR, errormsg);
-    perror(NULL);
-    freexit(EXIT_FAILURE);
-}
-
 int     main(int ac, char **av)
 {
     int     ret;

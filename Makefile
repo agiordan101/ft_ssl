@@ -21,7 +21,8 @@ SRC			=	$(NAME).c \
 				padding.c \
 				libft.c \
 				output.c \
-				verbose.c
+				verbose.c \
+				errors.c
 				# hmac_sha256_gh.c
 				# pbkdf2_gh.c
 

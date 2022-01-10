@@ -34,6 +34,9 @@ static Mem_8bits    *concat_and_hash(Mem_8bits *keyxor, Mem_8bits *to_concat, in
     // printMemHex(concat, concatByteSz, "K ^ pad || concat");
 
     Mem_8bits *hash_ret = sha256((Mem_8bits **)&concat, concatByteSz, NULL, 0);
+    for (Word_32bits *tmp = (Word_32bits *)hash_ret; (Mem_8bits *)tmp < hash_ret + SHA256_byteSz; tmp += 1)
+        endianReverse((Mem_8bits *)tmp, WORD32_byteSz);
+
     free(concat);
     // printMemHex(hash_ret, SHA256_byteSz, "h(K ^ pad || concat)");
     return hash_ret;

@@ -20,7 +20,7 @@ static int              magic_number_in(Mem_8bits *plaintext, t_des *des)
             free(buff);
             if (!des->key)
             {
-                ft_putstrfd(STDERR, "bad magic number\n");
+                ft_putstderr("bad magic number\n");
                 freexit(EXIT_SUCCESS);
             }
             return 0;
@@ -422,7 +422,7 @@ static Mem_8bits        *des_encryption(Mem_8bits *pt, Long_64bits ptByteSz, Lon
 
     if (ssl.flags & nopad && ptByteSz % 8)
     {
-        ft_putstrfd(STDERR, "Data not multiple of block length\n");
+        ft_putstderr("Data not multiple of block length\n");
         freexit(EXIT_FAILURE);
     }
     // printf("\n- DES ECRYPTION -\nptByteSz: %ld\tptSz: %d\n", ptByteSz, ptSz);
@@ -483,7 +483,7 @@ Mem_8bits               *des(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_6
     init_vars(*plaintext, &ssl.des);
     if (!ptByteSz || !hashByteSz)
     {
-        ft_putstrfd(STDERR, "Parameter ptByteSz OR hashByteSz can't be NULL in des() function.\n");
+        ft_putstderr("Parameter ptByteSz OR hashByteSz can't be NULL in des() function.\n");
         freexit(EXIT_FAILURE);
     }
     if (way & P_des)

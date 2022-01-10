@@ -72,19 +72,21 @@ typedef struct  s_hash
 
 int         parsing(int ac, char **av);
 void        freexit(int failure);
-void        malloc_failed(char *errormsg);
-void        open_failed(char *errormsg, char *file);
-void        write_failed(char *errormsg);
 char        *ask_password();
 
-int     	ft_atoi(const char *str);
+void        malloc_failed(char *errormsg);
+void        open_failed(char *errormsg, char *file);
+void        write_failed(char *errormsg, int fd);
+void        file_not_found(char *file);
+void        pbkdf2_iter_error();
+
 void	    ft_bzero(void *s, size_t n);
 void	    *ft_memcpy(void *dest, const void *src, size_t n);
 Mem_8bits   *ft_memnew(int byteSz);
-Mem_8bits   *ft_memdup(Mem_8bits *mem, int byteSz);
+Mem_8bits   *ft_memdup(void *mem, int byteSz);
 char        *ft_memjoin(void *mem1, int byteSz1, void *mem2, int byteSz2);
 
-// char        *ft_strnew(int len);
+int     	ft_atoi(const char *str);
 char	    *ft_strdup(char *src);
 char    	*ft_strinsert(char *str1, char *toinsert, char *str2);
 int		    ft_strlen(char *p);
@@ -92,22 +94,17 @@ int         ft_strcmp(const char *s1, const char *s2);
 char        *ft_stradd_quote(char *str, int len);
 char	    *ft_lower(char *str);
 
-Long_64bits ft_strtoHex(char *str);
-char        *ft_hextoStr(Long_64bits nbr);
-char        *ft_hexToBin(Long_64bits n, int byteSz);
-
 void	    ft_putstr(char *s);
 void    	ft_putstrfd(int fd, char *s);
-void    	ft_putstdout(char *s);
+void    	ft_putstderr(char *s);
 void    	ft_putnbr(int fd, int n);
+
 void        ft_printHex(Long_64bits n, int byteSz);
-Mem_8bits   *ft_strHexToBin(Mem_8bits *str, int byteSz);
+Long_64bits ft_strtoHex(char *str);
+char        *ft_hextoStr(Long_64bits nbr);
 
 void        output(t_hash *hash);
-void        key_output(Mem_8bits *p);
-void        md_hash_output(t_hash *p);      // Temporally
 void        print_usage_exit();
-void        pbkdf2_iter_error();
 
 
 
@@ -115,16 +112,14 @@ void        pbkdf2_iter_error();
     Bitwise operations --------------------------------
 */
 
-Mem_8bits       *padXbits(Mem_8bits **mem, int byteSz, int newSz);
-
 Mem_8bits       endianReverseByte(Mem_8bits byte);
 void            endianReverse(Mem_8bits *mem, Long_64bits byteSz);
+Mem_8bits       *padXbits(Mem_8bits **mem, int byteSz, int newSz);
 Word_32bits     rotL(Word_32bits x, Word_32bits r);
 Word_32bits     rotR(Word_32bits x, Word_32bits r);
 Long_64bits     key_discarding(Mem_8bits *p);
 Long_64bits     _bits_permutations(Long_64bits mem, char *ptable, int bitLen);
 Long_64bits     bits_permutations(Long_64bits mem, char *ptable, int bitLen);
-
 
 // Debug function, not used in this project
 void        printByte(char byte);
@@ -161,9 +156,9 @@ typedef struct  s_md5
     Word_32bits hash[MD5_wordSz];
 }               t_md5;
 
-// Mem_8bits   *md5(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
 Mem_8bits   *md5(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
 void        md5_t_hash(t_hash *hash);
+
 
 
 /*
@@ -182,16 +177,8 @@ typedef struct  s_sha
     Word_32bits hash[SHA256_wordSz];
 }               t_sha;
 
-// void        sha256(t_hash *hash);
-// void        sha256_msg(Mem_8bits **msg, int byteSz, Mem_8bits *dest);
-// void        sha256_mod256(Mem_8bits **msg, int *len);
-// void        sha256_xor_32bits(Word_32bits *sha1, Word_32bits *sha2, Word_32bits **result);
-
 Mem_8bits   *sha256(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
-// void        sha256_t_hash(t_hash *hash);
-
 void        sha256_xor_8bits(Mem_8bits *sha1, Mem_8bits *sha2, Mem_8bits **result);
-void        sha256_print(Mem_8bits *sha);
 
 
 
@@ -223,7 +210,6 @@ Mem_8bits   *base64(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *ha
 # define MAGICNUMBER        "Salted__"
 # define MAGICNUMBER_byteSz sizeof(MAGICNUMBER) - 1
 # define MAGICHEADER_byteSz (MAGICNUMBER_byteSz + KEY_byteSz)
-// # define MAGICHEADER_byteSz 16
 
 typedef enum    desmode {
     DESECB=1, DESCBC=2
@@ -247,6 +233,7 @@ Mem_8bits   *pbkdf2_sha256_hmac(Mem_8bits *key, int keyByteSz, Mem_8bits *msg, i
 Mem_8bits   *des(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
 Long_64bits des_padding(Mem_8bits *bloc);
 void        des_unpadding(Long_64bits *lastbloc, int *ptSz);
+
 
 
 /*
@@ -277,8 +264,9 @@ void    t_hash_base64_encode_output(t_hash *hash);
 void    t_hash_hashing(t_hash *hash);
 void    t_hash_output(t_hash *hash);
 
-// Not my code, for debugging:
 
+
+// Not my code, for debugging:
 
 // size_t hmac_sha256(const void* key, const size_t keylen, const void* data, const size_t datalen, void* out, const size_t outlen);
 // void PKCS5_PBKDF2_HMAC(unsigned char *password, size_t plen, unsigned char *salt, size_t slen, const unsigned long iteration_count, const unsigned long key_length, unsigned char *output);
