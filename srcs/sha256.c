@@ -121,10 +121,6 @@ Mem_8bits   *sha256(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *ha
         chunk += CHUNK_byteSz / WORD32_byteSz;
     }
 
-    // Wrong endianness order
-    // for (Word_32bits *tmp = (Word_32bits *)sha.hash; tmp < sha.hash + SHA256_wordSz; tmp += 1)
-    //     endianReverse((Mem_8bits *)tmp, WORD32_byteSz);
-
     (void)way;
     if (hashByteSz)
         *hashByteSz = SHA256_byteSz;

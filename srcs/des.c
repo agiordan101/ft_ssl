@@ -165,11 +165,11 @@ static void             init_vars(Mem_8bits *plaintext, t_des *des)
     if (des->vector)
     {
         if (des->mode != DESCBC)
-            ft_putstr("warning: iv not used by this cipher\n");
+            ft_putstderr("warning: iv not used by this cipher\n");
     }
     else if (des->mode == DESCBC)
     {
-        ft_putstr("\nInitialization vector is undefined\n");
+        ft_putstderr("\nInitialization vector is undefined\n");
         freexit(EXIT_SUCCESS);
     }
 

@@ -101,9 +101,10 @@ int     s_handler(char *av_next, int *i)
 Key_64bits  parse_keys(char *av_next)
 {
     Key_64bits  key = ft_strtoHex(av_next);
+    int         str_zero_count = 0;
+    int         hex_zero_count = 0;
 
     // Zeros at the beginning of -k parameter have to stay here
-    int str_zero_count, hex_zero_count = 0;
     while (av_next[str_zero_count] == '0') str_zero_count++;
 
     // Count missing half-byte left to remove them (Same as padding zero bytes to length, right)
@@ -240,9 +241,9 @@ int     hash_func_handler(char *str)
     }
     else
     {
-        ft_putstr("ft_ssl: Error: '");
-        ft_putstr(str);
-        ft_putstr("' is an invalid command.\n\n");
+        ft_putstderr("ft_ssl: Error: '");
+        ft_putstderr(str);
+        ft_putstderr("' is an invalid command.\n\n");
         return EXIT_FAILURE;
     }
     return 0;
@@ -298,10 +299,12 @@ void    flags_conflicts()
 {
     // Active input decode / output encode in respect to encryption/decryption mode
     if (ssl.flags & a)
+    {
         if (ssl.flags & d)
             ssl.flags += ssl.flags & ai ? 0 : ai;
         else
             ssl.flags += ssl.flags & ao ? 0 : ao;   
+    }
 
     // Handle conflict between e and d flags (Set encryption by default)
     if (ssl.flags & (e | d))

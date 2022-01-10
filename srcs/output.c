@@ -91,7 +91,6 @@ void    hash_8bits_output(t_hash *p)
         // Print one line
         if ((shitret = write(ssl.fd_out, p->hash, p->hashByteSz - n_padByte)) < 0)
             write_failed("write() failed in hash_8bits_output() function (plain part).\n", ssl.fd_out);
-        // ft_putstrfd(ssl.fd_out, "\n");
     }
 }
 

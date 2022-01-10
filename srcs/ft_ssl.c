@@ -9,19 +9,8 @@
 
     To do :
         -nosalt             Do not use salt in the KDF
-        shuffle usage right order
-
-
-    -> Probleme de openssl avec stdin ou stdout
-        bad decrypt
-        139951214458048:error:02012020:system library:fflush:Broken pipe:crypto/bio/bss_file.c:316:fflush()
-        139951214458048:error:20074002:BIO routines:file_ctrl:system lib:crypto/bio/bss_file.c:318:
 
     Attention -a et -a -A ne sortent pas la meme chose (Seulement un \n qui difere)
-
-    Attention aux redirection !! Ne pas perturber le hash
-    Les messages sur la sortie d'erreur
-    Les hash sur le ssl.fd_out
 
     REMETTRE LES FLAGS DE COMPILATION DANS LE MAKEFILE PTN
 
@@ -48,7 +37,7 @@ char    *ask_password()
         free(secondmsg);
         if (ft_strcmp(password, password2))
         {
-            ft_putstr("\nVerify failure.\nbad password read.\n");
+            ft_putstderr("\nVerify failure.\nbad password read.\n");
             free(password2);
             freexit(EXIT_SUCCESS);
         }
@@ -66,8 +55,6 @@ char    *ask_password()
 
 void    ssl_free()
 {
-    t_hash      *tmp;
-    t_hash      *hash = ssl.hash;
     t_des    *des = &ssl.des;
 
     if (des->password)

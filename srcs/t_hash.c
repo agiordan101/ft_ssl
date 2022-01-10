@@ -44,7 +44,7 @@ inline void t_hash_base64_decode_inputs(t_hash *hash)
 
 inline void t_hash_base64_encode_output(t_hash *hash)
 {
-    char    *tmp;
+    Mem_8bits   *tmp;
 
     while (hash)
     {
