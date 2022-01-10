@@ -1,4 +1,4 @@
-echo "For each command line, this script will display duplicate things or nothing if there is no error"
+echo "Unitests des-ecb: For each command line, this script will display duplicate things or nothing if there is no error"
 echo "ft_ssl encrypt / openssl decrypt ->"
 echo "1:"
 ./ft_ssl des-ecb -k 0123456789abcdef -i $1 -q | openssl des-ecb -K 0123456789abcdef -out unitests_out -d && diff $1 unitests_out

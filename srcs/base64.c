@@ -159,8 +159,6 @@ Mem_8bits           *base64(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64
     // printf("plaintext: %s\n", plaintext);
     if (way & e)
         return encode(*plaintext, ptByteSz, hashByteSz);
-    else if (way & d)
-        return decode(*plaintext, ptByteSz, hashByteSz);
     else
-        return encode(*plaintext, ptByteSz, hashByteSz);
+        return decode(*plaintext, ptByteSz, hashByteSz);
 }

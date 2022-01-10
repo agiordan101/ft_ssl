@@ -1,10 +1,10 @@
 #include "ft_ssl.h"
 
-static inline Mem_8bits *hmac_init_key_SHA256_byteSz(Mem_8bits *key, int keyByteSz, Mem_8bits *keypad)
+static Mem_8bits    *hmac_init_key_SHA256_byteSz(Mem_8bits *key, int keyByteSz, Mem_8bits *keypad)
 {
     if (keyByteSz > SHA256_byteSz)
     {
-        // Hash old key to have keyByteSz = SHA256_ByteSz
+        // Hash old key to have keyByteSz = SHA256_byteSz
         Mem_8bits *tmp = ft_memdup(key, keyByteSz);    // Duplicate before sha256
         key = sha256(&tmp, keyByteSz, NULL, 0);
         ft_memcpy(keypad, key, SHA256_byteSz);
@@ -13,7 +13,7 @@ static inline Mem_8bits *hmac_init_key_SHA256_byteSz(Mem_8bits *key, int keyByte
     }
     else
     {
-        // Pad old key with zeros until keyByteSz = SHA256_ByteSz
+        // Pad old key with zeros until keyByteSz = SHA256_byteSz
         ft_bzero(keypad, SHA256_byteSz);
         ft_memcpy(keypad, key, keyByteSz);
     }
@@ -26,11 +26,11 @@ static Mem_8bits    *concat_and_hash(Mem_8bits *keyxor, Mem_8bits *to_concat, in
         Concat key xored with a msg and hash the result
         key / ipad / opad length: CHUNK_byteSz (Depending on PRF block size: sha256 -> chunks of 512bits)
     */
-    int         concatByteSz = CHUNK_ByteSz + to_concatByteSz;
+    int         concatByteSz = CHUNK_byteSz + to_concatByteSz;
     Mem_8bits   *concat = ft_memnew(concatByteSz);   // Need to be malloc for sha256() function
 
-    ft_memcpy(concat, keyxor, CHUNK_ByteSz);
-    ft_memcpy(concat + CHUNK_ByteSz, to_concat, to_concatByteSz);
+    ft_memcpy(concat, keyxor, CHUNK_byteSz);
+    ft_memcpy(concat + CHUNK_byteSz, to_concat, to_concatByteSz);
     // printMemHex(concat, concatByteSz, "K ^ pad || concat");
 
     Mem_8bits *hash_ret = sha256((Mem_8bits **)&concat, concatByteSz, NULL, 0);
@@ -41,10 +41,10 @@ static Mem_8bits    *concat_and_hash(Mem_8bits *keyxor, Mem_8bits *to_concat, in
 
 Mem_8bits           *pbkdf2_sha256_hmac(Mem_8bits *key, int keyByteSz, Mem_8bits *msg, int msgByteSz)
 {
-    Mem_8bits   keypad[CHUNK_ByteSz];
-    Mem_8bits   ipad[CHUNK_ByteSz];
-    Mem_8bits   opad[CHUNK_ByteSz];
-    for (int i = 0; i < CHUNK_ByteSz; i++)
+    Mem_8bits   keypad[CHUNK_byteSz];
+    Mem_8bits   ipad[CHUNK_byteSz];
+    Mem_8bits   opad[CHUNK_byteSz];
+    for (int i = 0; i < CHUNK_byteSz; i++)
     {
         ipad[i] = 0x36;
         opad[i] = 0x5C;
@@ -56,8 +56,8 @@ Mem_8bits           *pbkdf2_sha256_hmac(Mem_8bits *key, int keyByteSz, Mem_8bits
         ipad[i] ^= keypad[i];
         opad[i] ^= keypad[i];
     }
-    // printMemHex(ipad, CHUNK_ByteSz, "K ^ ipad");
-    // printMemHex(opad, CHUNK_ByteSz, "K ^ opad");
+    // printMemHex(ipad, CHUNK_byteSz, "K ^ ipad");
+    // printMemHex(opad, CHUNK_byteSz, "K ^ opad");
 
     Mem_8bits *sha256_res = concat_and_hash(ipad, msg, msgByteSz);
     Mem_8bits *hmac_res = concat_and_hash(opad, sha256_res, SHA256_byteSz);
@@ -75,12 +75,12 @@ static Mem_8bits    *pbkdf2_sha256_prfxors(Mem_8bits *pwd, int pwdByteSz, Key_64
 
     // Set U0 = Salt_64bits_Big_Endian || bloci_32bits_Big_Endian
     endianReverse((Mem_8bits *)&salt, KEY_byteSz);
-    endianReverse((Mem_8bits *)&bloci, WORD32_ByteSz);
+    endianReverse((Mem_8bits *)&bloci, WORD32_byteSz);
     ft_memcpy(sha_prev, (Mem_8bits *)&salt, KEY_byteSz);
-    ft_memcpy(sha_prev + KEY_byteSz, (Mem_8bits *)&bloci, WORD32_ByteSz);
+    ft_memcpy(sha_prev + KEY_byteSz, (Mem_8bits *)&bloci, WORD32_byteSz);
 
     // U1 = PRF(password, U0)
-    sha_xor = pbkdf2_sha256_hmac(pwd, pwdByteSz, sha_prev, KEY_byteSz + WORD32_ByteSz);
+    sha_xor = pbkdf2_sha256_hmac(pwd, pwdByteSz, sha_prev, KEY_byteSz + WORD32_byteSz);
     ft_memcpy(sha_prev, sha_xor, SHA256_byteSz);
 
     for (int i = 1; i < c; i++)
@@ -97,7 +97,7 @@ static Mem_8bits    *pbkdf2_sha256_prfxors(Mem_8bits *pwd, int pwdByteSz, Key_64
     return sha_xor;
 }
 
-Key_64bits  pbkdf2_sha256(Mem_8bits *pwd, Key_64bits salt, int c)
+Key_64bits          pbkdf2_sha256(Mem_8bits *pwd, Key_64bits salt, int c)
 /*
 
     Desired output length: KEY_byteSz = 8 bytes / 64 bits
@@ -118,7 +118,7 @@ Key_64bits  pbkdf2_sha256(Mem_8bits *pwd, Key_64bits salt, int c)
                 ...
                 Uc = PRF(Password, Uc-1)
     
-    With sha256 as pseudo random function (PRF),
+    With SHA256-HMAC as pseudo random function (PRF),
     Hash output length is greater than the desired key length: 256 > 64 (bits)
     Conclusion: T1 || T2 || ... || Tdklen/hlen  =>  T1 & (1 << 65 - 1)
 

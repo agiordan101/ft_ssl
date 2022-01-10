@@ -65,7 +65,7 @@ int     file_handler(t_hash *node, char *file)
     else
     {
         node->len = get_file_len(file);
-        node->msg = ft_strnew(node->len);
+        node->msg = ft_memnew(node->len);
 
         if (read(fd, node->msg, node->len) == -1)
             return EXIT_FAILURE;
@@ -112,7 +112,7 @@ Key_64bits  parse_keys(char *av_next)
     // No padding if the right number of zero bytes left is here
     if (hex_zero_count > str_zero_count)
     {
-        ft_putstrfd(2, "hex string is too short, padding with zero bytes to length\n");
+        ft_putstrfd(STDERR, "hex string is too short, padding with zero bytes to length\n");
         key <<= (hex_zero_count - str_zero_count) * 4;
     }
     // printf("parse_keys: %lx\n", key);
@@ -261,7 +261,7 @@ int     stdin_handler()
             return EXIT_FAILURE;
 
         tmp = node->msg;
-        node->msg = ft_strnew(node->len + ret);
+        node->msg = ft_memnew(node->len + ret);
         ft_memcpy(node->msg, tmp, node->len);
         ft_memcpy(node->msg + node->len, buff, ret);
         if (tmp)
@@ -294,6 +294,25 @@ int     stdin_handler()
     return node->name ? 0 : EXIT_FAILURE;
 }
 
+void    flags_conflicts()
+{
+    // Active input decode / output encode in respect to encryption/decryption mode
+    if (ssl.flags & a)
+        if (ssl.flags & d)
+            ssl.flags += ssl.flags & ai ? 0 : ai;
+        else
+            ssl.flags += ssl.flags & ao ? 0 : ao;   
+
+    // Handle conflict between e and d flags (Set encryption by default)
+    if (ssl.flags & (e | d))
+    {
+        if (ssl.flags & e && ssl.flags & d)
+            ssl.flags -= d;
+    }
+    else
+        ssl.flags += e;
+}
+
 int     parsing(int ac, char **av)
 {
     e_flags flag;
@@ -324,12 +343,6 @@ int     parsing(int ac, char **av)
         if (stdin_handler())
             return EXIT_FAILURE;        
 
-    // Active input decode / output encode in respect to encryption/decryption mode
-    if (ssl.flags & a)
-        if (ssl.flags & d)
-            ssl.flags += ssl.flags & ai ? 0 : ai;
-        else
-            ssl.flags += ssl.flags & ao ? 0 : ao;   
-
+    flags_conflicts();
     return 0;
 }

@@ -23,14 +23,46 @@
     Les messages sur la sortie d'erreur
     Les hash sur le ssl.fd_out
 
-    Ajouter le magic number "Salted__" à l'affichage d'un hash en ascii lorsqu'un sel est utilisé (Uniquement utilisé dans pbkdf2 pour l'instant)
-    Skip le magic number lors de la lecture d'un hash en ascii
-
     REMETTRE LES FLAGS DE COMPILATION DANS LE MAKEFILE PTN
 
 */
 
 t_ssl    ssl;
+
+char    *ask_password()
+{
+    char *firstmsg_1 = "enter ";
+    char *password;
+
+    if (ssl.flags & e)
+    {
+        char *secondmsg_1 = "Verifying - enter ";
+        char *msg_2 = " encryption password:";
+        char *firstmsg = ft_strinsert(firstmsg_1, ssl.hash_func, msg_2);
+        char *secondmsg = ft_strinsert(secondmsg_1, ssl.hash_func, msg_2);
+
+        char *password2 = ft_strdup(getpass(firstmsg));
+        password = getpass(secondmsg);
+
+        free(firstmsg);
+        free(secondmsg);
+        if (ft_strcmp(password, password2))
+        {
+            ft_putstr("\nVerify failure.\nbad password read.\n");
+            free(password2);
+            freexit(EXIT_SUCCESS);
+        }
+        free(password2);
+    }
+    else
+    {
+        char *msg_2 = " decryption password:";
+        char *msg = ft_strinsert(firstmsg_1, ssl.hash_func, msg_2);   
+        password = getpass(msg);
+        free(msg);
+    }
+    return password;
+}
 
 void    ssl_free()
 {
@@ -55,27 +87,27 @@ void    freexit(int exit_state)
 
 void    malloc_failed(char *errormsg)
 {
-    ft_putstr("[MALLOC FAILED] ");
-    ft_putstr(errormsg);
+    ft_putstrfd(STDERR, "[MALLOC FAILED] ");
+    ft_putstrfd(STDERR, errormsg);
     perror(NULL);
     freexit(EXIT_FAILURE);
 }
 
 void    open_failed(char *errormsg, char *file)
 {
-    ft_putstdout("[OPEN FAILED] Unable to open file: ");
-    ft_putstdout(file);
-    ft_putstdout(errormsg);
+    ft_putstrfd(STDERR, "[OPEN FAILED] Unable to open file: ");
+    ft_putstrfd(STDERR, file);
+    ft_putstrfd(STDERR, errormsg);
     perror(NULL);
     freexit(EXIT_FAILURE);
 }
 
 void    write_failed(char *errormsg)
 {
-    ft_putstdout("[WRITE FAILED] fd= ");
-    ft_putnbr(1, ssl.fd_out);
-    ft_putstdout("\n");
-    ft_putstdout(errormsg);
+    ft_putstrfd(STDERR, "[WRITE FAILED] fd= ");
+    ft_putnbr(2, ssl.fd_out);
+    ft_putstrfd(STDERR, "\n");
+    ft_putstrfd(STDERR, errormsg);
     perror(NULL);
     freexit(EXIT_FAILURE);
 }

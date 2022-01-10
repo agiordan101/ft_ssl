@@ -21,8 +21,8 @@ Mem_8bits   *padXbits(Mem_8bits **mem, int byteSz, int newSz)
 void        md_padding(Mem_8bits **data, Long_64bits *byteSz, char reverseByteSz)
 {
     Long_64bits extend_byteSz =\
-        *byteSz - (*byteSz % CHUNK_ByteSz) + // Find byteSz of the filled chunks.
-        CHUNK_ByteSz * (*byteSz % CHUNK_ByteSz >= CHUNK_ByteSz - LONG64_ByteSz ? 2 : 1); // Add 1 chunk (witch is partially written), and add another one if we cannot cpy byteSz_mem at the end (overwritting is not possible)
+        *byteSz - (*byteSz % CHUNK_byteSz) + // Find byteSz of the filled chunks.
+        CHUNK_byteSz * (*byteSz % CHUNK_byteSz >= CHUNK_byteSz - LONG64_byteSz ? 2 : 1); // Add 1 chunk (witch is partially written), and add another one if we cannot cpy byteSz_mem at the end (overwritting is not possible)
 
     // printf("byteSz: %ld\n", *byteSz);
     // printf("extend_byteSz: %ld\n", extend_byteSz);
@@ -36,15 +36,15 @@ void        md_padding(Mem_8bits **data, Long_64bits *byteSz, char reverseByteSz
 
     // Transform Long_64bits memory to Mem_8bits memory (endianness matter)
     Long_64bits byteSz_bitSz = *byteSz * 8;
-    Mem_8bits   byteSz_mem[LONG64_ByteSz];
+    Mem_8bits   byteSz_mem[LONG64_byteSz];
 
-    ft_bzero(byteSz_mem, LONG64_ByteSz);
-    ft_memcpy(byteSz_mem, &byteSz_bitSz, LONG64_ByteSz);
+    ft_bzero(byteSz_mem, LONG64_byteSz);
+    ft_memcpy(byteSz_mem, &byteSz_bitSz, LONG64_byteSz);
     if (reverseByteSz)
-        endianReverse(byteSz_mem, LONG64_ByteSz);
+        endianReverse(byteSz_mem, LONG64_byteSz);
 
     // Overwrite the last 8 bytes of last chunk with input message bits size
-    ft_memcpy(*data + extend_byteSz - LONG64_ByteSz, byteSz_mem, LONG64_ByteSz);
+    ft_memcpy(*data + extend_byteSz - LONG64_byteSz, byteSz_mem, LONG64_byteSz);
 
     // printMemHex(*data, extend_byteSz, "md padding");
     *byteSz = extend_byteSz;
@@ -52,17 +52,17 @@ void        md_padding(Mem_8bits **data, Long_64bits *byteSz, char reverseByteSz
 
 Long_64bits des_padding(Mem_8bits *bloc)
 {
-    Mem_8bits   newbloc[LONG64_ByteSz];
-    ft_bzero(newbloc, LONG64_ByteSz);
+    Mem_8bits   newbloc[LONG64_byteSz];
+    ft_bzero(newbloc, LONG64_byteSz);
     int         missing_bytes;
     int         i = -1;
 
-    while (++i < LONG64_ByteSz && bloc[i])
+    while (++i < LONG64_byteSz && bloc[i])
         newbloc[i] = bloc[i];
     missing_bytes = 8 - i;
     // printf("missing_bytes: %d\n", missing_bytes);
     // printf("newbloc: %lx\n", *((Long_64bits *)newbloc));
-    while (i < LONG64_ByteSz)
+    while (i < LONG64_byteSz)
         newbloc[i++] = missing_bytes;
     // printf("newbloc: %lx\n", *((Long_64bits *)newbloc));
     return *((Long_64bits *)newbloc);
@@ -80,14 +80,14 @@ void        des_unpadding(Long_64bits *lastbloc, int *ptSz)
         *lastbloc = *lastbloc & (((Long_64bits)1 << (64 - lastbyte * 8)) - 1);
     else if (~ssl.flags & nopad)
     {
-        ft_putstdout("No padding found in decrypted data.\n");
+        ft_putstrfd(STDERR, "./ft_ssl: Bad decrypt: No padding found in decrypted data.\n");
         freexit(EXIT_FAILURE);
     }
     else
         return ;
     if (ssl.flags & nopad)
     {
-        ft_putstdout("-nopad is conflicting with padding found in decrypted data.\n");
+        ft_putstrfd(STDERR, "./ft_ssl: -nopad is conflicting with padding found in decrypted data.\n");
         freexit(EXIT_FAILURE);
     }
 }

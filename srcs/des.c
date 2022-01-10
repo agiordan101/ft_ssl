@@ -1,29 +1,62 @@
 #include "ft_ssl.h"
 
-static void             ask_password(t_des *des)
+static int              magic_number_in(Mem_8bits *plaintext, t_des *des)
 {
-    char *firstmsg_1 = "enter ";
-    char *secondmsg_1 = "Verifying - enter ";
-    char *msgs_2 = " encryption password:";
-    char *firstmsg = ft_strinsert(firstmsg_1, ssl.hash_func, msgs_2);
-    char *secondmsg = ft_strinsert(secondmsg_1, ssl.hash_func, msgs_2);
-
-    char *password = ft_strdup(getpass(firstmsg));
-    des->password = getpass(secondmsg);
-
-    free(firstmsg);
-    free(secondmsg);
-    if (ft_strcmp(password, des->password))
+    /*
+        Encryption:
+            Create magic number if no key is provided (Create one with Salt and Password),
+            or password is given (Even if a key is provided).
+        Decryption:
+            Magic number is always needed unless key is provide
+            // Magic number is needed when salt/password are used in PBKDF2 (Even if a key is provided).
+    */
+    if (ssl.flags & d)
     {
-        free(password);
-        ft_putstr("\nVerify failure.\nbad password read.\n");
-        freexit(EXIT_SUCCESS);
+        Mem_8bits *buff = ft_memdup(plaintext, MAGICNUMBER_byteSz);
+        // printf("*plaintext: %s\n", buff);
+
+        if (ft_strcmp(buff, MAGICNUMBER))
+        {
+            free(buff);
+            if (!des->key)
+            {
+                ft_putstrfd(STDERR, "bad magic number\n");
+                freexit(EXIT_SUCCESS);
+            }
+            return 0;
+        }
+        else
+        {
+            // Fetch Salt
+            free(buff);
+            des->salt = *(Key_64bits *)(plaintext + MAGICNUMBER_byteSz);
+            endianReverse((Mem_8bits *)&des->salt, KEY_byteSz);
+        }
     }
-    else
-        free(password);
+    else if (des->key && !des->password) // Only case with no magic number needed in encryption
+        return 0;
+    return 1;
 }
 
-static inline Key_64bits    generate_key()
+static Mem_8bits        *magic_number_out(Mem_8bits *hash, Long_64bits *hashByteSz)
+{
+    // A magic number concat with salt need to be added before hash, on encryption with PBKDF2 case
+    Mem_8bits   header[MAGICHEADER_byteSz];
+
+    endianReverse((Mem_8bits *)&ssl.des.salt, KEY_byteSz);
+    ft_memcpy(header, MAGICNUMBER, MAGICNUMBER_byteSz);
+    ft_memcpy(header + MAGICNUMBER_byteSz, (void *)&ssl.des.salt, KEY_byteSz);
+    // printf("header (len=%ld): %s\n", MAGICHEADER_byteSz, header);
+
+    Mem_8bits *header_hash = ft_memjoin(header, MAGICHEADER_byteSz, hash, *hashByteSz);
+    *hashByteSz += MAGICHEADER_byteSz;
+    // printf("hash ret (len=%ld): %s\n", *hashByteSz, ret);
+
+    free(hash);
+    return header_hash;
+}
+
+static Key_64bits       generate_key()
 {
     Key_64bits  key = 0;
 
@@ -124,7 +157,7 @@ static void             key_transformation(t_des *des)
     // exit(0);
 }
 
-static void             init_vars(t_des *des)
+static void             init_vars(Mem_8bits *plaintext, t_des *des)
 {
     srand(time(NULL));
 
@@ -149,35 +182,10 @@ static void             init_vars(t_des *des)
     {
         // A password is asked if it's not provided
         if (!des->password)
-            ask_password(des);
+            des->password = ask_password(des);
 
-        /*          HMAC VERIFICATION           */
-
-        // Mem_8bits *hmac = pbkdf2_sha256_hmac(
-        //     des->password, ft_strlen(des->password),
-        //     msg, KEY_byteSz
-        // );
-        // // printf("\n\npbkdf2_sha256_hmac result (len=%d/%ld) >%s<\n", ft_strlen(hmac), SHA256_byteSz, hmac);
-        // printMemHex(hmac, SHA256_byteSz, "pbkdf2_sha256_hmac result");
-
-        // hmac = ft_memnew(SHA256_byteSz);
-        // hmac_sha256(des->password, ft_strlen(des->password), msg, KEY_byteSz, hmac, SHA256_byteSz);
-        // printMemHex(hmac, SHA256_byteSz, "hmac result");
-
-        /*            PBKDF2 VERIFICATION           */
-
-        // des->key = pbkdf2_sha256(des->password, des->salt, PBKDF2_iter);
+        // Password-based key derivation function (PBKDF) using SHA256-HMAC function as pseudo random function (PRF)
         des->key = pbkdf2_sha256(des->password, des->salt, ssl.flags & pbkdf2_iter ? ssl.pbkdf2_iter : PBKDF2_iter);
-        // printf("--- cipher->key ---> %lx\n", des->key);
-
-        // printf("\n\t[GITHUB PBKDF2]\n");
-        // Mem_8bits *msg = ft_memdup((Mem_8bits *)&des->salt, KEY_byteSz);
-        // endianReverse(msg, KEY_byteSz);
-
-        // Mem_8bits *out = ft_memnew(KEY_byteSz);
-        // PKCS5_PBKDF2_HMAC(des->password, ft_strlen(des->password), msg, KEY_byteSz, ssl.flags & PBKDF2_iter ? ssl.pbkdf2_iter : PBKDF2_iter, KEY_byteSz, out);
-        // printMemHex(out, KEY_byteSz, "PBKDF2 github result");
-
     }
 
     // Key scheldule
@@ -373,11 +381,7 @@ static Mem_8bits        *des_decryption(Mem_8bits *pt, Long_64bits ptByteSz, Lon
     Long_64bits *plaintext = (Long_64bits *)pt + ptSz - 1;
     Long_64bits bloc;
 
-    // if (ssl.flags & nopad && ptByteSz % 8)
-    // {
-    //     ft_putstdout("Data not multiple of block length\n");
-    //     freexit(EXIT_FAILURE);
-    // }
+    // printMemHex(pt, ptByteSz, "Plaintext hex");
     // printf("\n- DES DECRYPTION -\nptByteSz: %ld\tptSz: %d\n", ptByteSz, ptSz);
     for (int i = ptSz - 1; i >= 0; i--)
     {
@@ -404,7 +408,7 @@ static Mem_8bits        *des_decryption(Mem_8bits *pt, Long_64bits ptByteSz, Lon
     // for (int i = 0; i < ptSz; i++)
     //     printf("ciphertext %d: %lx\n", i, ciphertext[i]);
 
-    *hashByteSz = ptSz * LONG64_ByteSz;
+    *hashByteSz = ptSz * LONG64_byteSz;
     return ft_memdup((Mem_8bits *)ciphertext, *hashByteSz);
 }
 
@@ -418,7 +422,7 @@ static Mem_8bits        *des_encryption(Mem_8bits *pt, Long_64bits ptByteSz, Lon
 
     if (ssl.flags & nopad && ptByteSz % 8)
     {
-        ft_putstdout("Data not multiple of block length\n");
+        ft_putstrfd(STDERR, "Data not multiple of block length\n");
         freexit(EXIT_FAILURE);
     }
     // printf("\n- DES ECRYPTION -\nptByteSz: %ld\tptSz: %d\n", ptByteSz, ptSz);
@@ -462,43 +466,53 @@ static Mem_8bits        *des_encryption(Mem_8bits *pt, Long_64bits ptByteSz, Lon
 
     // Restore right endianness order
     // for (int i = 0; i < ptSz; i++)
-    //     endianReverse((Mem_8bits *)(ciphertext + i), LONG64_ByteSz);
+    //     endianReverse((Mem_8bits *)(ciphertext + i), LONG64_byteSz);
 
     if (hashByteSz)
-        *hashByteSz = ptSz * LONG64_ByteSz;
-    return ft_memdup((Mem_8bits *)ciphertext, ptSz * LONG64_ByteSz);
+        *hashByteSz = ptSz * LONG64_byteSz;
+    return ft_memdup((Mem_8bits *)ciphertext, ptSz * LONG64_byteSz);
 }
 
 Mem_8bits               *des(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way)
 {
-    init_vars(&ssl.des);
+    // Return 1 if magic number is needed (encryption) or seen (decryption)
+    int         magic_number_case = magic_number_in(*plaintext, &ssl.des);
 
+    // Parse and initialize data
+    Mem_8bits   *hash = NULL;
+    init_vars(*plaintext, &ssl.des);
+    if (!ptByteSz || !hashByteSz)
+    {
+        ft_putstrfd(STDERR, "Parameter ptByteSz OR hashByteSz can't be NULL in des() function.\n");
+        freexit(EXIT_FAILURE);
+    }
     if (way & P_des)
     {
-        ssl.fd_out = 1;
-        ft_putstdout("salt=");
+        ssl.fd_out = STDERR; // For ft_printHex function
+        ft_putstrfd(ssl.fd_out, "salt=");
         ft_printHex(ssl.des.salt, KEY_byteSz);
-        ft_putstdout("\nkey=");
+        ft_putstrfd(ssl.fd_out, "\nkey=");
         ft_printHex(ssl.des.key, KEY_byteSz);
         if (ssl.des.mode == DESCBC)
         {
-            ft_putstdout("\niv=");
+            ft_putstrfd(ssl.fd_out, "\niv=");
             ft_printHex(ssl.des.vector, KEY_byteSz);
         }
-        ft_putstdout("\n");
+        ft_putstrfd(ssl.fd_out, "\n");
         freexit(EXIT_SUCCESS);
     }
+
+    // Algorithm part
+    endianReverse((Mem_8bits *)&ssl.des.vector, KEY_byteSz); // Do this now to print iv/vector exactly like openssl with P_des flag
+    if (way & e)
+        return magic_number_case ?\
+            magic_number_out(des_encryption(*plaintext, ptByteSz, hashByteSz), hashByteSz) :\
+            des_encryption(*plaintext, ptByteSz, hashByteSz);
     else
     {
-        endianReverse((Mem_8bits *)&ssl.des.vector, KEY_byteSz); // Do this now to print iv/vector exactly like openssl with P_des flag
-        if (way & e)
-            return des_encryption(*plaintext, ptByteSz, hashByteSz);
-        else if (way & d)
-        {
-            set_keys_for_decryption(&ssl.des);
-            return des_decryption(*plaintext, ptByteSz, hashByteSz);
-        }
-        else
-            return des_encryption(*plaintext, ptByteSz, hashByteSz);
+        set_keys_for_decryption(&ssl.des);
+        return magic_number_case ?\
+            des_decryption(*plaintext + MAGICHEADER_byteSz, ptByteSz - MAGICHEADER_byteSz, hashByteSz) :\
+            des_decryption(*plaintext, ptByteSz, hashByteSz);
     }
 }

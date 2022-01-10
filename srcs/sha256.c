@@ -27,7 +27,7 @@ static void                 init_sha(t_sha *sha, Mem_8bits *chunks, Long_64bits 
         0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
         0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
     };
-    ft_memcpy(sha->k, k, 64 * WORD32_ByteSz);
+    ft_memcpy(sha->k, k, 64 * WORD32_byteSz);
 }
 
 static inline Word_32bits   Ch(Word_32bits x, Word_32bits y, Word_32bits z)
@@ -74,13 +74,13 @@ static void hash_chunk(t_sha *sha, Word_32bits *chunk)
     Word_32bits g = sha->hash[6];
     Word_32bits h = sha->hash[7];
 
-    ft_memcpy(words, chunk, CHUNK_ByteSz);
+    ft_memcpy(words, chunk, CHUNK_byteSz);
 
     for (int i = 0; i < 64; i++)
     {
         // Initialize words (16 from chunk and 48 made with)
         if (i < 16)
-            endianReverse((Mem_8bits *)&words[i], WORD32_ByteSz); // Big endian to little endian
+            endianReverse((Mem_8bits *)&words[i], WORD32_byteSz); // Big endian to little endian
         else
             words[i] = Sigma1(words[i - 2]) + words[i - 7] + Sigma0(words[i - 15]) + words[i - 16];
 
@@ -112,18 +112,18 @@ Mem_8bits   *sha256(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *ha
     md_padding(plaintext, &ptByteSz, 1);
     init_sha(&sha, *plaintext, ptByteSz);
 
-    // printBits(chunks, CHUNK_ByteSz);
+    // printBits(chunks, CHUNK_byteSz);
     Word_32bits *chunks = (Word_32bits *)sha.chunks;
     Word_32bits *chunk = chunks;
-    while (chunk < chunks + sha.chunksSz / WORD32_ByteSz)
+    while (chunk < chunks + sha.chunksSz / WORD32_byteSz)
     {
         hash_chunk(&sha, chunk);
-        chunk += CHUNK_ByteSz / WORD32_ByteSz;
+        chunk += CHUNK_byteSz / WORD32_byteSz;
     }
 
     // Restore right endianness order
-    for (Word_32bits *tmp = (Word_32bits *)sha.hash; tmp < sha.hash + SHA256_WordSz; tmp += 1)
-        endianReverse((Mem_8bits *)tmp, WORD32_ByteSz);
+    for (Word_32bits *tmp = (Word_32bits *)sha.hash; tmp < sha.hash + SHA256_wordSz; tmp += 1)
+        endianReverse((Mem_8bits *)tmp, WORD32_byteSz);
 
     (void)way;
     if (hashByteSz)
@@ -137,14 +137,14 @@ Mem_8bits   *sha256(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *ha
 
 inline void sha256_xor_8bits(Mem_8bits *sha1, Mem_8bits *sha2, Mem_8bits **result)
 {
-    for (uint i = 0; i < SHA256_byteSz; i++)
+    for (int i = 0; i < SHA256_byteSz; i++)
         (*result)[i] = sha1[i] ^ sha2[i];
 }
 
 inline void sha256_print(Mem_8bits *sha)
 {
-    printf("\nSHA256 HASH (len=%ld) >%s<\n", SHA256_byteSz, sha);
-    for (Word_32bits *tmp = (Word_32bits *)sha; tmp < (Word_32bits *)sha + SHA256_WordSz; tmp += 1)
-        ft_printHex(*tmp, WORD32_ByteSz);
+    printf("\nSHA256 HASH (len=%d) >%s<\n", SHA256_byteSz, sha);
+    for (Word_32bits *tmp = (Word_32bits *)sha; tmp < (Word_32bits *)sha + SHA256_wordSz; tmp += 1)
+        ft_printHex(*tmp, WORD32_byteSz);
     printf("\n");
 }

@@ -19,7 +19,7 @@ static void init_md5(t_md5 *md5, Mem_8bits *chunks, Long_64bits chunksSz)
         0xf4292244,	0x432aff97,	0xab9423a7,	0xfc93a039,	0x655b59c3,	0x8f0ccc92,	0xffeff47d,	0x85845dd1,
         0x6fa87e4f,	0xfe2ce6e0,	0xa3014314,	0x4e0811a1,	0xf7537e82,	0xbd3af235,	0x2ad7d2bb,	0xeb86d391
     };
-    ft_memcpy(md5->sinus, sinus, 64 * WORD32_ByteSz);
+    ft_memcpy(md5->sinus, sinus, 64 * WORD32_byteSz);
 
     Word_32bits constants[64] = {
         7, 12, 17, 22,  7, 12, 17, 22,  7, 12, 17, 22,  7, 12, 17, 22,
@@ -27,7 +27,7 @@ static void init_md5(t_md5 *md5, Mem_8bits *chunks, Long_64bits chunksSz)
         4, 11, 16, 23,  4, 11, 16, 23,  4, 11, 16, 23,  4, 11, 16, 23,
         6, 10, 15, 21,  6, 10, 15, 21,  6, 10, 15, 21,  6, 10, 15, 21
     };
-    ft_memcpy(md5->constants, constants, 64 * WORD32_ByteSz);
+    ft_memcpy(md5->constants, constants, 64 * WORD32_byteSz);
 }
 
 static void hash_chunk(t_md5 *md5, Word_32bits *chunk)
@@ -42,7 +42,7 @@ static void hash_chunk(t_md5 *md5, Word_32bits *chunk)
     Word_32bits words[16];  // Chunk msg
     int         g;          // Word's index in chunk msg
 
-    ft_memcpy(words, chunk, CHUNK_ByteSz);
+    ft_memcpy(words, chunk, CHUNK_byteSz);
     for (int i = 0; i < 64; i++)
     {
         if (i < 16)
@@ -87,15 +87,15 @@ Mem_8bits   *md5(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashB
 
     Word_32bits *chunks = (Word_32bits *)md5.chunks;
     Word_32bits *chunk = chunks;
-    while (chunk < chunks + md5.chunksSz / WORD32_ByteSz)
+    while (chunk < chunks + md5.chunksSz / WORD32_byteSz)
     {
         hash_chunk(&md5, chunk);
-        chunk += CHUNK_ByteSz / WORD32_ByteSz;
+        chunk += CHUNK_byteSz / WORD32_byteSz;
     }
 
     // Restore right endianness order
-    for (int i = 0; i < MD5_WordSz; i++)
-        endianReverse((Mem_8bits *)(md5.hash + i), WORD32_ByteSz);
+    for (int i = 0; i < MD5_wordSz; i++)
+        endianReverse((Mem_8bits *)(md5.hash + i), WORD32_byteSz);
 
     (void)way;
     if (hashByteSz)

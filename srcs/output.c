@@ -84,11 +84,11 @@ void    hash_64bits_output(t_hash *p)
 {
     Long_64bits *hash = (Long_64bits *)p->hash;
     // int         bloc64bitsSz = (p->hashByteSz + 7) / 8;
-    int         bloc64bitsSz = ((p->hashByteSz + 7) / 8) * 8 / LONG64_ByteSz;
+    int         bloc64bitsSz = ((p->hashByteSz + 7) / 8) * 8 / LONG64_byteSz;
 
     // printf("Hash (len=%d): %lx\n", bloc64bitsSz, hash[0]);
     for (Long_64bits *tmp = hash; tmp < hash + bloc64bitsSz; tmp += 1)
-        ft_printHex(*tmp, LONG64_ByteSz);
+        ft_printHex(*tmp, LONG64_byteSz);
     // for (Long_64bits *tmp = hash; tmp < hash + bloc64bitsSz; tmp += 1)
     //     printf("%lx", *tmp);
     // printf("\n");
@@ -97,11 +97,11 @@ void    hash_64bits_output(t_hash *p)
 void    hash_32bits_output(t_hash *p)
 {
     Word_32bits *hash = (Word_32bits *)p->hash;
-    int         bloc32bitsSz = p->hashByteSz / WORD32_ByteSz;
-    // int         bloc32bitsSz = (p->hashByteSz + 5) / WORD32_ByteSz; // Beaucoup mieux non ???
+    int         bloc32bitsSz = p->hashByteSz / WORD32_byteSz;
+    // int         bloc32bitsSz = (p->hashByteSz + 5) / WORD32_byteSz; // Beaucoup mieux non ???
 
     for (Word_32bits *tmp = hash; tmp < hash + bloc32bitsSz; tmp += 1)
-        ft_printHex(*tmp, WORD32_ByteSz);
+        ft_printHex(*tmp, WORD32_byteSz);
     // for (Word_32bits *tmp = hash; tmp < hash + bloc32bitsSz; tmp += 1)
     //     printf("%x", *tmp);
     // printf("\n");
@@ -130,11 +130,11 @@ void    hash_8bits_output(t_hash *p)
 
 void    hash_output(t_hash *hash, int hashBlocByteSz)
 {
-    if (hashBlocByteSz == MEM8_ByteSz || ssl.flags & ao) //base64 command  OR  des flag d  OR  a | ao flags (base64 output format)
+    if (hashBlocByteSz == MEM8_byteSz || ssl.flags & ao) //base64 command  OR  des flag d  OR  a | ao flags (base64 output format)
         hash_8bits_output(hash);
-    else if (hashBlocByteSz == WORD32_ByteSz)
+    else if (hashBlocByteSz == WORD32_byteSz)
         hash_32bits_output(hash);
-    else if (hashBlocByteSz == LONG64_ByteSz)
+    else if (hashBlocByteSz == LONG64_byteSz)
         hash_64bits_output(hash);
     // printf("\nhashBlocByteSz: %d\n", hashBlocByteSz);
 }
@@ -154,7 +154,7 @@ void    md_stdin_quiet_output(t_hash *hash)
 {
     ft_putstr(hash->name);
     ft_putstr("\n");
-    hash_output(hash, WORD32_ByteSz);
+    hash_output(hash, WORD32_byteSz);
 }
 
 void    md_stdin_output(t_hash *hash)
@@ -162,12 +162,12 @@ void    md_stdin_output(t_hash *hash)
     ft_putstr("(");
     ft_putstr(hash->name);
     ft_putstr(")= ");
-    hash_output(hash, WORD32_ByteSz);
+    hash_output(hash, WORD32_byteSz);
 }
 
 void    md_reversed_output(t_hash *hash)
 {
-    hash_output(hash, WORD32_ByteSz);
+    hash_output(hash, WORD32_byteSz);
     ft_putstr(" ");
     ft_putstr(hash->name);
 }
@@ -179,16 +179,16 @@ void    md_output(t_hash *hash)
         if (ssl.flags & q && ssl.flags & p_md)
             md_stdin_quiet_output(hash);
         else if (ssl.flags & q)
-            hash_output(hash, WORD32_ByteSz);
+            hash_output(hash, WORD32_byteSz);
         else
             md_stdin_output(hash);
     }
     else if (ssl.flags & q)
-        hash_output(hash, WORD32_ByteSz);
+        hash_output(hash, WORD32_byteSz);
     else if (ssl.flags & r)
         md_reversed_output(hash);
     else
-        classic_output(hash, WORD32_ByteSz);
+        classic_output(hash, WORD32_byteSz);
     ft_putstr("\n");
 }
 
@@ -196,28 +196,10 @@ void    md_output(t_hash *hash)
 
 void    cipher_output(t_hash *hash)
 {
-    int hashBlocByteSz = MEM8_ByteSz;
-
-    // if (ssl.hash_func_addr == des)
-    // {
-    //     if (ssl.flags & d)
-    //         hashBlocByteSz = MEM8_ByteSz;
-    //     else
-    //         hashBlocByteSz = LONG64_ByteSz;
-    // }
-    // else
-    //     hashBlocByteSz = MEM8_ByteSz;
-
-    // if (ssl.hash_func_addr == base64)
-    // {
-    //     // WTFFF ???? stop do that
-        // if (((char *)hash->hash)[hash->hashByteSz / 4 - 1] == '\n')
-        //     ((char *)hash->hash)[hash->hashByteSz / 4 - 1] = '\0'; //To remove \n, it's like 'echo -n <node->msg> | ./ft_ssl ...'
-    // }
     if (ssl.flags & (o | q))
-        hash_output(hash, hashBlocByteSz);
+        hash_output(hash, MEM8_byteSz);
     else
-        classic_output(hash, hashBlocByteSz);
+        classic_output(hash, MEM8_byteSz);
 }
 
 // ---------------------- GLOBAL output ---------------------------
@@ -231,5 +213,5 @@ void    output(t_hash *hash)
     else if (ssl.command & CIPHER)
         cipher_output(hash);
     else
-        ft_putstdout("This command doesn't handle an output.");
+        ft_putstrfd(STDOUT, "This command doesn't handle an output.");
 }

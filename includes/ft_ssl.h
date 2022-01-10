@@ -6,6 +6,13 @@
 # include <math.h>
 # include <time.h>
 
+# define    STDIN   0
+# define    STDOUT  1
+# define    STDERR  2
+
+# define    BIGENDIAN      0
+# define    LITTLEENDIAN   1
+
 /*
     ft_ssl Data --------------------------------------
 */
@@ -14,14 +21,11 @@ typedef unsigned char   Mem_8bits;
 typedef unsigned int    Word_32bits;
 typedef unsigned long   Long_64bits;
 
-# define MEM8_ByteSz    sizeof(Mem_8bits)        // 1 byte  or 8  bits
-# define WORD32_ByteSz  sizeof(Word_32bits)      // 4 bytes or 32 bits
-# define LONG64_ByteSz  sizeof(Long_64bits)      // 8 bytes or 64 bits
+# define MEM8_byteSz    sizeof(Mem_8bits)        // 1 byte  or 8  bits
+# define WORD32_byteSz  sizeof(Word_32bits)      // 4 bytes or 32 bits
+# define LONG64_byteSz  sizeof(Long_64bits)      // 8 bytes or 64 bits
 
 # define BUFF_SIZE      420
-
-# define BIGENDIAN      0
-# define LITTLEENDIAN   1
 
 # define ENDMSG         0b10000000
 # define INTMAXLESS1    (Word_32bits)pow(2, 32) - 1
@@ -66,20 +70,21 @@ typedef struct  s_hash
     struct s_hash *next;
 }               t_hash;
 
-Mem_8bits   *parse_key(char *str);
 int         parsing(int ac, char **av);
 void        freexit(int failure);
 void        malloc_failed(char *errormsg);
 void        open_failed(char *errormsg, char *file);
 void        write_failed(char *errormsg);
+char        *ask_password();
 
 int     	ft_atoi(const char *str);
 void	    ft_bzero(void *s, size_t n);
 void	    *ft_memcpy(void *dest, const void *src, size_t n);
 Mem_8bits   *ft_memnew(int byteSz);
 Mem_8bits   *ft_memdup(Mem_8bits *mem, int byteSz);
+char        *ft_memjoin(void *mem1, int byteSz1, void *mem2, int byteSz2);
 
-char        *ft_strnew(int len);
+// char        *ft_strnew(int len);
 char	    *ft_strdup(char *src);
 char    	*ft_strinsert(char *str1, char *toinsert, char *str2);
 int		    ft_strlen(char *p);
@@ -136,7 +141,7 @@ void        printLong(Long_64bits l);
     ----------------------------------------------------
 */
 
-# define CHUNK_ByteSz   (16 * sizeof(Word_32bits))    // 64 bytes or 512 bits
+# define CHUNK_byteSz   (16 * sizeof(Word_32bits))    // 64 bytes or 512 bits
 
 void        md_padding(Mem_8bits **data, Long_64bits *byteSz, char reverseByteSz);
 
@@ -144,8 +149,8 @@ void        md_padding(Mem_8bits **data, Long_64bits *byteSz, char reverseByteSz
     MD5 Data -----------------------------------------
 */
 
-# define    MD5_WordSz  4
-# define    MD5_byteSz  MD5_WordSz * WORD32_ByteSz     // 16 bytes / 128 bits  
+# define    MD5_wordSz  4
+# define    MD5_byteSz  MD5_wordSz * WORD32_byteSz     // 16 bytes / 128 bits  
 
 typedef struct  s_md5
 {
@@ -153,7 +158,7 @@ typedef struct  s_md5
     Long_64bits chunksSz;
     Word_32bits sinus[64];
     Word_32bits constants[64];
-    Word_32bits hash[MD5_WordSz];
+    Word_32bits hash[MD5_wordSz];
 }               t_md5;
 
 // Mem_8bits   *md5(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
@@ -165,15 +170,16 @@ void        md5_t_hash(t_hash *hash);
     SHA256 Data --------------------------------------
 */
 
-# define    SHA256_WordSz  8
-# define    SHA256_byteSz  SHA256_WordSz * WORD32_ByteSz     // 8 * 4 = 32 bytes / 256 bits  
+# define    SHA256_bitSz    256
+# define    SHA256_byteSz   SHA256_bitSz / 8
+# define    SHA256_wordSz   SHA256_byteSz / WORD32_byteSz
 
 typedef struct  s_sha
 {
     Mem_8bits   *chunks;
     Long_64bits chunksSz;
     Word_32bits k[64];
-    Word_32bits hash[SHA256_WordSz];
+    Word_32bits hash[SHA256_wordSz];
 }               t_sha;
 
 // void        sha256(t_hash *hash);
@@ -213,7 +219,11 @@ Mem_8bits   *base64(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *ha
     DES Data --------------------------------------
 */
 
-# define PBKDF2_iter    10000
+# define PBKDF2_iter        10000
+# define MAGICNUMBER        "Salted__"
+# define MAGICNUMBER_byteSz sizeof(MAGICNUMBER) - 1
+# define MAGICHEADER_byteSz (MAGICNUMBER_byteSz + KEY_byteSz)
+// # define MAGICHEADER_byteSz 16
 
 typedef enum    desmode {
     DESECB=1, DESCBC=2
@@ -270,5 +280,5 @@ void    t_hash_output(t_hash *hash);
 // Not my code, for debugging:
 
 
-size_t hmac_sha256(const void* key, const size_t keylen, const void* data, const size_t datalen, void* out, const size_t outlen);
-void PKCS5_PBKDF2_HMAC(unsigned char *password, size_t plen, unsigned char *salt, size_t slen, const unsigned long iteration_count, const unsigned long key_length, unsigned char *output);
+// size_t hmac_sha256(const void* key, const size_t keylen, const void* data, const size_t datalen, void* out, const size_t outlen);
+// void PKCS5_PBKDF2_HMAC(unsigned char *password, size_t plen, unsigned char *salt, size_t slen, const unsigned long iteration_count, const unsigned long key_length, unsigned char *output);
