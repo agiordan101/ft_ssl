@@ -1,4 +1,6 @@
-make
+make -C ..
+cp ../ft_ssl .
+
 echo "\nUnitests ft_ssl ->\n"
 sh unitests_md5.sh $1
 echo "\n\n"
@@ -9,3 +11,5 @@ echo "\n\n"
 sh unitests_des_cbc.sh $1
 echo "\n\n"
 sh unitests_des_cbc_pbkdf2.sh $1
+
+rm ft_ssl

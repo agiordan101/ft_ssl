@@ -15,7 +15,7 @@ static int              magic_number_in(Mem_8bits *plaintext, t_des *des)
         Mem_8bits *buff = ft_memdup(plaintext, MAGICNUMBER_byteSz);
         // printf("*plaintext: %s\n", buff);
 
-        if (ft_strcmp(buff, MAGICNUMBER))
+        if (ft_strcmp((char *)buff, MAGICNUMBER))
         {
             free(buff);
             if (!des->key)
@@ -48,12 +48,12 @@ static Mem_8bits        *magic_number_out(Mem_8bits *hash, Long_64bits *hashByte
     ft_memcpy(header + MAGICNUMBER_byteSz, (void *)&ssl.des.salt, KEY_byteSz);
     // printf("header (len=%ld): %s\n", MAGICHEADER_byteSz, header);
 
-    Mem_8bits *header_hash = ft_memjoin(header, MAGICHEADER_byteSz, hash, *hashByteSz);
+    char *header_hash = ft_memjoin(header, MAGICHEADER_byteSz, hash, *hashByteSz);
     *hashByteSz += MAGICHEADER_byteSz;
     // printf("hash ret (len=%ld): %s\n", *hashByteSz, ret);
 
     free(hash);
-    return header_hash;
+    return (Mem_8bits *)header_hash;
 }
 
 static Key_64bits       generate_key()
@@ -182,7 +182,7 @@ static void             init_vars(Mem_8bits *plaintext, t_des *des)
     {
         // A password is asked if it's not provided
         if (!des->password)
-            des->password = ask_password(des);
+            des->password = (Mem_8bits *)ask_password(des);
 
         // Password-based key derivation function (PBKDF) using SHA256-HMAC function as pseudo random function (PRF)
         des->key = pbkdf2_sha256(des->password, des->salt, ssl.flags & pbkdf2_iter ? ssl.pbkdf2_iter : PBKDF2_iter);

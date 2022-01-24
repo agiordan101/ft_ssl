@@ -59,7 +59,7 @@ void    printBits(void *p, int size)
 // Debug function, not used in this project
 void    printMemHex(void *p, int size, char *msg)
 {
-    unsigned char *mem = (char *)p;
+    char *mem = (char *)p;
 
     if (msg)
         printf("\n%s (len=%d) >%s<\n", msg, size, mem);

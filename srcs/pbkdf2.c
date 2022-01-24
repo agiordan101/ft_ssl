@@ -128,7 +128,7 @@ Key_64bits          pbkdf2_sha256(Mem_8bits *pwd, Key_64bits salt, int c)
 */
 {
     // T1 = F(Password, Salt, c, i) = U1 ^ U2 ^ ... ^ Uc
-    Mem_8bits *key = pbkdf2_sha256_prfxors(pwd, ft_strlen(pwd), salt, c, 1);
+    Mem_8bits *key = pbkdf2_sha256_prfxors(pwd, ft_strlen((char *)pwd), salt, c, 1);
     endianReverse(key, KEY_byteSz);
 
     // DK = T1 & (1 << 65 - 1)

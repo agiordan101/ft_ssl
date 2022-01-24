@@ -1,3 +1,4 @@
+make -C .. && cp ../ft_ssl .
 echo "\n --- Unitests md5: This script will display differences if errors are found"
 
 echo "(stdin)= 35f1d6de0302e2086a4e472266efb3a9

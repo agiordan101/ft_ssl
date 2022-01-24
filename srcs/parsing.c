@@ -65,7 +65,7 @@ int     file_handler(t_hash *node, char *file)
     else
     {
         node->len = get_file_len(file);
-        node->msg = ft_memnew(node->len);
+        node->msg = (char *)ft_memnew(node->len);
 
         if (read(fd, node->msg, node->len) == -1)
             return EXIT_FAILURE;
@@ -251,7 +251,7 @@ int     hash_func_handler(char *str)
 
 int     stdin_handler()
 {
-    t_hash  *node = addmsg_front();
+    t_hash      *node = addmsg_front();
     char    *tmp;
     char    buff[BUFF_SIZE];
     int     ret = BUFF_SIZE;
@@ -262,9 +262,10 @@ int     stdin_handler()
             return EXIT_FAILURE;
 
         tmp = node->msg;
-        node->msg = ft_memnew(node->len + ret);
-        ft_memcpy(node->msg, tmp, node->len);
-        ft_memcpy(node->msg + node->len, buff, ret);
+        // node->msg = ft_memnew(node->len + ret);
+        // ft_memcpy(node->msg, tmp, node->len);
+        // ft_memcpy(node->msg + node->len, buff, ret);
+        node->msg = ft_memjoin(tmp, node->len, buff, ret);
         if (tmp)
             free(tmp);
         node->len += ret;

@@ -1,3 +1,4 @@
+make -C .. && cp ../ft_ssl .
 echo "\n --- Unitests des-ecb: For each command line, this script will display duplicate things or nothing if there is no error"
 echo "\nft_ssl encrypt / openssl decrypt ->"
 echo "1:"
@@ -22,3 +23,5 @@ echo "8:"
 ./ft_ssl des-ecb -k 0123456789abcdef -i $1 -q -a | ./ft_ssl des-ecb -k 0123456789abcdef -o unitests_out -q -a -d && diff $1 unitests_out
 echo "9:"
 ./ft_ssl des-ecb -k 0123456789abcdef -i $1 -q -a -A | ./ft_ssl des-ecb -k 0123456789abcdef -o unitests_out -q -a -A -d && diff $1 unitests_out
+
+rm unitests_out

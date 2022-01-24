@@ -84,7 +84,7 @@ void	    ft_bzero(void *s, size_t n);
 void	    *ft_memcpy(void *dest, const void *src, size_t n);
 Mem_8bits   *ft_memnew(int byteSz);
 Mem_8bits   *ft_memdup(void *mem, int byteSz);
-char        *ft_memjoin(void *mem1, int byteSz1, void *mem2, int byteSz2);
+void        *ft_memjoin(void *mem1, int byteSz1, void *mem2, int byteSz2);
 
 int     	ft_atoi(const char *str);
 char	    *ft_strdup(char *src);
@@ -264,9 +264,3 @@ void    t_hash_base64_encode_output(t_hash *hash);
 void    t_hash_hashing(t_hash *hash);
 void    t_hash_output(t_hash *hash);
 
-
-
-// Not my code, for debugging:
-
-// size_t hmac_sha256(const void* key, const size_t keylen, const void* data, const size_t datalen, void* out, const size_t outlen);
-// void PKCS5_PBKDF2_HMAC(unsigned char *password, size_t plen, unsigned char *salt, size_t slen, const unsigned long iteration_count, const unsigned long key_length, unsigned char *output);

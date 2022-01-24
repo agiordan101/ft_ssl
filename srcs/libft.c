@@ -41,9 +41,9 @@ inline Mem_8bits *ft_memdup(void *mem, int byteSz)
     return dup;
 }
 
-inline char     *ft_memjoin(void *mem1, int byteSz1, void *mem2, int byteSz2)
+inline void     *ft_memjoin(void *mem1, int byteSz1, void *mem2, int byteSz2)
 {
-    char    *memjoin = ft_memnew(byteSz1 + byteSz2);
+    Mem_8bits   *memjoin = ft_memnew(byteSz1 + byteSz2);
     ft_memcpy(memjoin, mem1, byteSz1);
     ft_memcpy(memjoin + byteSz1, mem2, byteSz2);
     return memjoin;
@@ -95,7 +95,7 @@ inline int	ft_strlen(char *p)
 
 inline char *ft_strdup(char *src)
 {
-    return ft_memdup(src, ft_strlen(src));
+    return (char *)ft_memdup(src, ft_strlen(src));
 }
 
 inline char *ft_strinsert(char *str1, char *toinsert, char *str2)
@@ -105,7 +105,7 @@ inline char *ft_strinsert(char *str1, char *toinsert, char *str2)
     int     str2len = ft_strlen(str2);
     // char    concat[str1len + toinsertlen + str2len + 1];
     // ft_bzero(concat, str1len + toinsertlen + str2len + 1);
-    char    *concat = ft_memnew(str1len + toinsertlen + str2len);
+    char    *concat = (char *)ft_memnew(str1len + toinsertlen + str2len);
 
     // printf("lengths: %d / %d / %d\n", str1len, toinsertlen, str2len);
     ft_memcpy(concat, str1, str1len);
@@ -202,7 +202,7 @@ inline Long_64bits  ft_strtoHex(char *str)
 
 inline char         *ft_hextoStr(Long_64bits nbr)
 {
-	char    *str = ft_memnew(LONG64_byteSz);
+	char    *str = (char *)ft_memnew(LONG64_byteSz);
 
 	for (int i = 0; i < LONG64_byteSz; i++)
         str[i] = (nbr >> (i * 8)) & 0xff;

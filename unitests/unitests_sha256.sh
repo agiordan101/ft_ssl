@@ -1,3 +1,4 @@
+make -C .. && cp ../ft_ssl .
 echo "\n --- Unitests sha256: This script will display differences if errors are found"
 
 echo "1ceb55d2845d9dd98557b50488db12bbf51aaca5aa9c1199eb795607a2457daf
