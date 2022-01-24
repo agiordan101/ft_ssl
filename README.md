@@ -1,5 +1,7 @@
     Recode a part of openssl library
 
+Author: agiordan
+
 
 usage: ft_ssl <algorithm> [flags] [file | string]
 
@@ -14,7 +16,6 @@ Global flags:
 Message Digest commands:
     md5
     sha256
-
 Message Digest flags:
     -p      echo STDIN to STDOUT and append the checksum to STDOUT
     -r      reverse the format of the output
@@ -23,10 +24,9 @@ Message Digest flags:
 
 Cipher commands:
     base64
-    des     (Default as des-ecb)
+    des     (Default as des-cbc)
     des-ecb
     des-cbc
-
 Cipher flags:
     -e      encrypt mode (default mode) (-e has priority over -d)
     -d      decrypt mode
@@ -44,3 +44,11 @@ Cipher flags:
 
 Standard commands:
     Not yet...
+
+
+Road map:
+
+- srcs structure
+- Makefile en fonction de la nouvelle struct de srcs 
+- rsa prime number gemerator
+

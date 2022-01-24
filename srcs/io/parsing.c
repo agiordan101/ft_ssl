@@ -262,17 +262,11 @@ int     stdin_handler()
             return EXIT_FAILURE;
 
         tmp = node->msg;
-        // node->msg = ft_memnew(node->len + ret);
-        // ft_memcpy(node->msg, tmp, node->len);
-        // ft_memcpy(node->msg + node->len, buff, ret);
         node->msg = ft_memjoin(tmp, node->len, buff, ret);
         if (tmp)
             free(tmp);
         node->len += ret;
-        // printf("read ret %d, len = %d bytes\n", ret, node->len);
     }
-    // printf("stdin handler read %d bytes: >%s<\n", node->len, node->msg);
-    // exit(0);
 
     // Pre-computing for output part
     node->stdin = 1;

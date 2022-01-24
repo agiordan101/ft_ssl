@@ -1,18 +1,12 @@
 #include "ft_ssl.h"
 
 /*
-    Message digest :
-        Ne pas reverse le stdin avec -r
-        MD5 au debut sauf en reverse ou stdin
-        -p -q -r alors print STDIN + \n + hash pour la premiere ligne
-        .. -q -r = .. -q car -r s'annule en présence de -q
+    ft_ssl_md5 -> Pas de prérequis pour corriger
+    ft_ssl_des -> Avoir commencé ft_ssl_md5
+    ft_ssl_rsa -> Avoir fini ft_ssl_des
 
     To do :
         -nosalt             Do not use salt in the KDF
-
-    Attention -a et -a -A ne sortent pas la meme chose (Seulement un \n qui difere)
-
-    REMETTRE LES FLAGS DE COMPILATION DANS LE MAKEFILE PTN
 
 */
 

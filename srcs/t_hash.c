@@ -3,7 +3,6 @@
 inline void init_t_hash(t_hash *hash)
 {
     *hash = (t_hash){0, NULL, NULL, 0, NULL, 0, 0, NULL};
-    // *hash = (t_hash){0, NULL, NULL, 0, NULL, 0, 0, 0, NULL};
 }
 
 inline void t_hash_free(t_hash *hash)
@@ -12,7 +11,6 @@ inline void t_hash_free(t_hash *hash)
 
     while (hash)
     {
-        // printf("free: %p\n", hash->msg);
         if (hash->name)
             free(hash->name);
         if (hash->msg)

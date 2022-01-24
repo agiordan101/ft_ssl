@@ -10,26 +10,24 @@ INCS		=	$(addprefix $(INC_PATH), $(INCLUDES))
 SRC_PATH	=	./srcs/
 SRC			=	$(NAME).c \
 				t_hash.c \
+				parsing.c \
+				md5.c \
+				sha256.c \
+				base64.c \
+				pbkdf2.c \
+				des.c \
 				bitwise.c \
-				io/parsing.c \
-				io/padding.c \
-				io/output.c \
-				utils/libft.c \
-				utils/verbose.c \
-				utils/errors.c \
-				algorithms/sha256.c \
-				algorithms/md5.c \
-				algorithms/pbkdf2.c \
-				algorithms/des.c \
-				algorithms/base64.c
+				padding.c \
+				libft.c \
+				output.c \
+				verbose.c \
+				errors.c
 
 BIN_PATH	=	./bins/
 BIN			=	$(SRC:.c=.o)
 BINS		=	$(addprefix $(BIN_PATH), $(BIN))
 
-SUBDIRS = algorithms
-
-.PHONY: all clean fclean re dirs
+.PHONY: all clean fclean re
 
 #__________RULES__________#
 
@@ -42,13 +40,8 @@ $(NAME): $(BINS)
 
 $(BIN_PATH)%.o: $(SRC_PATH)%.c $(INCS)
 
+	@mkdir -p $(BIN_PATH) || true
 	@$(CC) $(CFLAGS) -I $(INC_PATH) -o $@ -c $< && echo " \c"
-
-dirs:
-	@mkdir $(BIN_PATH) || true
-	@mkdir $(BIN_PATH)/algorithms || true
-	@mkdir $(BIN_PATH)/io || true
-	@mkdir $(BIN_PATH)/utils || true
 
 clean:
 	@rm -rf $(BIN_PATH)
