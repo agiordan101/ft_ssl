@@ -27,8 +27,6 @@ BIN_PATH	=	./bins/
 BIN			=	$(SRC:.c=.o)
 BINS		=	$(addprefix $(BIN_PATH), $(BIN))
 
-SUBDIRS = algorithms
-
 .PHONY: all clean fclean re dirs
 
 #__________RULES__________#

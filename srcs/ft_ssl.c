@@ -49,10 +49,8 @@ char    *ask_password()
 
 void    ssl_free()
 {
-    t_des    *des = &ssl.des;
-
-    if (des->password)
-        free(des->password);
+    if (ssl.des.password)
+        free(ssl.des.password);
 
     t_hash_free(ssl.hash);
 
