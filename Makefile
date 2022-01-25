@@ -17,11 +17,12 @@ SRC			=	$(NAME).c \
 				utils/libft.c \
 				utils/verbose.c \
 				utils/errors.c \
-				algorithms/sha256.c \
-				algorithms/md5.c \
 				algorithms/pbkdf2.c \
-				algorithms/des.c \
-				algorithms/base64.c
+				algorithms/md/sha256.c \
+				algorithms/md/md5.c \
+				algorithms/ciphers/des.c \
+				algorithms/ciphers/base64.c \
+				algorithms/rsa/prime.c
 
 BIN_PATH	=	./bins/
 BIN			=	$(SRC:.c=.o)
@@ -43,10 +44,11 @@ $(BIN_PATH)%.o: $(SRC_PATH)%.c $(INCS)
 	@$(CC) $(CFLAGS) -I $(INC_PATH) -o $@ -c $< && echo " \c"
 
 dirs:
-	@mkdir $(BIN_PATH) || true
-	@mkdir $(BIN_PATH)/algorithms || true
-	@mkdir $(BIN_PATH)/io || true
-	@mkdir $(BIN_PATH)/utils || true
+	@mkdir -p $(BIN_PATH)/io || true
+	@mkdir -p $(BIN_PATH)/utils || true
+	@mkdir -p $(BIN_PATH)/algorithms/md || true
+	@mkdir -p $(BIN_PATH)/algorithms/ciphers || true
+	@mkdir -p $(BIN_PATH)/algorithms/rsa || true
 
 clean:
 	@rm -rf $(BIN_PATH)

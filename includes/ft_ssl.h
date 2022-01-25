@@ -237,7 +237,24 @@ void        des_unpadding(Long_64bits *lastbloc, int *ptSz);
 
 
 /*
-    MAIN structure ----------------------------------
+    ----------------------------------------------------
+    STANDARD
+    ----------------------------------------------------
+*/
+
+/*
+    RSA Data --------------------------------------
+*/
+
+# define    ISPRIMEMEMSZ    10
+
+int         is_prime(Long_64bits n, float p);
+Mem_8bits   *rsa(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
+
+/*
+    ----------------------------------------------------
+    MAIN structure
+    ----------------------------------------------------
 */
 
 typedef struct  s_ssl

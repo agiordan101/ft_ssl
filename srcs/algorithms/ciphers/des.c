@@ -159,8 +159,6 @@ static void             key_transformation(t_des *des)
 
 static void             init_vars(Mem_8bits *plaintext, t_des *des)
 {
-    srand(time(NULL));
-
     // Vector is only for CBC mode, ft_ssl failed if it's not provided
     if (des->vector)
     {

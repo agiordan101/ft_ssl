@@ -68,6 +68,7 @@ int     main(int ac, char **av)
 {
     int     ret;
 
+    srand(time(NULL));
     ssl.fd_out = 1;
     if ((ret = parsing(ac, av)))
         freexit(ret);

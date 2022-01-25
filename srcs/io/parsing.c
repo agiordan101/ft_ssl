@@ -239,6 +239,12 @@ int     hash_func_handler(char *str)
         ssl.command = CIPHER;
         ssl.des.mode = DESCBC;
     }
+    else if (!ft_strcmp(str, "rsa"))
+    {
+        ssl.hash_func = "RSA";
+        ssl.hash_func_addr = rsa;
+        ssl.command = STANDARD;
+    }
     else
     {
         ft_putstderr("ft_ssl: Error: '");

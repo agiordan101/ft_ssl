@@ -47,10 +47,3 @@ Cipher flags:
 Standard commands:
     Not yet...
 
-
-Road map:
-
-- srcs structure
-- Makefile en fonction de la nouvelle struct de srcs 
-- rsa prime number gemerator
-
