@@ -10,6 +10,9 @@ static int     miller_rabin_witness(Long_64bits n, Long_64bits a)
 int     is_prime(Long_64bits n, float p)
 {
     /*
+        http://defeo.lu/in420/DM3%20-%20Test%20de%20Miller-Rabin
+        https://fr.wikipedia.org/wiki/Test_de_primalit%C3%A9_de_Miller-Rabin
+
         Miller-Rabin algorithm ->
             Test witness value a, like 1 < a < n - 1,
             until the desired probability p is reached
