@@ -65,7 +65,7 @@ Mem_8bits   *rsa(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashB
     float   p = 0.00005;
 
     // printf("is_prime(%lu, %f) -> %d\n\n\n", (Long_64bits)1<<34, p, is_prime(((Long_64bits)1)<<34, p));
-    for (int i = 1; i < 25; i++)
+    for (int i = 1; i < 8; i++)
         printf("is_prime(%d, %f) -> %d\n\n\n", i, p, is_prime(i, p));
     exit(0);
 }

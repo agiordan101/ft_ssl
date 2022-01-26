@@ -8,6 +8,9 @@
     To do :
         -nosalt             Do not use salt in the KDF
 
+    Afficher l'usage de la command passé
+    Boucler pour les flags
+
 */
 
 t_ssl    ssl;
