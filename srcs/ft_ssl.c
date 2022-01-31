@@ -6,10 +6,14 @@
     ft_ssl_rsa -> Avoir fini ft_ssl_des
 
     To do :
-        -nosalt             Do not use salt in the KDF
 
-    Afficher l'usage de la command passé
-    Boucler pour les flags
+        Add -proba pour isprime command
+        Faire la différence entre les command_familly et les commands (On peut pas comparer les adresses car plusieurs fonctions existe pour la meme commande)
+        Enlever les protection useless dans le parsing
+        Gerer les \n dans l'output
+        Afficher l'usage de la command_familly passé
+        Boucler pour les flags parsing pt sur ft
+        -nosalt             Do not use salt in the KDF
 
 */
 
@@ -24,8 +28,8 @@ char    *ask_password()
     {
         char *secondmsg_1 = "Verifying - enter ";
         char *msg_2 = " encryption password:";
-        char *firstmsg = ft_strinsert(firstmsg_1, ssl.hash_func, msg_2);
-        char *secondmsg = ft_strinsert(secondmsg_1, ssl.hash_func, msg_2);
+        char *firstmsg = ft_strinsert(firstmsg_1, ssl.command_title, msg_2);
+        char *secondmsg = ft_strinsert(secondmsg_1, ssl.command_title, msg_2);
 
         char *password2 = ft_strdup(getpass(firstmsg));
         password = getpass(secondmsg);
@@ -43,7 +47,7 @@ char    *ask_password()
     else
     {
         char *msg_2 = " decryption password:";
-        char *msg = ft_strinsert(firstmsg_1, ssl.hash_func, msg_2);   
+        char *msg = ft_strinsert(firstmsg_1, ssl.command_title, msg_2);   
         password = getpass(msg);
         free(msg);
     }
@@ -90,8 +94,8 @@ int     main(int ac, char **av)
 
     t_hash_hashing(ssl.hash);
 
-    // Base64 encode output (Do not encode if command is already base64 in encryption mode)
-    if (ssl.flags & ao && !(ssl.hash_func_addr == base64 && ssl.flags & e))
+    // Base64 encode output (Do not encode if command_familly is already base64 in encryption mode)
+    if (ssl.flags & ao && !(ssl.command_addr == base64 && ssl.flags & e))
         t_hash_base64_encode_output(ssl.hash);
 
     t_hash_output(ssl.hash);

@@ -34,7 +34,7 @@ void    write_failed(char *errormsg, int fd)
 void    pbkdf2_iter_error()
 {
     ft_putstderr("ft_ssl: ");
-    ft_putstderr(ssl.hash_func);
+    ft_putstderr(ssl.command_title);
     ft_putstderr(": Non-positive number \"");
     ft_putnbr(STDERR, ssl.pbkdf2_iter);
     ft_putstderr("\" for -iter\n");
@@ -44,7 +44,7 @@ void    pbkdf2_iter_error()
 void    file_not_found(char *file)
 {
     ft_putstderr("ft_ssl: ");
-    ft_putstderr(ssl.hash_func);
+    ft_putstderr(ssl.command_title);
     ft_putstderr(": ");
     ft_putstderr(file);
     ft_putstderr(": No such file or directory\n");

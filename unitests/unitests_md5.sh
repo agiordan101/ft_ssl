@@ -1,7 +1,7 @@
 make -C .. > /dev/null
 cp ../ft_ssl . > /dev/null
 
-echo "\n --- Unitests md5: This script will display differences if errors are found"
+echo "\n --- Unitests md5: This script will display differences if a potential error is found"
 
 echo "(stdin)= 35f1d6de0302e2086a4e472266efb3a9
 (\"42 is nice\")= 35f1d6de0302e2086a4e472266efb3a9

@@ -51,11 +51,11 @@ inline void     *ft_memjoin(void *mem1, int byteSz1, void *mem2, int byteSz2)
 
 // About string (char *) ------------------------------------------------------------------
 
-inline int	ft_atoi(const char *str)
+inline Long_64bits	ft_atoi(const char *str)
 {
 	long	nb;
-	int		sign;
-	int		i;
+	Long_64bits		sign;
+	Long_64bits		i;
 
 	i = 0;
 	nb = 0;
@@ -71,7 +71,7 @@ inline int	ft_atoi(const char *str)
 	}
 	while (str[i] >= '0' && str[i] <= '9')
 		nb = nb * 10 + str[i++] - '0';
-	return ((int)(nb * sign));
+	return ((Long_64bits)(nb * sign));
 }
 
 inline int	ft_strlen(char *p)

@@ -58,7 +58,7 @@ inline void t_hash_hashing(t_hash *hash)
     while (hash)
     {
         if (!hash->error)
-            hash->hash = ssl.hash_func_addr((Mem_8bits **)&hash->msg, hash->len, (Long_64bits *)&hash->hashByteSz, ssl.flags);
+            hash->hash = ssl.command_addr((Mem_8bits **)&hash->msg, hash->len, (Long_64bits *)&hash->hashByteSz, ssl.flags);
         hash = hash->next;
     }
 }

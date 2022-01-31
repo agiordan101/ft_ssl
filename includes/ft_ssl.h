@@ -39,20 +39,26 @@ typedef enum    error {
 }               e_error;
 
 typedef enum    flags {
-    i_=1<<1, o=1<<2, q=1<<3, a=1<<4, ai=1<<5, ao=1<<6, A=1<<7, help=1<<19,
+    i_=1<<1, o=1<<2, s=1<<10, p=1<<8,
+    a=1<<4, ai=1<<5, ao=1<<6, A=1<<7,
+    q=1<<3, help=1<<19,
 
     // Only Message Digest
-    p_md=1<<8, r=1<<9, s_md=1<<10,
+    r=1<<9,
 
     // Only Cypher
     d=1<<11, e=1<<12,
         // Only des
         k_des=1<<13, p_des=1<<14, s_des=1<<15, v_des=1<<16, P_des=1<<17, nopad=1<<18,
+    
     // Only PBKDF2
     pbkdf2_iter=1<<20,
+    
+    // Only PBKDF2
+    prob=1<<21,
 }               e_flags;
-# define AVFLAGS        (p_md + q + r + d + e + A + ai + ao + P_des + nopad + help)
-# define AVPARAM        (s_md + i_ + o + k_des + p_des + s_des + v_des + pbkdf2_iter)
+# define AVFLAGS        (p + q + r + d + e + A + ai + ao + P_des + nopad + help)
+# define AVPARAM        (s + i_ + o + k_des + p_des + s_des + v_des + pbkdf2_iter + prob)
 
 typedef enum    command {
     MD=1, CIPHER=2, STANDARD=4
@@ -96,7 +102,7 @@ Mem_8bits   *ft_memnew(int byteSz);
 Mem_8bits   *ft_memdup(void *mem, int byteSz);
 void        *ft_memjoin(void *mem1, int byteSz1, void *mem2, int byteSz2);
 
-int     	ft_atoi(const char *str);
+Long_64bits	ft_atoi(const char *str);
 char	    *ft_strdup(char *src);
 char    	*ft_strinsert(char *str1, char *toinsert, char *str2);
 int		    ft_strlen(char *p);
@@ -132,7 +138,7 @@ Long_64bits     bits_permutations(Long_64bits mem, char *ptable, int bitLen);
     Maths ---------------------------------------------
 */
 
-Long_64bits ft_pow(Long_64bits a, int pow);
+// Long_64bits ft_pow(Long_64bits a, int pow);
 Long_64bits modular_exp(Long_64bits a, Long_64bits b, Long_64bits m);
 Long_64bits modular_mult(Long_64bits a, Long_64bits b, Long_64bits mod);
 
@@ -270,8 +276,10 @@ void        des_unpadding(Long_64bits *lastbloc, int *ptSz);
 # define    ABS(x)          (x >= 0 ? x : -x)
 # define    ISPRIMEMEMSZ    10
 
-int         is_prime(Long_64bits n, float p);
-Mem_8bits   *rsa(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
+Mem_8bits       *rsa(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
+Mem_8bits       *isprime(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
+
+int              miller_rabin_primality_test(Long_64bits n, float p);
 
 
 
@@ -283,13 +291,15 @@ Mem_8bits   *rsa(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashB
 
 typedef struct  s_ssl
 {
-    char        *hash_func;
-    Mem_8bits   *(*hash_func_addr)(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
-    e_command   command;
+    char        *command_title;
+    Mem_8bits   *(*command_addr)(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
+    e_command   command_familly;
+
     e_flags     flags;
 
-    t_des       des;
-    int         pbkdf2_iter;
+    // Use void * here, correct malloc in parsing depending on the input command, and correct cast in command
+    t_des       des;            // Move that shit somewhere else
+    int         pbkdf2_iter;    // Move that shit somewhere else
 
     t_hash      *hash;
     char        *output_file;

@@ -1,16 +1,16 @@
 # include "ft_ssl.h"
 
-Long_64bits ft_pow(Long_64bits a, int pow)
-{
-    if (pow == 0)
-        return 1;
+// Long_64bits ft_pow(Long_64bits a, int pow)
+// {
+//     if (pow == 0)
+//         return 1;
 
-    Long_64bits a_pow = a;
+//     Long_64bits a_pow = a;
 
-    for (int i = 1; i < pow; i++)
-        a_pow *= a;
-    return a_pow;
-}
+//     for (int i = 1; i < pow; i++)
+//         a_pow *= a;
+//     return a_pow;
+// }
 
 Long_64bits modular_mult(Long_64bits a, Long_64bits b, Long_64bits mod)
 {

@@ -1,6 +1,6 @@
 #include "ft_ssl.h"
 
-static void     fermat_test_solver(Long_64bits n, Long_64bits *d, int *s)
+static void fermat_test_solver(Long_64bits n, Long_64bits *d, int *s)
 {
     /*
         With n > 2 and n odd, d odd, s > 0, find s and d like :
@@ -22,7 +22,7 @@ static void     fermat_test_solver(Long_64bits n, Long_64bits *d, int *s)
     // printf("fermat_test_solver | %ld - 1 = 2^%d * %ld\n", n, *s, *d);
 }
 
-static int     miller_rabin_witness(Long_64bits n, Long_64bits a, Long_64bits d, int s)
+static int  miller_rabin_witness_test(Long_64bits n, Long_64bits a, Long_64bits d, int s)
 {
     // printf("miller_rabin_witness n=%ld\ta=%ld\ts=%d\n", n, a, s);
 
@@ -40,7 +40,7 @@ static int     miller_rabin_witness(Long_64bits n, Long_64bits a, Long_64bits d,
     return 1;
 }
 
-int     is_prime(Long_64bits n, float p)
+int         miller_rabin_primality_test(Long_64bits n, float p)
 {
     /*
         http://defeo.lu/in420/DM3%20-%20Test%20de%20Miller-Rabin
@@ -92,7 +92,7 @@ int     is_prime(Long_64bits n, float p)
         a_save[(i_a_save++) % ISPRIMEMEMSZ] = a;
 
         // Test of the witness/a
-        if (miller_rabin_witness(n, a, d, s))
+        if (miller_rabin_witness_test(n, a, d, s))
             return 0;
         prime_prob *= 0.25;
         // printf("prime_prob=%f\n", prime_prob);
@@ -100,21 +100,21 @@ int     is_prime(Long_64bits n, float p)
     return 1;
 }
 
-Mem_8bits   *rsa(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way)
+Mem_8bits   *isprime(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way)
 {
-    float   p = 0.00001;
-    Long_64bits i = 0;
+    float       p = 0.00001;
+    Long_64bits n = ft_atoi(*plaintext);
 
-    // printf("is_prime(%lu, %f) -> %d\n\n\n", (Long_64bits)1<<34, p, is_prime(((Long_64bits)1)<<34, p));
-    // for (int i = 100; i < 1000; i++)
-    // {
-    //     int prime = is_prime(i, p);
-    //     if (prime)
-    //         printf("is_prime(%d, %f) -> %d\n\n\n", i, p, prime);
-    // }
-
-    i = 3039784665689775677;
-    printf("is_prime(%ld, %f) -> %d\n\n\n", i, p, is_prime(i, p));
-
-    exit(0);
+    Mem_8bits *result;
+    if (miller_rabin_primality_test(n, p))
+    {
+        result = "True\n";
+        *hashByteSz = 5;
+    }
+    else
+    {
+        result = "False\n";
+        *hashByteSz = 6;
+    }
+    return ft_memdup(result, *hashByteSz);
 }

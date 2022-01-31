@@ -84,19 +84,20 @@ int     string_handler(t_hash *node, char *av_next)
     node->len = ft_strlen(av_next);
     if (!(node->name = ft_stradd_quote(av_next, node->len)))
         return EXIT_FAILURE;
+    // printf("string handler: %s\n", av_next);
     return 0;
 }
 
-int     s_handler(char *av_next, int *i)
-{
-    if (ssl.flags & s_md)
-    {
-        (*i)--; // Cancel -s as a flag parameter
-        return file_handler(NULL, "-s");
-    }
-    else
-        return string_handler(NULL, av_next);
-}
+// int     s_handler(char *av_next, int *i)
+// {
+//     if (ssl.flags & s)
+//     {
+//         (*i)--; // Cancel -s as a flag parameter
+//         return file_handler(NULL, "-s");
+//     }
+//     else
+//         return string_handler(NULL, av_next);
+// }
 
 Key_64bits  parse_keys(char *av_next)
 {
@@ -122,13 +123,13 @@ Key_64bits  parse_keys(char *av_next)
 
 int     param_handler(e_flags flag, char *av_next, int *i)
 {
-    // printf("v_des flag condition %d\n", flag & v_des);
-    // printf("i_ flag condition %d\n", flag & i_);
-    if (flag & s_md)
-    {
-        if (s_handler(av_next, i))
-            return EXIT_FAILURE;
-    }
+    if (flag & s)
+        string_handler(NULL, av_next);
+    // if (flag & s)
+    // {
+    //     if (s_handler(av_next, i))
+    //         return EXIT_FAILURE;
+    // }
     else if (flag & i_)
     {
         if (file_handler(NULL, av_next))
@@ -158,28 +159,20 @@ e_flags strToFlag(char *str)
 {
     if (!ft_strcmp(str, "-s"))
     {
-        if (ssl.command & MD)
-            return s_md;
-        else if (ssl.command & CIPHER)
+        if (ssl.command_familly == CIPHER)
             return s_des;
+        else 
+            return s;
     }
     if (!ft_strcmp(str, "-p"))
     {
-        if (ssl.command & MD)
-            return p_md;
-        else if (ssl.command & CIPHER)
+        if (ssl.command_familly & CIPHER)
             return p_des;
+        else
+            return p;
     }
     if (!ft_strcmp(str, "-P"))
         return P_des;
-    if (!ft_strcmp(str, "-q"))
-        return q;
-    if (!ft_strcmp(str, "-r"))
-        return r;
-    if (!ft_strcmp(str, "-d"))
-        return d;
-    if (!ft_strcmp(str, "-e"))
-        return e;
     if (!ft_strcmp(str, "-i"))
         return i_;
     if (!ft_strcmp(str, "-o"))
@@ -192,6 +185,16 @@ e_flags strToFlag(char *str)
         return ao;
     if (!ft_strcmp(str, "-A"))
         return A;
+    if (!ft_strcmp(str, "-q"))
+        return q;
+    if (!ft_strcmp(str, "-help"))
+        return help;
+    if (!ft_strcmp(str, "-r"))
+        return r;
+    if (!ft_strcmp(str, "-d"))
+        return d;
+    if (!ft_strcmp(str, "-e"))
+        return e;
     if (!ft_strcmp(str, "-k"))
         return k_des;
     if (!ft_strcmp(str, "-v"))
@@ -200,8 +203,8 @@ e_flags strToFlag(char *str)
         return nopad;
     if (!ft_strcmp(str, "-iter"))
         return pbkdf2_iter;
-    if (!ft_strcmp(str, "-help"))
-        return help;
+    if (!ft_strcmp(str, "-prob"))
+        return prob;
     return 0;
 }
 
@@ -209,47 +212,47 @@ int     hash_func_handler(char *str)
 {
     if (!ft_strcmp(str, "md5"))
     {
-        ssl.hash_func = "MD5";
-        ssl.hash_func_addr = md5;
-        ssl.command = MD;
+        ssl.command_title = "MD5";
+        ssl.command_addr = md5;
+        ssl.command_familly = MD;
     }
     else if (!ft_strcmp(str, "sha256"))
     {
-        ssl.hash_func = "SHA256";
-        ssl.hash_func_addr = sha256;
-        ssl.command = MD;
+        ssl.command_title = "SHA256";
+        ssl.command_addr = sha256;
+        ssl.command_familly = MD;
     }
     else if (!ft_strcmp(str, "base64"))
     {
-        ssl.hash_func = "BASE64";
-        ssl.hash_func_addr = base64;
-        ssl.command = CIPHER;
+        ssl.command_title = "BASE64";
+        ssl.command_addr = base64;
+        ssl.command_familly = CIPHER;
     }
     else if (!ft_strcmp(str, "des-ecb"))
     {
-        ssl.hash_func = "DES-ECB";
-        ssl.hash_func_addr = des;
-        ssl.command = CIPHER;
+        ssl.command_title = "DES-ECB";
+        ssl.command_addr = des;
+        ssl.command_familly = CIPHER;
         ssl.des.mode = DESECB;
     }
     else if (!ft_strcmp(str, "des") || !ft_strcmp(str, "des-cbc"))
     {
-        ssl.hash_func = "DES-CBC";
-        ssl.hash_func_addr = des;
-        ssl.command = CIPHER;
+        ssl.command_title = "DES-CBC";
+        ssl.command_addr = des;
+        ssl.command_familly = CIPHER;
         ssl.des.mode = DESCBC;
     }
-    else if (!ft_strcmp(str, "rsa"))
+    else if (!ft_strcmp(str, "isprime"))
     {
-        ssl.hash_func = "RSA";
-        ssl.hash_func_addr = rsa;
-        ssl.command = STANDARD;
+        ssl.command_title = "Is prime ? ";
+        ssl.command_addr = isprime;
+        ssl.command_familly = STANDARD;
     }
     else
     {
         ft_putstderr("ft_ssl: Error: '");
         ft_putstderr(str);
-        ft_putstderr("' is an invalid command.\n\n");
+        ft_putstderr("' is an invalid command_familly.\n\n");
         return EXIT_FAILURE;
     }
     return 0;
@@ -276,13 +279,13 @@ int     stdin_handler()
 
     // Pre-computing for output part
     node->stdin = 1;
-    if (ssl.flags & p_md)
+    if (ssl.flags & p)
     {
         tmp = ft_strdup(node->msg);
         if (tmp[node->len - 1] == '\n')
             tmp[node->len - 1] = '\0'; //To remove \n, it's like 'echo -n <node->msg> | ./ft_ssl ...'
 
-        // q will not print name, but when q, r and p_md are True, stdin content without quote is required. Yes, I know, it's sucks
+        // q will not print name, but when q, r and p are True, stdin content without quote is required. Yes, I know, it's sucks
         if (ssl.flags & q)
             node->name = tmp;
         else
@@ -342,8 +345,8 @@ int     parsing(int ac, char **av)
                 return EXIT_FAILURE;
         }
 
-    // Read on stdin if no hash found or p_md flags is provided
-    if (ssl.flags & p_md || !ssl.hash)
+    // Read on stdin if no hash found or p flags is provided
+    if (ssl.flags & p || !ssl.hash)
         if (stdin_handler())
             return EXIT_FAILURE;        
 
