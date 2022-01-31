@@ -1,4 +1,6 @@
-make -C .. && cp ../ft_ssl .
+make -C .. > /dev/null
+cp ../ft_ssl . > /dev/null
+
 echo "\n --- Unitests des-ecb: For each command line, this script will display duplicate things or nothing if there is no error"
 echo "\nft_ssl encrypt / openssl decrypt ->"
 echo "1:"

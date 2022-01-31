@@ -1,5 +1,5 @@
-make -C ..
-cp ../ft_ssl .
+make -C .. > /dev/null
+cp ../ft_ssl . > /dev/null
 
 echo "\nUnitests ft_ssl ->\n"
 sh unitests_md5.sh $1

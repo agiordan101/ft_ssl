@@ -1,5 +1,7 @@
-make -C .. && cp ../ft_ssl .
-echo "\n --- Unitests des-cbc with pbkdf2: Each command line should behave like test 0"
+make -C .. > /dev/null
+cp ../ft_ssl . > /dev/null
+
+echo "\n --- Unitests des-cbc with pbkdf2: Each command line should behave like test 0 (duplicate output is correct too)"
 echo "\nopenssl encrypt / openssl decrypt ->"
 echo "Test 0:"
 openssl des-cbc -iter 420 -S a1b2c3d4e5f6 -pbkdf2 -pass "pass:0123456789abcdef" -iv fedcba4242abcdef -in $1 | openssl des-cbc -iter 420 -S a1b2c3d4e5f6 -pbkdf2 -pass "pass:0123456789abcdef" -iv fedcba4242abcdef -out unitests_out -d && diff $1 unitests_out

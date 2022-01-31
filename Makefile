@@ -10,13 +10,14 @@ INCS		=	$(addprefix $(INC_PATH), $(INCLUDES))
 SRC_PATH	=	./srcs/
 SRC			=	$(NAME).c \
 				t_hash.c \
-				bitwise.c \
 				io/parsing.c \
 				io/padding.c \
 				io/output.c \
 				utils/libft.c \
 				utils/verbose.c \
 				utils/errors.c \
+				calculations/maths.c \
+				calculations/bitwise.c \
 				algorithms/pbkdf2.c \
 				algorithms/md/sha256.c \
 				algorithms/md/md5.c \
@@ -46,6 +47,7 @@ $(BIN_PATH)%.o: $(SRC_PATH)%.c $(INCS)
 dirs:
 	@mkdir -p $(BIN_PATH)/io || true
 	@mkdir -p $(BIN_PATH)/utils || true
+	@mkdir -p $(BIN_PATH)/calculations || true
 	@mkdir -p $(BIN_PATH)/algorithms/md || true
 	@mkdir -p $(BIN_PATH)/algorithms/ciphers || true
 	@mkdir -p $(BIN_PATH)/algorithms/rsa || true

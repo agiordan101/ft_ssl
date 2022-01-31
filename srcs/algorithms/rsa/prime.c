@@ -1,10 +1,43 @@
 #include "ft_ssl.h"
 
-static int     miller_rabin_witness(Long_64bits n, Long_64bits a)
+static void     fermat_test_solver(Long_64bits n, Long_64bits *d, int *s)
 {
-    // printf("miller_rabin_witness n=%ld\ta=%ld\n", n, a);
+    /*
+        With n > 2 and n odd, d odd, s > 0, find s and d like :
 
-    return 0;
+            n - 1 = 2^s * d
+                
+            With 2^s = 1 << s
+                => n - 1 = d << s   (represent by d concat with s-zeros in memory)
+                => d = (n-1) >> s
+
+        n - 1 is odd: there are always
+        a right part with s zeros and
+        a left part with the truth d value
+    */
+    *d = n - 1;
+    for (*s = 0; !(*d & 1); (*s)++)
+        *d >>= 1;
+
+    // printf("fermat_test_solver | %ld - 1 = 2^%d * %ld\n", n, *s, *d);
+}
+
+static int     miller_rabin_witness(Long_64bits n, Long_64bits a, Long_64bits d, int s)
+{
+    // printf("miller_rabin_witness n=%ld\ta=%ld\ts=%d\n", n, a, s);
+
+    Long_64bits x = modular_exp(a, d, n);
+
+    if (x == 1 || x == n - 1)
+        return 0;
+
+    for (int i = 0; i < s - 1; i++)
+    {
+        x = modular_mult(x, x, n);
+        if (x == n - 1)
+            return 0;
+    }
+    return 1;
 }
 
 int     is_prime(Long_64bits n, float p)
@@ -18,22 +51,29 @@ int     is_prime(Long_64bits n, float p)
             until the desired probability p is reached
     */
     float       prime_prob = 1;
+
     Long_64bits a;
     Long_64bits a_save[ISPRIMEMEMSZ];
     int         i_a_save = 0;
-    int         is_valid_a = 1;
+    
+    int         is_valid_rand = 1;
     int         i_tmp;
 
+    Long_64bits d;
+    int         s;
+
     // Handle obvious not prime number: Even number (except 2) | 1
-    if ((n % 2 == 0 && n != 2) || n == 1)
+    if ((n != 2 && n % 2 == 0) || n == 1)
         return 0;
 
-    // Handle case where all possible a values were tested (i_a_save = n - 3 -> No more witness)
-    while (prime_prob > p && i_a_save < (int)n - 3)
+    fermat_test_solver(n, &d, &s); // n has to be odd
+
+    // Handle case where all possible a values were tested (i_a_save = n - 3 -> No more random witness)
+    while (prime_prob > p && i_a_save < n - 3)
     {
         // Generate random number until get one witch is never seen
-        is_valid_a = 0;
-        while (!is_valid_a)
+        is_valid_rand = 0;
+        while (!is_valid_rand)
         {
             a = rand() % (n - 3) + 2; // 1 < a < n - 1
 
@@ -46,13 +86,13 @@ int     is_prime(Long_64bits n, float p)
             }
 
             // If we reach end of memory -> New a value is found
-            is_valid_a = (i_tmp == i_a_save) || (i_tmp == ISPRIMEMEMSZ);
-            printf("a=%lu\ti_tmp=%d\ti_a_save=%d\tvalid: %d\n", a, i_tmp, i_a_save, is_valid_a);
+            is_valid_rand = (i_tmp == i_a_save) || (i_tmp == ISPRIMEMEMSZ);
+            // printf("a=%lu\ti_tmp=%d\ti_a_save=%d\tvalid: %d\n", a, i_tmp, i_a_save, is_valid_rand);
         }
         a_save[(i_a_save++) % ISPRIMEMEMSZ] = a;
 
         // Test of the witness/a
-        if (miller_rabin_witness(n, a))
+        if (miller_rabin_witness(n, a, d, s))
             return 0;
         prime_prob *= 0.25;
         // printf("prime_prob=%f\n", prime_prob);
@@ -62,10 +102,19 @@ int     is_prime(Long_64bits n, float p)
 
 Mem_8bits   *rsa(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way)
 {
-    float   p = 0.00005;
+    float   p = 0.00001;
+    Long_64bits i = 0;
 
     // printf("is_prime(%lu, %f) -> %d\n\n\n", (Long_64bits)1<<34, p, is_prime(((Long_64bits)1)<<34, p));
-    for (int i = 1; i < 8; i++)
-        printf("is_prime(%d, %f) -> %d\n\n\n", i, p, is_prime(i, p));
+    // for (int i = 100; i < 1000; i++)
+    // {
+    //     int prime = is_prime(i, p);
+    //     if (prime)
+    //         printf("is_prime(%d, %f) -> %d\n\n\n", i, p, prime);
+    // }
+
+    i = 3039784665689775677;
+    printf("is_prime(%ld, %f) -> %d\n\n\n", i, p, is_prime(i, p));
+
     exit(0);
 }

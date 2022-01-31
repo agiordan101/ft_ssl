@@ -1,5 +1,5 @@
-make -C ..
-cp ../ft_ssl .
+make -C .. > /dev/null
+cp ../ft_ssl . > /dev/null
 
 echo "\n --- Unitests sha256: This script will display differences if errors are found"
 

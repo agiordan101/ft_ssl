@@ -25,10 +25,12 @@ typedef unsigned long   Long_64bits;
 # define WORD32_byteSz  sizeof(Word_32bits)      // 4 bytes or 32 bits
 # define LONG64_byteSz  sizeof(Long_64bits)      // 8 bytes or 64 bits
 
+# define INTMAXLESS1    (Word_32bits)pow(2, 32) - 1
+// # define BIG_LONG64     ((Long_64bits)1 << 63) - 1
+
 # define BUFF_SIZE      420
 
 # define ENDMSG         0b10000000
-# define INTMAXLESS1    (Word_32bits)pow(2, 32) - 1
 # define HEXABASE       "0123456789abcdef"
 
 typedef enum    error {
@@ -80,6 +82,14 @@ void        write_failed(char *errormsg, int fd);
 void        file_not_found(char *file);
 void        pbkdf2_iter_error();
 
+void        output(t_hash *hash);
+void        print_usage_exit();
+
+
+/*
+    Libft functions ---------------------------------
+*/
+
 void	    ft_bzero(void *s, size_t n);
 void	    *ft_memcpy(void *dest, const void *src, size_t n);
 Mem_8bits   *ft_memnew(int byteSz);
@@ -103,10 +113,6 @@ void        ft_printHex(Long_64bits n, int byteSz);
 Long_64bits ft_strtoHex(char *str);
 char        *ft_hextoStr(Long_64bits nbr);
 
-void        output(t_hash *hash);
-void        print_usage_exit();
-
-
 
 /*
     Bitwise operations --------------------------------
@@ -121,7 +127,20 @@ Long_64bits     key_discarding(Mem_8bits *p);
 Long_64bits     _bits_permutations(Long_64bits mem, char *ptable, int bitLen);
 Long_64bits     bits_permutations(Long_64bits mem, char *ptable, int bitLen);
 
-// Debug function, not used in this project
+
+/*
+    Maths ---------------------------------------------
+*/
+
+Long_64bits ft_pow(Long_64bits a, int pow);
+Long_64bits modular_exp(Long_64bits a, Long_64bits b, Long_64bits m);
+Long_64bits modular_mult(Long_64bits a, Long_64bits b, Long_64bits mod);
+
+
+/*
+    Debug function, not used in this project -----------
+*/
+
 void        printByte(char byte);
 void        printBits(void *p, int size);
 void        printMemHex(void *p, int size, char *msg);
@@ -139,6 +158,7 @@ void        printLong(Long_64bits l);
 # define CHUNK_byteSz   (16 * sizeof(Word_32bits))    // 64 bytes or 512 bits
 
 void        md_padding(Mem_8bits **data, Long_64bits *byteSz, char reverseByteSz);
+
 
 /*
     MD5 Data -----------------------------------------
@@ -158,7 +178,6 @@ typedef struct  s_md5
 
 Mem_8bits   *md5(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
 void        md5_t_hash(t_hash *hash);
-
 
 
 /*
@@ -194,6 +213,7 @@ typedef unsigned long   Key_64bits;
 # define KEY_bitSz          KEY_byteSz * 8
 # define KEYDISCARD_byteSz  KEY_byteSz - 1
 
+
 /*
     BASE64 Data --------------------------------------
 */
@@ -201,6 +221,7 @@ typedef unsigned long   Key_64bits;
 # define    BASE64  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
 Mem_8bits   *base64(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
+
 
 /*
     DES Data --------------------------------------
@@ -246,10 +267,13 @@ void        des_unpadding(Long_64bits *lastbloc, int *ptSz);
     RSA Data --------------------------------------
 */
 
+# define    ABS(x)          (x >= 0 ? x : -x)
 # define    ISPRIMEMEMSZ    10
 
 int         is_prime(Long_64bits n, float p);
 Mem_8bits   *rsa(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
+
+
 
 /*
     ----------------------------------------------------
