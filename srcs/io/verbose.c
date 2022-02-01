@@ -36,7 +36,7 @@ void    print_usage_exit()
     ft_putstderr("\t-iter\tSpecify the iteration count of PBKDF2\n");
 
     // ft_ssl 3rd project
-    ft_putstderr("\nStandard commands:\n\tisprime\n");
+    ft_putstderr("\nStandard commands:\n\tisprime (Handle 64-bits numbers, up to ~19 digits)\n");
     ft_putstderr("isprime command flags:\n");
     ft_putstderr("\t-prob\tprobability requested for Miller-Rabin primality test in percentile (0 < p <= 100)\n");
     ft_putstderr("Standard flags:\n");

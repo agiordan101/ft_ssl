@@ -45,7 +45,7 @@ void    isprime_prob_error(int p)
 {
     ft_putstderr("ft_ssl: ");
     ft_putstderr(ssl.command_title);
-    ft_putstderr(": flag -prob \"");
+    ft_putstderr(": flag -prob argument \"");
     ft_putnbr(STDERR, p);
     ft_putstderr("\" does not respect probabilities conditions: 0 < p <= 100\n");
     freexit(EXIT_SUCCESS);

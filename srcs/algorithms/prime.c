@@ -25,7 +25,6 @@ static void fermat_test_solver(Long_64bits n, Long_64bits *d, int *s)
 static int  miller_rabin_witness_test(Long_64bits n, Long_64bits a, Long_64bits d, int s)
 {
     // printf("miller_rabin_witness n=%ld\ta=%ld\ts=%d\n", n, a, s);
-
     Long_64bits x = modular_exp(a, d, n);
 
     if (x == 1 || x == n - 1)
@@ -47,8 +46,8 @@ int         miller_rabin_primality_test(Long_64bits n, float p)
         https://fr.wikipedia.org/wiki/Test_de_primalit%C3%A9_de_Miller-Rabin
 
         Miller-Rabin algorithm ->
-            Test witness value a, like 1 < a < n - 1,
-            until the desired probability p is reached
+            Apply miller_rabin_witness_test() on a values (1 < a < n - 1) to know if n is composed.
+            If the desired probability p is reached, n is considered to be prime
     */
     float       error_prob = 1;
 
@@ -113,15 +112,11 @@ Mem_8bits   *isprime(void *command_data, Mem_8bits **plaintext, Long_64bits ptBy
         )
     )
     {
-        // result = "True\n";
-        // *hashByteSz = 5;
         result = "True";
         *hashByteSz = 4;
     }
     else
     {
-        // result = "False\n";
-        // *hashByteSz = 6;
         result = "False";
         *hashByteSz = 5;
     }
