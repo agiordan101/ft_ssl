@@ -1,49 +1,5 @@
 #include "ft_ssl.h"
 
-// ---------------------- VERBOSE output ---------------------------
-
-void    print_usage_exit()
-{
-    ft_putstderr("usage: ft_ssl <algorithm> [flags] [file | string]\n\n");
-    ft_putstderr("Global flags:\n");
-    ft_putstderr("\t-help\tDisplay this summary and exit\n");
-    ft_putstderr("\t-p\tforce data reception in stdin\n");
-    ft_putstderr("\t-s\tinput data as string\n");
-    ft_putstderr("\t-i\tinput data as file\n");
-    ft_putstderr("\t-o\toutput file\n");
-    ft_putstderr("\t-q\tquiet mode\n");
-
-    // ft_ssl 1st project
-    ft_putstderr("\nMessage Digest commands:\n\tmd5\n\tsha256\n");
-    ft_putstderr("Message Digest flags:\n");
-    ft_putstderr("\t-r\treverse the format of the output\n");
-
-    // ft_ssl 2nd project
-    ft_putstderr("\nCipher commands:\n\tbase64\n\tdes\t(Default as des-cbc)\n\tdes-ecb\n\tdes-cbc\n");
-    ft_putstderr("Cipher flags:\n");
-    ft_putstderr("\t-e\tencrypt mode (default mode) (-e has priority over -d)\n");
-    ft_putstderr("\t-d\tdecrypt mode\n");
-    ft_putstderr("\t-a\tdecode/encode the input/output in base64, depending on the encrypt mode\n");
-    ft_putstderr("\t-ai\tdecode the input in base64\n");
-    ft_putstderr("\t-ao\tencode the output in base64\n");
-    ft_putstderr("\t-A\tUsed with -[a | ai | ao] to specify base64 buffer as a single line\n");
-    ft_putstderr("\t-k\tsend the key in hex\n");
-    ft_putstderr("\t-p\tsend password in ascii\t(Override the behavior of global flag -p)\n");
-    ft_putstderr("\t-s\tsend the salt in hex\t(Override the behavior of global flag -s)\n");
-    ft_putstderr("\t-v\tsend initialization vector in hex\n");
-    ft_putstderr("\t-P\tprint the vector/key and exit\n");
-    ft_putstderr("\t-nopad\tdisable standard block padding\n");
-    ft_putstderr("\t-iter\tSpecify the iteration count of PBKDF2\n");
-
-    // ft_ssl 3rd project
-    ft_putstderr("\nStandard commands:\n\tisprime\n");
-    ft_putstderr("isprime command flags:\n");
-    ft_putstderr("\t-prob\tprobability requested for Miller-Rabin primality test of the given number in percentile (0 < p < 100)\n");
-    ft_putstderr("Standard flags:\n");
-
-    freexit(EXIT_SUCCESS);
-}
-
 // ---------------------- DATA output ---------------------------
 
 void    hash_64bytesbloc_output(t_hash *p)
@@ -154,7 +110,7 @@ void    output_based_on_flags(t_hash *hash)
     else
         classic_output(hash);
 
-    if (ssl.command_familly == MD)          // Very bad code
+    if (ssl.command_familly != CIPHER)          // Very bad code
         ft_putstrfd(ssl.fd_out, "\n");
 }
 

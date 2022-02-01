@@ -31,13 +31,23 @@ void    write_failed(char *errormsg, int fd)
 
 // ft_ssl errors
 
-void    pbkdf2_iter_error()
+void    pbkdf2_iter_error(int p)
 {
     ft_putstderr("ft_ssl: ");
     ft_putstderr(ssl.command_title);
     ft_putstderr(": Non-positive number \"");
-    ft_putnbr(STDERR, ssl.pbkdf2_iter);
+    ft_putnbr(STDERR, p);
     ft_putstderr("\" for -iter\n");
+    freexit(EXIT_SUCCESS);
+}
+
+void    isprime_prob_error(int p)
+{
+    ft_putstderr("ft_ssl: ");
+    ft_putstderr(ssl.command_title);
+    ft_putstderr(": flag -prob \"");
+    ft_putnbr(STDERR, p);
+    ft_putstderr("\" does not respect probabilities conditions: 0 < p <= 100\n");
     freexit(EXIT_SUCCESS);
 }
 

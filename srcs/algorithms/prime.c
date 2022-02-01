@@ -50,7 +50,7 @@ int         miller_rabin_primality_test(Long_64bits n, float p)
             Test witness value a, like 1 < a < n - 1,
             until the desired probability p is reached
     */
-    float       prime_prob = 1;
+    float       error_prob = 1;
 
     Long_64bits a;
     Long_64bits a_save[ISPRIMEMEMSZ];
@@ -69,7 +69,7 @@ int         miller_rabin_primality_test(Long_64bits n, float p)
     fermat_test_solver(n, &d, &s); // n has to be odd
 
     // Handle case where all possible a values were tested (i_a_save = n - 3 -> No more random witness)
-    while (prime_prob > p && i_a_save < n - 3)
+    while (error_prob > p && i_a_save < n - 3)
     {
         // Generate random number until get one witch is never seen
         is_valid_rand = 0;
@@ -94,27 +94,36 @@ int         miller_rabin_primality_test(Long_64bits n, float p)
         // Test of the witness/a
         if (miller_rabin_witness_test(n, a, d, s))
             return 0;
-        prime_prob *= 0.25;
-        // printf("prime_prob=%f\n", prime_prob);
+        error_prob *= 0.25;
+        // printf("error_prob=%f\n", error_prob);
     }
     return 1;
 }
 
-Mem_8bits   *isprime(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way)
+Mem_8bits   *isprime(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way)
 {
-    float       p = 0.00001;
+    Mem_8bits   *result;
     Long_64bits n = ft_atoi(*plaintext);
 
-    Mem_8bits *result;
-    if (miller_rabin_primality_test(n, p))
+    if (miller_rabin_primality_test(
+            n,
+            command_data && ((t_isprime *)command_data)->prob_requested ?\
+                ((t_isprime *)command_data)->prob_requested :\
+                PROBMIN_ISPRIME
+        )
+    )
     {
-        result = "True\n";
-        *hashByteSz = 5;
+        // result = "True\n";
+        // *hashByteSz = 5;
+        result = "True";
+        *hashByteSz = 4;
     }
     else
     {
-        result = "False\n";
-        *hashByteSz = 6;
+        // result = "False\n";
+        // *hashByteSz = 6;
+        result = "False";
+        *hashByteSz = 5;
     }
     return ft_memdup(result, *hashByteSz);
 }

@@ -1,6 +1,6 @@
 #include "ft_ssl.h"
 
-static int              magic_number_in(Mem_8bits *plaintext, t_des *des)
+static int              magic_number_in(t_des *des, Mem_8bits *plaintext)
 {
     /*
         Encryption:
@@ -38,14 +38,14 @@ static int              magic_number_in(Mem_8bits *plaintext, t_des *des)
     return 1;
 }
 
-static Mem_8bits        *magic_number_out(Mem_8bits *hash, Long_64bits *hashByteSz)
+static Mem_8bits        *magic_number_out(t_des *des, Mem_8bits *hash, Long_64bits *hashByteSz)
 {
     // A magic number concat with salt need to be added before hash, on encryption with PBKDF2 case
     Mem_8bits   header[MAGICHEADER_byteSz];
 
-    endianReverse((Mem_8bits *)&ssl.des.salt, KEY_byteSz);
+    endianReverse((Mem_8bits *)&des->salt, KEY_byteSz);
     ft_memcpy(header, MAGICNUMBER, MAGICNUMBER_byteSz);
-    ft_memcpy(header + MAGICNUMBER_byteSz, (void *)&ssl.des.salt, KEY_byteSz);
+    ft_memcpy(header + MAGICNUMBER_byteSz, (void *)&des->salt, KEY_byteSz);
     // printf("header (len=%ld): %s\n", MAGICHEADER_byteSz, header);
 
     char *header_hash = ft_memjoin(header, MAGICHEADER_byteSz, hash, *hashByteSz);
@@ -157,7 +157,7 @@ static void             key_transformation(t_des *des)
     // exit(0);
 }
 
-static void             init_vars(Mem_8bits *plaintext, t_des *des)
+static void             init_vars(t_des *des, Mem_8bits *plaintext)
 {
     // Vector is only for CBC mode, ft_ssl failed if it's not provided
     if (des->vector)
@@ -183,7 +183,13 @@ static void             init_vars(Mem_8bits *plaintext, t_des *des)
             des->password = (Mem_8bits *)ask_password(des);
 
         // Password-based key derivation function (PBKDF) using SHA256-HMAC function as pseudo random function (PRF)
-        des->key = pbkdf2_sha256(des->password, des->salt, ssl.flags & pbkdf2_iter ? ssl.pbkdf2_iter : PBKDF2_iter);
+        des->key = pbkdf2_sha256(
+            des->password,
+            des->salt,
+            des->pbkdf2_iter ?\
+                des->pbkdf2_iter :\
+                PBKDF2_iter
+        );
     }
 
     // Key scheldule
@@ -339,9 +345,9 @@ static Word_32bits      feistel_func(Word_32bits halfblock, Long_64bits subkey)
     return outblock;
 }
 
-static Long_64bits      feistel_algorithm(Long_64bits plaintext)
+static Long_64bits      feistel_algorithm(t_des *des, Long_64bits plaintext)
 {
-    plaintext = bits_permutations(plaintext, ssl.des.ipt, 64);
+    plaintext = bits_permutations(plaintext, des->ipt, 64);
     // printf("After ipt permutation hex: %lx\nAfter ipt permutation bin:\n", plaintext);
     // printLong(plaintext);
     // exit(0);
@@ -355,24 +361,24 @@ static Long_64bits      feistel_algorithm(Long_64bits plaintext)
 
     for (int i = 0; i < 16; i++)
     {
-        lpart ^= feistel_func(rpart, ssl.des.subkeys[i]);
+        lpart ^= feistel_func(rpart, des->subkeys[i]);
 
         rpart ^= lpart;
         lpart ^= rpart;
         rpart ^= lpart;
 
-        // printf("lpart rpart %d: %x %x\tkey %lx\n", i, lpart, rpart, ssl.des.subkeys[i]);
+        // printf("lpart rpart %d: %x %x\tkey %lx\n", i, lpart, rpart, des->subkeys[i]);
     }
 
     plaintext = (Long_64bits)lpart << 32 | rpart;
-    plaintext = bits_permutations(plaintext, ssl.des.fpt, 64);
+    plaintext = bits_permutations(plaintext, des->fpt, 64);
     // printf("After fpt permutation: %lx\n", plaintext);
     // printf("After fpt permutation: %s\n", (char *)&plaintext);
 
     return plaintext;
 }
 
-static Mem_8bits        *des_decryption(Mem_8bits *pt, Long_64bits ptByteSz, Long_64bits *hashByteSz)
+static Mem_8bits        *des_decryption(t_des *des, Mem_8bits *pt, Long_64bits ptByteSz, Long_64bits *hashByteSz)
 {
     int         ptSz = (ptByteSz + 7) / 8; // Count of 64-bits bloc
     Long_64bits ciphertext[ptSz];
@@ -388,13 +394,13 @@ static Mem_8bits        *des_decryption(Mem_8bits *pt, Long_64bits ptByteSz, Lon
 
         // printf("hex   bloc: %lx\n", bloc);
 
-        ciphertext[i] = feistel_algorithm(bloc);
+        ciphertext[i] = feistel_algorithm(des, bloc);
         // printf("ciphertext: %lx\n", ciphertext[i]);
 
-        if (ssl.des.mode == DESCBC)
+        if (des->mode == DESCBC)
         {
-            // printf("XOR\nbloc  %lx\nvector %lx\n", bloc, i ? *plaintext : ssl.des.vector);
-            ciphertext[i] = ciphertext[i] ^ (i ? *(plaintext - 1) : ssl.des.vector);
+            // printf("XOR\nbloc  %lx\nvector %lx\n", bloc, i ? *plaintext : des->vector);
+            ciphertext[i] = ciphertext[i] ^ (i ? *(plaintext - 1) : des->vector);
             // printf("hex bloc %d: %lx (CBC xor)\n", i, ciphertext[i]);
         }
         plaintext--;
@@ -410,7 +416,7 @@ static Mem_8bits        *des_decryption(Mem_8bits *pt, Long_64bits ptByteSz, Lon
     return ft_memdup((Mem_8bits *)ciphertext, *hashByteSz);
 }
 
-static Mem_8bits        *des_encryption(Mem_8bits *pt, Long_64bits ptByteSz, Long_64bits *hashByteSz)
+static Mem_8bits        *des_encryption(t_des *des, Mem_8bits *pt, Long_64bits ptByteSz, Long_64bits *hashByteSz)
 {
     // ptSz is the count of 64-bits bloc (Padding: Add one bloc if the lastest is full)
     int         ptSz = (ptByteSz + (ssl.flags & nopad ? 7 : 8)) / 8;
@@ -433,28 +439,28 @@ static Mem_8bits        *des_encryption(Mem_8bits *pt, Long_64bits ptByteSz, Lon
         if (i == ptSz - 1)
             bloc = des_padding((Mem_8bits *)&bloc);
 
-        // printf("\nhex vector: %lx\n", i ? ciphertext[i - 1] : ssl.des.vector);
+        // printf("\nhex vector: %lx\n", i ? ciphertext[i - 1] : des->vector);
         // printf("hex   bloc: %lx\n", bloc);
 
         // printf("bin vector: ");
-        // printLong(i ? ciphertext[i - 1] : ssl.des.vector);
+        // printLong(i ? ciphertext[i - 1] : des->vector);
         // printf("bin   bloc: ");
         // printLong(bloc);
 
-        if (ssl.des.mode == DESCBC)
+        if (des->mode == DESCBC)
         {
-            // printf("ssl.des.vector & 0xFF: %d\n", ssl.des.vector & 0xFF);
+            // printf("des->vector & 0xFF: %d\n", des->vector & 0xFF);
             // printf("bloc & 0xFF: %d\n", bloc & 0xFF);
-            // printf("XOR\nbloc  %lx\nvector %lx\n", bloc, i ? ciphertext[i - 1] : ssl.des.vector);
-            bloc ^= i ? ciphertext[i - 1] : ssl.des.vector;
+            // printf("XOR\nbloc  %lx\nvector %lx\n", bloc, i ? ciphertext[i - 1] : des->vector);
+            bloc ^= i ? ciphertext[i - 1] : des->vector;
             // printf("hex   bloc: %lx (CBC xor)\n", bloc);
         }
         //     printf("bin   bloc: ");
         //     printLong(bloc);
         //     printf(" (CBC xor)\n");
 
-        ciphertext[i] = feistel_algorithm(bloc);
-        
+        ciphertext[i] = feistel_algorithm(des, bloc);
+
         // printf("ciphertext: %lx\n\n", ciphertext[i]);
         plaintext++;
     }
@@ -471,46 +477,39 @@ static Mem_8bits        *des_encryption(Mem_8bits *pt, Long_64bits ptByteSz, Lon
     return ft_memdup((Mem_8bits *)ciphertext, ptSz * LONG64_byteSz);
 }
 
-Mem_8bits               *des(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way)
+Mem_8bits               *des(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way)
 {
-    // Return 1 if magic number is needed (encryption) or seen (decryption)
-    int         magic_number_case = magic_number_in(*plaintext, &ssl.des);
+    t_des       *des_data = (t_des *)command_data;
 
-    // Parse and initialize data
-    Mem_8bits   *hash = NULL;
-    init_vars(*plaintext, &ssl.des);
-    if (!ptByteSz || !hashByteSz)
+    if (!command_data || !ptByteSz || !hashByteSz)
     {
-        ft_putstderr("Parameter ptByteSz OR hashByteSz can't be NULL in des() function.\n");
+        ft_putstderr("Parameters command_data, ptByteSz and hashByteSz can't be NULL in des() function.\n");
         freexit(EXIT_FAILURE);
     }
+
+    // Return 1 if magic number is needed (encryption) or seen (decryption)
+    int         magic_number_case = magic_number_in(des_data, *plaintext);
+
+    // Parse and initialize data
+    init_vars(des_data, *plaintext);
     if (way & P_des)
-    {
-        ssl.fd_out = STDERR; // For ft_printHex function
-        ft_putstrfd(ssl.fd_out, "salt=");
-        ft_printHex(ssl.des.salt, KEY_byteSz);
-        ft_putstrfd(ssl.fd_out, "\nkey=");
-        ft_printHex(ssl.des.key, KEY_byteSz);
-        if (ssl.des.mode == DESCBC)
-        {
-            ft_putstrfd(ssl.fd_out, "\niv=");
-            ft_printHex(ssl.des.vector, KEY_byteSz);
-        }
-        ft_putstrfd(ssl.fd_out, "\n");
-        freexit(EXIT_SUCCESS);
-    }
+        des_P_flag_output(des_data);
 
     // Algorithm part
-    endianReverse((Mem_8bits *)&ssl.des.vector, KEY_byteSz); // Do this now to print iv/vector exactly like openssl with P_des flag
+    endianReverse((Mem_8bits *)&des_data->vector, KEY_byteSz); // Do this now to print iv/vector exactly like openssl with P_des flag
     if (way & e)
         return magic_number_case ?\
-            magic_number_out(des_encryption(*plaintext, ptByteSz, hashByteSz), hashByteSz) :\
-            des_encryption(*plaintext, ptByteSz, hashByteSz);
+            magic_number_out(
+                des_data,
+                des_encryption(des_data, *plaintext, ptByteSz, hashByteSz), //Merge 2 encryption calls
+                hashByteSz
+            ) :\
+            des_encryption(des_data, *plaintext, ptByteSz, hashByteSz);
     else
     {
-        set_keys_for_decryption(&ssl.des);
+        set_keys_for_decryption(des_data);
         return magic_number_case ?\
-            des_decryption(*plaintext + MAGICHEADER_byteSz, ptByteSz - MAGICHEADER_byteSz, hashByteSz) :\
-            des_decryption(*plaintext, ptByteSz, hashByteSz);
+            des_decryption(des_data, *plaintext + MAGICHEADER_byteSz, ptByteSz - MAGICHEADER_byteSz, hashByteSz) :\
+            des_decryption(des_data, *plaintext, ptByteSz, hashByteSz);
     }
 }

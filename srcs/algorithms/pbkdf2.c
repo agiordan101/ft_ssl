@@ -6,7 +6,7 @@ static Mem_8bits    *hmac_init_key_SHA256_byteSz(Mem_8bits *key, int keyByteSz, 
     {
         // Hash old key to have keyByteSz = SHA256_byteSz
         Mem_8bits *tmp = ft_memdup(key, keyByteSz);    // Duplicate before sha256
-        key = sha256(&tmp, keyByteSz, NULL, 0);
+        key = sha256(NULL, &tmp, keyByteSz, NULL, 0);
         ft_memcpy(keypad, key, SHA256_byteSz);
         free(tmp);
         free(key);
@@ -33,7 +33,7 @@ static Mem_8bits    *concat_and_hash(Mem_8bits *keyxor, Mem_8bits *to_concat, in
     ft_memcpy(concat + CHUNK_byteSz, to_concat, to_concatByteSz);
     // printMemHex(concat, concatByteSz, "K ^ pad || concat");
 
-    Mem_8bits *hash_ret = sha256((Mem_8bits **)&concat, concatByteSz, NULL, 0);
+    Mem_8bits *hash_ret = sha256(NULL, (Mem_8bits **)&concat, concatByteSz, NULL, 0);
     for (Word_32bits *tmp = (Word_32bits *)hash_ret; (Mem_8bits *)tmp < hash_ret + SHA256_byteSz; tmp += 1)
         endianReverse((Mem_8bits *)tmp, WORD32_byteSz);
 

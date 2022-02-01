@@ -20,7 +20,7 @@ inline void	*ft_memcpy(void *dest, const void *src, size_t n)
 
 	while (++i < n)
 		castdest[i] = castsrc[i];
-	return (castdest);
+	return castdest;
 }
 
 inline Mem_8bits *ft_memnew(int byteSz)

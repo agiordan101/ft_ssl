@@ -7,10 +7,10 @@
 
     To do :
 
-        Add -proba pour isprime command
+        INTMAXLESS1 enlever le pow
         Faire la différence entre les command_familly et les commands (On peut pas comparer les adresses car plusieurs fonctions existe pour la meme commande)
         Enlever les protection useless dans le parsing
-        Gerer les \n dans l'output
+        Gerer les \n dans l'output (pas dans les ft hash)
         Afficher l'usage de la command_familly passé
         Boucler pour les flags parsing pt sur ft
         -nosalt             Do not use salt in the KDF
@@ -56,8 +56,12 @@ char    *ask_password()
 
 void    ssl_free()
 {
-    if (ssl.des.password)
-        free(ssl.des.password);
+    if (ssl.command_data)
+    {
+        if (ssl.command_addr == des && ((t_des *)ssl.command_data)->password)
+            free(((t_des *)ssl.command_data)->password);
+        free(ssl.command_data);
+    }
 
     t_hash_free(ssl.hash);
 

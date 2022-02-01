@@ -77,28 +77,29 @@ static void hash_chunk(t_md5 *md5, Word_32bits *chunk)
     md5->hash[3] += d;
 }
 
-Mem_8bits   *md5(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way)
+Mem_8bits   *md5(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way)
 {
     t_md5   md5;
+    t_md5   *md5_data = &md5;
 
     md_padding(plaintext, &ptByteSz, 0);
-    init_md5(&md5, *plaintext, ptByteSz);
-    // printBits(md5.chunks, md5.chunksSz);
+    init_md5(md5_data, *plaintext, ptByteSz);
 
-    Word_32bits *chunks = (Word_32bits *)md5.chunks;
+    Word_32bits *chunks = (Word_32bits *)md5_data->chunks;
     Word_32bits *chunk = chunks;
-    while (chunk < chunks + md5.chunksSz / WORD32_byteSz)
+    while (chunk < chunks + md5_data->chunksSz / WORD32_byteSz)
     {
-        hash_chunk(&md5, chunk);
+        hash_chunk(md5_data, chunk);
         chunk += CHUNK_byteSz / WORD32_byteSz;
     }
 
     // Restore right endianness order
     for (int i = 0; i < MD5_wordSz; i++)
-        endianReverse((Mem_8bits *)(md5.hash + i), WORD32_byteSz);
+        endianReverse((Mem_8bits *)(md5_data->hash + i), WORD32_byteSz);
 
-    (void)way;
+    (void)way;          // Decryption does not exist
+    (void)command_data; // No data pass in needed
     if (hashByteSz)
         *hashByteSz = MD5_byteSz;
-    return ft_memdup((Mem_8bits *)md5.hash, MD5_byteSz);
+    return ft_memdup((Mem_8bits *)md5_data->hash, MD5_byteSz);
 }

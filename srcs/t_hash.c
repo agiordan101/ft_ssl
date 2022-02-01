@@ -30,7 +30,7 @@ inline void t_hash_base64_decode_inputs(t_hash *hash)
     while (hash)
     {
         tmp = hash->msg;
-        hash->msg = (char *)base64((Mem_8bits **)&hash->msg, hash->len, (Long_64bits *)&hash->len, d);
+        hash->msg = (char *)base64(NULL, (Mem_8bits **)&hash->msg, hash->len, (Long_64bits *)&hash->len, d);
 
         free(tmp);
         hash = hash->next;
@@ -46,7 +46,7 @@ inline void t_hash_base64_encode_output(t_hash *hash)
         if (!hash->error)
         {
             tmp = hash->hash;
-            hash->hash = base64(&hash->hash, hash->hashByteSz, (Long_64bits *)&hash->hashByteSz, e);
+            hash->hash = base64(NULL, &hash->hash, hash->hashByteSz, (Long_64bits *)&hash->hashByteSz, e);
             free(tmp);
         }
         hash = hash->next;
@@ -58,7 +58,13 @@ inline void t_hash_hashing(t_hash *hash)
     while (hash)
     {
         if (!hash->error)
-            hash->hash = ssl.command_addr((Mem_8bits **)&hash->msg, hash->len, (Long_64bits *)&hash->hashByteSz, ssl.flags);
+            hash->hash = ssl.command_addr(
+                ssl.command_data,
+                (Mem_8bits **)&hash->msg,
+                hash->len,
+                (Long_64bits *)&hash->hashByteSz,
+                ssl.flags
+            );
         hash = hash->next;
     }
 }

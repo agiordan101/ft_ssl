@@ -84,20 +84,8 @@ int     string_handler(t_hash *node, char *av_next)
     node->len = ft_strlen(av_next);
     if (!(node->name = ft_stradd_quote(av_next, node->len)))
         return EXIT_FAILURE;
-    // printf("string handler: %s\n", av_next);
     return 0;
 }
-
-// int     s_handler(char *av_next, int *i)
-// {
-//     if (ssl.flags & s)
-//     {
-//         (*i)--; // Cancel -s as a flag parameter
-//         return file_handler(NULL, "-s");
-//     }
-//     else
-//         return string_handler(NULL, av_next);
-// }
 
 Key_64bits  parse_keys(char *av_next)
 {
@@ -125,11 +113,6 @@ int     param_handler(e_flags flag, char *av_next, int *i)
 {
     if (flag & s)
         string_handler(NULL, av_next);
-    // if (flag & s)
-    // {
-    //     if (s_handler(av_next, i))
-    //         return EXIT_FAILURE;
-    // }
     else if (flag & i_)
     {
         if (file_handler(NULL, av_next))
@@ -138,41 +121,49 @@ int     param_handler(e_flags flag, char *av_next, int *i)
     else if (flag & o)
         ssl.output_file = av_next;
     else if (flag & k_des)
-        ssl.des.key = parse_keys(av_next);
-    else if (flag & p_des)
-        ssl.des.password = (Mem_8bits *)ft_strdup(av_next);
+        ((t_des *)ssl.command_data)->key = parse_keys(av_next);
     else if (flag & s_des)
-        ssl.des.salt = parse_keys(av_next);
+        ((t_des *)ssl.command_data)->salt = parse_keys(av_next);
     else if (flag & v_des)
-        ssl.des.vector = parse_keys(av_next);
+        ((t_des *)ssl.command_data)->vector = parse_keys(av_next);
+    else if (flag & p_des)
+        ((t_des *)ssl.command_data)->password = (Mem_8bits *)ft_strdup(av_next);
     else if (flag & pbkdf2_iter)
     {
-        ssl.pbkdf2_iter = ft_atoi(av_next);
-        if (ssl.pbkdf2_iter <= 0)
-            pbkdf2_iter_error();
+        int p = ft_atoi(av_next);
+        if (p <= 0)
+            pbkdf2_iter_error(p);
+        ((t_des *)ssl.command_data)->pbkdf2_iter = p;
+    }
+    else if (flag & prob)
+    {
+        int p = ft_atoi(av_next);
+        if (p <= 0 || 100 < p)
+            isprime_prob_error(p);
+        ((t_isprime *)ssl.command_data)->prob_requested = (p == 100 ? PROBMIN_ISPRIME : 1 - (float)p / 100);
     }
     (*i)++;
     return 0;
 }
 
+// e_flags strToFlag(char *str)
+// {
+//     static void *flags_convertion[2] = {
+//         {"-i", i_},
+//         {"-o", o},
+//         {"-P", P_des},
+//         {"-a", a}
+//     };
+
+//     for (int i = 0; i < N_FLAGS; i++)
+//     {
+//         if (!ft_strcmp(flags_convertion[i][0], str))
+//             return flags_convertion[i][1];
+//     }
+// }
+
 e_flags strToFlag(char *str)
 {
-    if (!ft_strcmp(str, "-s"))
-    {
-        if (ssl.command_familly == CIPHER)
-            return s_des;
-        else 
-            return s;
-    }
-    if (!ft_strcmp(str, "-p"))
-    {
-        if (ssl.command_familly & CIPHER)
-            return p_des;
-        else
-            return p;
-    }
-    if (!ft_strcmp(str, "-P"))
-        return P_des;
     if (!ft_strcmp(str, "-i"))
         return i_;
     if (!ft_strcmp(str, "-o"))
@@ -187,24 +178,45 @@ e_flags strToFlag(char *str)
         return A;
     if (!ft_strcmp(str, "-q"))
         return q;
-    if (!ft_strcmp(str, "-help"))
-        return help;
     if (!ft_strcmp(str, "-r"))
         return r;
     if (!ft_strcmp(str, "-d"))
         return d;
     if (!ft_strcmp(str, "-e"))
         return e;
-    if (!ft_strcmp(str, "-k"))
-        return k_des;
-    if (!ft_strcmp(str, "-v"))
-        return v_des;
-    if (!ft_strcmp(str, "-nopad"))
-        return nopad;
-    if (!ft_strcmp(str, "-iter"))
-        return pbkdf2_iter;
-    if (!ft_strcmp(str, "-prob"))
-        return prob;
+    if (!ft_strcmp(str, "-help"))
+        return help;
+
+    if (ssl.command_addr == des)
+    {
+        if (!ft_strcmp(str, "-s"))
+            return s_des;
+        if (!ft_strcmp(str, "-p"))
+            return p_des;
+        if (!ft_strcmp(str, "-P"))
+            return P_des;
+        if (!ft_strcmp(str, "-k"))
+            return k_des;
+        if (!ft_strcmp(str, "-v"))
+            return v_des;
+        if (!ft_strcmp(str, "-nopad"))
+            return nopad;
+        if (!ft_strcmp(str, "-iter"))
+            return pbkdf2_iter;
+    }
+    else
+    {
+        if (!ft_strcmp(str, "-s"))
+            return s;
+        if (!ft_strcmp(str, "-p"))
+            return p;
+    }
+
+    if (ssl.command_addr == isprime)
+    {
+        if (!ft_strcmp(str, "-prob"))
+            return prob;
+    }
     return 0;
 }
 
@@ -233,20 +245,23 @@ int     hash_func_handler(char *str)
         ssl.command_title = "DES-ECB";
         ssl.command_addr = des;
         ssl.command_familly = CIPHER;
-        ssl.des.mode = DESECB;
+        ssl.command_data = ft_memnew(sizeof(t_des));
+        ((t_des *)ssl.command_data)->mode = DESECB;
     }
     else if (!ft_strcmp(str, "des") || !ft_strcmp(str, "des-cbc"))
     {
         ssl.command_title = "DES-CBC";
         ssl.command_addr = des;
         ssl.command_familly = CIPHER;
-        ssl.des.mode = DESCBC;
+        ssl.command_data = ft_memnew(sizeof(t_des));
+        ((t_des *)ssl.command_data)->mode = DESCBC;
     }
     else if (!ft_strcmp(str, "isprime"))
     {
         ssl.command_title = "Is prime ? ";
         ssl.command_addr = isprime;
         ssl.command_familly = STANDARD;
+        ssl.command_data = ft_memnew(sizeof(t_isprime));
     }
     else
     {

@@ -10,20 +10,20 @@ INCS		=	$(addprefix $(INC_PATH), $(INCLUDES))
 SRC_PATH	=	./srcs/
 SRC			=	$(NAME).c \
 				t_hash.c \
+				io/output.c \
+				io/errors.c \
 				io/parsing.c \
 				io/padding.c \
-				io/output.c \
+				io/verbose.c \
 				utils/libft.c \
-				utils/verbose.c \
-				utils/errors.c \
 				calculations/maths.c \
 				calculations/bitwise.c \
+				algorithms/prime.c \
 				algorithms/pbkdf2.c \
 				algorithms/md/sha256.c \
 				algorithms/md/md5.c \
 				algorithms/ciphers/des.c \
-				algorithms/ciphers/base64.c \
-				algorithms/rsa/prime.c
+				algorithms/ciphers/base64.c
 
 BIN_PATH	=	./bins/
 BIN			=	$(SRC:.c=.o)

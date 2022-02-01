@@ -25,6 +25,7 @@ typedef unsigned long   Long_64bits;
 # define WORD32_byteSz  sizeof(Word_32bits)      // 4 bytes or 32 bits
 # define LONG64_byteSz  sizeof(Long_64bits)      // 8 bytes or 64 bits
 
+# define ABS(x)          (x >= 0 ? x : -x)
 # define INTMAXLESS1    (Word_32bits)pow(2, 32) - 1
 // # define BIG_LONG64     ((Long_64bits)1 << 63) - 1
 
@@ -41,28 +42,27 @@ typedef enum    error {
 typedef enum    flags {
     i_=1<<1, o=1<<2, s=1<<10, p=1<<8,
     a=1<<4, ai=1<<5, ao=1<<6, A=1<<7,
-    q=1<<3, help=1<<19,
-
-    // Only Message Digest
-    r=1<<9,
+    q=1<<3, r=1<<9,
+    help=1<<19,
 
     // Only Cypher
     d=1<<11, e=1<<12,
         // Only des
-        k_des=1<<13, p_des=1<<14, s_des=1<<15, v_des=1<<16, P_des=1<<17, nopad=1<<18,
-    
-    // Only PBKDF2
-    pbkdf2_iter=1<<20,
-    
-    // Only PBKDF2
+        k_des=1<<13, p_des=1<<14, s_des=1<<15, v_des=1<<16,
+        P_des=1<<17, nopad=1<<18, pbkdf2_iter=1<<20,
+
+    // Only isprime command
     prob=1<<21,
 }               e_flags;
 # define AVFLAGS        (p + q + r + d + e + A + ai + ao + P_des + nopad + help)
 # define AVPARAM        (s + i_ + o + k_des + p_des + s_des + v_des + pbkdf2_iter + prob)
+# define N_FLAGS        21
+
 
 typedef enum    command {
     MD=1, CIPHER=2, STANDARD=4
 }               e_command;
+
 
 typedef struct  s_hash
 {
@@ -78,18 +78,20 @@ typedef struct  s_hash
     struct s_hash *next;
 }               t_hash;
 
-int         parsing(int ac, char **av);
-void        freexit(int failure);
 char        *ask_password();
+int         parsing(int ac, char **av);
+void        output(t_hash *hash);
+
+void        print_usage_exit();
+void        freexit(int failure);
 
 void        malloc_failed(char *errormsg);
 void        open_failed(char *errormsg, char *file);
 void        write_failed(char *errormsg, int fd);
+
 void        file_not_found(char *file);
 void        pbkdf2_iter_error();
-
-void        output(t_hash *hash);
-void        print_usage_exit();
+void        isprime_prob_error(int p);
 
 
 /*
@@ -182,7 +184,7 @@ typedef struct  s_md5
     Word_32bits hash[MD5_wordSz];
 }               t_md5;
 
-Mem_8bits   *md5(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
+Mem_8bits   *md5(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
 void        md5_t_hash(t_hash *hash);
 
 
@@ -202,7 +204,7 @@ typedef struct  s_sha
     Word_32bits hash[SHA256_wordSz];
 }               t_sha;
 
-Mem_8bits   *sha256(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
+Mem_8bits   *sha256(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
 void        sha256_xor_8bits(Mem_8bits *sha1, Mem_8bits *sha2, Mem_8bits **result);
 
 
@@ -226,14 +228,13 @@ typedef unsigned long   Key_64bits;
 
 # define    BASE64  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
-Mem_8bits   *base64(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
+Mem_8bits   *base64(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
 
 
 /*
     DES Data --------------------------------------
 */
 
-# define PBKDF2_iter        10000
 # define MAGICNUMBER        "Salted__"
 # define MAGICNUMBER_byteSz sizeof(MAGICNUMBER) - 1
 # define MAGICHEADER_byteSz (MAGICNUMBER_byteSz + KEY_byteSz)
@@ -252,14 +253,27 @@ typedef struct  s_des
     Key_64bits  subkeys[16];
     char        ipt[KEY_bitSz];     // Initial permutation table
     char        fpt[KEY_bitSz];     // Final   permutation table
+    int         pbkdf2_iter;
 }               t_des;
+
+Mem_8bits   *des(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
+Long_64bits des_padding(Mem_8bits *bloc);
+void        des_unpadding(Long_64bits *lastbloc, int *ptSz);
+void        des_P_flag_output(t_des *des_data);
+
+
+/*
+    PBKDF2 Data --------------------------------------
+*/
+
+# define PBKDF2_iter        10000
+
+// typedef struct  s_pbkdf2 {
+//     int         pbkdf2_iter;
+// }               t_pbkdf2;
 
 Key_64bits  pbkdf2_sha256(Mem_8bits *pwd, Key_64bits salt, int c);
 Mem_8bits   *pbkdf2_sha256_hmac(Mem_8bits *key, int keyByteSz, Mem_8bits *msg, int msgByteSz);
-
-Mem_8bits   *des(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
-Long_64bits des_padding(Mem_8bits *bloc);
-void        des_unpadding(Long_64bits *lastbloc, int *ptSz);
 
 
 
@@ -269,17 +283,27 @@ void        des_unpadding(Long_64bits *lastbloc, int *ptSz);
     ----------------------------------------------------
 */
 
+
+/*
+    isprime Data --------------------------------------
+*/
+
+# define    ISPRIMEMEMSZ    10
+# define    PROBMIN_ISPRIME 0.0001
+
+typedef struct  s_isprime {
+    float       prob_requested;
+}               t_isprime;
+
+Mem_8bits   *isprime(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
+int         miller_rabin_primality_test(Long_64bits n, float p);
+
+
 /*
     RSA Data --------------------------------------
 */
 
-# define    ABS(x)          (x >= 0 ? x : -x)
-# define    ISPRIMEMEMSZ    10
-
-Mem_8bits       *rsa(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
-Mem_8bits       *isprime(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
-
-int              miller_rabin_primality_test(Long_64bits n, float p);
+Mem_8bits   *rsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
 
 
 
@@ -292,14 +316,11 @@ int              miller_rabin_primality_test(Long_64bits n, float p);
 typedef struct  s_ssl
 {
     char        *command_title;
-    Mem_8bits   *(*command_addr)(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
     e_command   command_familly;
+    Mem_8bits   *(*command_addr)(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
+    void        *command_data;
 
     e_flags     flags;
-
-    // Use void * here, correct malloc in parsing depending on the input command, and correct cast in command
-    t_des       des;            // Move that shit somewhere else
-    int         pbkdf2_iter;    // Move that shit somewhere else
 
     t_hash      *hash;
     char        *output_file;
@@ -314,4 +335,3 @@ void    t_hash_base64_decode_inputs(t_hash *hash);
 void    t_hash_base64_encode_output(t_hash *hash);
 void    t_hash_hashing(t_hash *hash);
 void    t_hash_output(t_hash *hash);
-

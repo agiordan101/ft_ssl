@@ -105,26 +105,28 @@ static void hash_chunk(t_sha *sha, Word_32bits *chunk)
     sha->hash[7] += h;
 }
 
-Mem_8bits   *sha256(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way)
+Mem_8bits   *sha256(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way)
 {
     t_sha   sha;
+    t_sha   *sha_data = &sha;
 
     md_padding(plaintext, &ptByteSz, 1);
-    init_sha(&sha, *plaintext, ptByteSz);
+    init_sha(sha_data, *plaintext, ptByteSz);
 
     // printBits(chunks, CHUNK_byteSz);
-    Word_32bits *chunks = (Word_32bits *)sha.chunks;
+    Word_32bits *chunks = (Word_32bits *)sha_data->chunks;
     Word_32bits *chunk = chunks;
-    while (chunk < chunks + sha.chunksSz / WORD32_byteSz)
+    while (chunk < chunks + sha_data->chunksSz / WORD32_byteSz)
     {
-        hash_chunk(&sha, chunk);
+        hash_chunk(sha_data, chunk);
         chunk += CHUNK_byteSz / WORD32_byteSz;
     }
 
-    (void)way;
+    (void)way;          // Decryption does not exist
+    (void)command_data; // No data pass in needed
     if (hashByteSz)
         *hashByteSz = SHA256_byteSz;
-    return ft_memdup((Mem_8bits *)sha.hash, SHA256_byteSz);
+    return ft_memdup((Mem_8bits *)sha_data->hash, SHA256_byteSz);
 }
 
 /*

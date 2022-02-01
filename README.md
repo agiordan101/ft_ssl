@@ -1,6 +1,16 @@
-    Recode a part of openssl library
+    Recode a part of openssl library, and additionnal features, from scratch.
 
-Author: agiordan
+    No C library used.
+    All externals functions used:
+        - open
+        - close
+        - read
+        - write
+        - malloc
+        - perror
+        - exit
+
+    Author: agiordan
 
 
 
