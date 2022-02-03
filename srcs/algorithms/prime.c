@@ -171,16 +171,17 @@ Long_64bits prime_generator()
     /*
         Pick a number between
     */
-    Long_64bits p = 2;
+    Long_64bits p = 4;
 
     while (!miller_rabin_primality_test(p, PROBMIN_ISPRIME))
     {
+        p = LONG64_LEFTBITMASK | ulrandom(LONG64_byteSz - 2);
         while (first_primes_multiple(p))
         {
-            p = rand();
-            p |= LONG64_LEFTBITMASK;
-            printf("rand= %llu\n", p);
+            p = LONG64_LEFTBITMASK | ulrandom(LONG64_byteSz - 2);
+            // printf("rand & mask=\t%lu\n", p);
         }
+        // printf("Not first primes multiple=\t%lu\n", p);
     }
     return p;
 }

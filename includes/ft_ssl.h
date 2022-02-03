@@ -159,9 +159,12 @@ Long_64bits     bits_permutations(Long_64bits mem, char *ptable, int bitLen);
     Maths ---------------------------------------------
 */
 
+# define    URANDBUFF   (100 * LONG64_byteSz)
+
 // Long_64bits ft_pow(Long_64bits a, int pow);
 Long_64bits modular_exp(Long_64bits a, Long_64bits b, Long_64bits m);
 Long_64bits modular_mult(Long_64bits a, Long_64bits b, Long_64bits mod);
+Long_64bits ulrandom();
 
 
 /*
@@ -348,6 +351,8 @@ typedef struct  s_ssl
     t_hash      *hash;
     char        *output_file;
     int         fd_out;
+    
+    int         urandom_fd;
 }               t_ssl;
 
 extern t_ssl    ssl;

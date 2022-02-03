@@ -12,7 +12,7 @@
 //     return a_pow;
 // }
 
-Long_64bits modular_mult(Long_64bits a, Long_64bits b, Long_64bits mod)
+inline Long_64bits modular_mult(Long_64bits a, Long_64bits b, Long_64bits mod)
 {
     Long_64bits res = 0;
  
@@ -28,7 +28,7 @@ Long_64bits modular_mult(Long_64bits a, Long_64bits b, Long_64bits mod)
     return res;
 }
 
-Long_64bits modular_exp(Long_64bits a, Long_64bits b, Long_64bits mod)
+inline Long_64bits modular_exp(Long_64bits a, Long_64bits b, Long_64bits mod)
 {
     Long_64bits res = 1;
 
@@ -42,4 +42,30 @@ Long_64bits modular_exp(Long_64bits a, Long_64bits b, Long_64bits mod)
         b >>= 1;
     }
     return res;
+}
+
+inline Long_64bits ulrandom()
+{
+    static int  fd = -2;
+    static char buff[URANDBUFF];
+    static char *buff_offset = buff;
+    static int  data_left = 0;
+    int         ret;
+
+    if (fd == -2)
+        fd = open("/dev/urandom", O_RDONLY);
+    if (fd == -1)
+        open_failed("urandom() failed: Cannot open file '/dev/urandom' in O_RDONLY mode", "/dev/urandom");
+
+    if (data_left < LONG64_byteSz)
+    {
+        // printf("read / data_left=%d / fd=%d\n", data_left, fd);
+        if ((ret = read(fd, buff, URANDBUFF)) == -1)
+            read_failed("urandom() failed: Cannot read file '/dev/urandom'", fd);
+        data_left += ret;
+        buff_offset = buff;
+    }
+    data_left -= LONG64_byteSz;
+    buff_offset += LONG64_byteSz;
+    return *((Long_64bits *)buff_offset);
 }
