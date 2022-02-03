@@ -29,6 +29,7 @@ inline void t_hash_base64_decode_inputs(t_hash *hash)
 
     while (hash)
     {
+        // printf("Hash(len=%d)= >%s<\n", hash->len, hash->msg);
         tmp = hash->msg;
         hash->msg = (char *)base64(NULL, (Mem_8bits **)&hash->msg, hash->len, (Long_64bits *)&hash->len, d);
 
@@ -55,6 +56,18 @@ inline void t_hash_base64_encode_output(t_hash *hash)
 
 inline void t_hash_hashing(t_hash *hash)
 {
+    // EXECONES_COMMANDS commands doesn't need t_hash / any data input. Only one t_hash for printing
+    if (ssl.command & EXECONES_COMMANDS)
+    {
+        if (hash)
+        {
+            t_hash_free(hash->next);
+            hash->next = NULL;
+        }
+        else
+            hash = add_thash_front();
+    }
+
     while (hash)
     {
         if (!hash->error)

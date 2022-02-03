@@ -2,18 +2,20 @@
 
 // Extern errors
 
-void    malloc_failed(char *errormsg)
+void    open_failed(char *errormsg, char *file)
 {
-    ft_putstderr("[MALLOC FAILED] ");
+    ft_putstderr("[OPEN FAILED] Unable to open file: ");
+    ft_putstderr(file);
     ft_putstderr(errormsg);
     perror(NULL);
     freexit(EXIT_FAILURE);
 }
 
-void    open_failed(char *errormsg, char *file)
+void    read_failed(char *errormsg, int fd)
 {
-    ft_putstderr("[OPEN FAILED] Unable to open file: ");
-    ft_putstderr(file);
+    ft_putstderr("[READ FAILED] fd= ");
+    ft_putnbr(STDERR, fd);
+    ft_putstderr("\n");
     ft_putstderr(errormsg);
     perror(NULL);
     freexit(EXIT_FAILURE);
@@ -24,6 +26,14 @@ void    write_failed(char *errormsg, int fd)
     ft_putstderr("[WRITE FAILED] fd= ");
     ft_putnbr(STDERR, fd);
     ft_putstderr("\n");
+    ft_putstderr(errormsg);
+    perror(NULL);
+    freexit(EXIT_FAILURE);
+}
+
+void    malloc_failed(char *errormsg)
+{
+    ft_putstderr("[MALLOC FAILED] ");
     ft_putstderr(errormsg);
     perror(NULL);
     freexit(EXIT_FAILURE);

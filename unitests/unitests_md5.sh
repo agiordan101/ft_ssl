@@ -40,4 +40,4 @@ echo "one more thing" | ./ft_ssl md5 -r -p -s "foo" file -s "bar" >> md5_respons
 echo "just to be extra clear" | ./ft_ssl md5 -r -q -p -s "foo" file >> md5_responses
 
 diff md5_responses md5_subject_responses
-rm md5_responses md5_subject_responses file ft_ssl
+# rm md5_responses md5_subject_responses file ft_ssl

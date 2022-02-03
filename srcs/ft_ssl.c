@@ -7,6 +7,8 @@
 
     To do :
 
+        //Leaks ft_stradd_quote ?
+        inline keywords pour les prime peut etre et le dossier calculations
         INTMAXLESS1 enlever le pow
         Faire la différence entre les command_familly et les commands (On peut pas comparer les adresses car plusieurs fonctions existe pour la meme commande)
         Enlever les protection useless dans le parsing

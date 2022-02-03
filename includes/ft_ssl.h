@@ -1,3 +1,6 @@
+#ifndef FT_SSL_H
+#define FT_SSL_H
+
 # include <stdlib.h>
 # include <unistd.h>
 # include <stdio.h>
@@ -34,10 +37,21 @@ typedef unsigned long   Long_64bits;
 # define ENDMSG         0b10000000
 # define HEXABASE       "0123456789abcdef"
 
-typedef enum    error {
-    FILENOTFOUND = 1 << 1,
-    DONOTHASH = 1 << 2
-}               e_error;
+
+typedef enum    command {
+    MD5=1<<1, SHA256=1<<2,
+    BASE64=1, DESECB=1<<3, DESCBC=1<<4,
+    GENPRIME=1<<5, ISPRIME=1<<6,
+    GENRSA=1<<7, RSA=1<<8, RSAUTL=1<<9
+}               e_command;
+# define MD                     (MD5 + SHA256)
+# define CIPHERS                (BASE64 + DESECB + DESCBC)
+# define PRIMES                 (GENPRIME + ISPRIME)
+// # define STANDARDS              (GENRSA)
+
+# define THASHNEED_COMMANDS     (MD + CIPHERS + ISPRIME)
+# define EXECONES_COMMANDS      (GENPRIME)
+
 
 typedef enum    flags {
     i_=1<<1, o=1<<2, s=1<<10, p=1<<8,
@@ -56,13 +70,13 @@ typedef enum    flags {
 }               e_flags;
 # define AVFLAGS        (p + q + r + d + e + A + ai + ao + P_des + nopad + help)
 # define AVPARAM        (s + i_ + o + k_des + p_des + s_des + v_des + pbkdf2_iter + prob)
-# define N_FLAGS        21
+// # define N_FLAGS        21
 
 
-typedef enum    command {
-    MD=1, CIPHER=2, STANDARD=4
-}               e_command;
-
+typedef enum    error {
+    FILENOTFOUND = 1 << 1,
+    DONOTHASH = 1 << 2
+}               e_error;
 
 typedef struct  s_hash
 {
@@ -79,15 +93,17 @@ typedef struct  s_hash
 }               t_hash;
 
 char        *ask_password();
+t_hash *    add_thash_front();
 int         parsing(int ac, char **av);
 void        output(t_hash *hash);
 
 void        print_usage_exit();
 void        freexit(int failure);
 
-void        malloc_failed(char *errormsg);
 void        open_failed(char *errormsg, char *file);
 void        write_failed(char *errormsg, int fd);
+void        read_failed(char *errormsg, int fd);
+void        malloc_failed(char *errormsg);
 
 void        file_not_found(char *file);
 void        pbkdf2_iter_error();
@@ -105,12 +121,15 @@ Mem_8bits   *ft_memdup(void *mem, int byteSz);
 void        *ft_memjoin(void *mem1, int byteSz1, void *mem2, int byteSz2);
 
 Long_64bits	ft_atoi(const char *str);
+char    	*ft_ulltoa(Long_64bits n);
 char	    *ft_strdup(char *src);
 char    	*ft_strinsert(char *str1, char *toinsert, char *str2);
 int		    ft_strlen(char *p);
 int         ft_strcmp(const char *s1, const char *s2);
 char        *ft_stradd_quote(char *str, int len);
 char	    *ft_lower(char *str);
+
+int         ft_unbrlen(Long_64bits nbr);
 
 void	    ft_putstr(char *s);
 void    	ft_putstrfd(int fd, char *s);
@@ -226,7 +245,7 @@ typedef unsigned long   Key_64bits;
     BASE64 Data --------------------------------------
 */
 
-# define    BASE64  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+# define    BASE64_BASE  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
 Mem_8bits   *base64(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
 
@@ -239,14 +258,10 @@ Mem_8bits   *base64(void *command_data, Mem_8bits **plaintext, Long_64bits ptByt
 # define MAGICNUMBER_byteSz sizeof(MAGICNUMBER) - 1
 # define MAGICHEADER_byteSz (MAGICNUMBER_byteSz + KEY_byteSz)
 
-typedef enum    desmode {
-    DESECB=1, DESCBC=2
-}               e_desmode;
-
 typedef struct  s_des
 {
-    e_desmode   mode;
-    Mem_8bits   *password;  // malloc
+    e_command   mode;               // Not necessarily related to command
+    Mem_8bits   *password;          // Malloced
     Key_64bits  key;
     Key_64bits  salt;
     Key_64bits  vector;
@@ -268,10 +283,6 @@ void        des_P_flag_output(t_des *des_data);
 
 # define PBKDF2_iter        10000
 
-// typedef struct  s_pbkdf2 {
-//     int         pbkdf2_iter;
-// }               t_pbkdf2;
-
 Key_64bits  pbkdf2_sha256(Mem_8bits *pwd, Key_64bits salt, int c);
 Mem_8bits   *pbkdf2_sha256_hmac(Mem_8bits *key, int keyByteSz, Mem_8bits *msg, int msgByteSz);
 
@@ -283,13 +294,13 @@ Mem_8bits   *pbkdf2_sha256_hmac(Mem_8bits *key, int keyByteSz, Mem_8bits *msg, i
     ----------------------------------------------------
 */
 
+# define    PROBMIN_ISPRIME 0.0001
 
 /*
     isprime Data --------------------------------------
 */
 
 # define    ISPRIMEMEMSZ    10
-# define    PROBMIN_ISPRIME 0.0001
 
 typedef struct  s_isprime {
     float       prob_requested;
@@ -300,10 +311,22 @@ int         miller_rabin_primality_test(Long_64bits n, float p);
 
 
 /*
+    genprime Data --------------------------------------
+*/
+
+# define    LONG64_LEFTBITMASK  (1UL << 62)
+
+Mem_8bits   *genprime(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
+// Long_64bits prime_generator(Long_64bits min, Long_64bits max);
+Long_64bits prime_generator();
+
+
+/*
     RSA Data --------------------------------------
 */
 
 Mem_8bits   *rsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
+Mem_8bits   *genrsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
 
 
 
@@ -315,8 +338,8 @@ Mem_8bits   *rsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz
 
 typedef struct  s_ssl
 {
+    e_command   command;
     char        *command_title;
-    e_command   command_familly;
     Mem_8bits   *(*command_addr)(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
     void        *command_data;
 
@@ -335,3 +358,5 @@ void    t_hash_base64_decode_inputs(t_hash *hash);
 void    t_hash_base64_encode_output(t_hash *hash);
 void    t_hash_hashing(t_hash *hash);
 void    t_hash_output(t_hash *hash);
+
+#endif

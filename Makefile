@@ -23,7 +23,8 @@ SRC			=	$(NAME).c \
 				algorithms/md/sha256.c \
 				algorithms/md/md5.c \
 				algorithms/ciphers/des.c \
-				algorithms/ciphers/base64.c
+				algorithms/ciphers/base64.c \
+				algorithms/standard/genrsa.c
 
 BIN_PATH	=	./bins/
 BIN			=	$(SRC:.c=.o)
@@ -50,7 +51,7 @@ dirs:
 	@mkdir -p $(BIN_PATH)/calculations || true
 	@mkdir -p $(BIN_PATH)/algorithms/md || true
 	@mkdir -p $(BIN_PATH)/algorithms/ciphers || true
-	@mkdir -p $(BIN_PATH)/algorithms/rsa || true
+	@mkdir -p $(BIN_PATH)/algorithms/standard || true
 
 clean:
 	@rm -rf $(BIN_PATH)

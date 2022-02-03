@@ -4,7 +4,7 @@
 
 void    print_usage_exit()
 {
-    ft_putstderr("usage: ft_ssl <algorithm> [flags] [file | string]\n\n");
+    ft_putstderr("usage: ft_ssl <algorithm> [file] [flags]\n\n");
     ft_putstderr("Global flags:\n");
     ft_putstderr("\t-help\tDisplay this summary and exit\n");
     ft_putstderr("\t-p\tforce data reception in stdin\n");
@@ -51,7 +51,7 @@ void    des_P_flag_output(t_des *des_data)
     ft_printHex(des_data->salt, KEY_byteSz);
     ft_putstrfd(ssl.fd_out, "\nkey=");
     ft_printHex(des_data->key, KEY_byteSz);
-    if (des_data->mode == DESCBC)
+    if (ssl.command == DESCBC)
     {
         ft_putstrfd(ssl.fd_out, "\niv=");
         ft_printHex(des_data->vector, KEY_byteSz);

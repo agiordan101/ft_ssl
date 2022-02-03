@@ -74,6 +74,19 @@ inline Long_64bits	ft_atoi(const char *str)
 	return ((Long_64bits)(nb * sign));
 }
 
+char	*ft_ulltoa(Long_64bits n)
+{
+	int		len = ft_unbrlen(n);
+	char	*str = ft_memnew(len);
+
+	while (n)
+	{
+		str[--len] = n % 10 + '0';
+		n /= 10;
+	}
+	return str;
+}
+
 inline int	ft_strlen(char *p)
 {
     unsigned long long *str = (unsigned long long *)p;
@@ -142,6 +155,17 @@ inline char	*ft_lower(char *str)
 	for (int i = 0; i < ft_strlen(str); i++)
 		str[i] = ('A' <= str[i] && str[i] <= 'Z') ? str[i] + ('a' - 'A') : str[i];
 	return str;
+}
+
+// Long_64bits about functions ------------------------------------------------------------------
+
+int         ft_unbrlen(Long_64bits nbr)
+{
+	int count = 1;
+
+    for (Long_64bits p = 10; p <= nbr; p *= 10)
+        count++;
+	return count;
 }
 
 // Display functions ------------------------------------------------------------------

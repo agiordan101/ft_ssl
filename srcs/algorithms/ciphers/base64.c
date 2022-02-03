@@ -19,8 +19,7 @@ static inline int   base64_to_bin(char num)
 
 static inline void  bin_to_base64(Mem_8bits *bin, int byteSz)
 {
-    // static char        base[65] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-    static char     base[65] = BASE64;
+    static char     base[65] = BASE64_BASE;
 
     for (int i = 0; i < byteSz; i++)
         bin[i] = (Mem_8bits)base[bin[i]];

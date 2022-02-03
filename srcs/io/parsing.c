@@ -1,24 +1,24 @@
 #include "ft_ssl.h"
 
-t_hash *     addmsg_front()
+t_hash      *add_thash_front()
 {
     t_hash *tmp;
 
     tmp = ssl.hash;
     if (!(ssl.hash = (t_hash *)malloc(sizeof(t_hash))))
-		malloc_failed("Unable to malloc new t_hash in parsing addmsg_front() function\n");
+		malloc_failed("Unable to malloc new t_hash in parsing add_thash_front() function\n");
     init_t_hash(ssl.hash);
     ssl.hash->next = tmp;
     return ssl.hash;
 }
 
-t_hash *     addmsg_back()
+t_hash      *add_thash_back()
 {
     t_hash *tmp;
     t_hash *node;
 
     if (!(node = (t_hash *)malloc(sizeof(t_hash))))
-		malloc_failed("Unable to malloc new t_hash in parsing addmsg_back() function\n");
+		malloc_failed("Unable to malloc new t_hash in parsing add_thash_back() function\n");
     init_t_hash(node);
     if (ssl.hash)
     {
@@ -35,56 +35,50 @@ t_hash *     addmsg_back()
 int     get_file_len(char *file)
 {
     char    buff[BUFF_SIZE];
-    int     len = 0;
     int     ret = BUFF_SIZE;
+    int     len = 0;
     int     fd;
 
     if ((fd = open(file, O_RDONLY)) == -1)
-        open_failed(" in parsing get_file_len() function\n", file);
+        open_failed("get_file_len()\n", file);
     while (ret == BUFF_SIZE)
     {
         if ((ret = read(fd, buff, BUFF_SIZE)) == -1)
-            return EXIT_FAILURE;
+            read_failed("parsing failed: get_file_len(): \n", fd);
         len += ret;
     }
     close(fd);
     return len;
 }
 
-int     file_handler(t_hash *node, char *file)
+void    file_handler(t_hash *node, char *file)
 {
     int fd;
 
-    if (!node && !(node = addmsg_back()))
-        return EXIT_FAILURE;
+    if (!node)
+        node = add_thash_back();
 
-    if (!(node->name = ft_strdup(file)))
-        return EXIT_FAILURE;
+    node->name = ft_strdup(file);
     if ((fd = open(file, O_RDONLY)) == -1)
         node->error = FILENOTFOUND;
     else
     {
         node->len = get_file_len(file);
-        node->msg = (char *)ft_memnew(node->len);
+        node->msg = ft_memnew(node->len);
 
         if (read(fd, node->msg, node->len) == -1)
-            return EXIT_FAILURE;
+            read_failed("parsing failed: file_handler(): \n", fd);
         close(fd);
     }
-    return 0;
 }
 
-int     string_handler(t_hash *node, char *av_next)
+void    string_handler(t_hash *node, char *av_next)
 {
-    if (!node && !(node = addmsg_back()))
-        return EXIT_FAILURE;
-
-    if (!(node->msg = ft_strdup(av_next)))
-        return EXIT_FAILURE;
-    node->len = ft_strlen(av_next);
-    if (!(node->name = ft_stradd_quote(av_next, node->len)))
-        return EXIT_FAILURE;
-    return 0;
+    if (!node)
+        node = add_thash_back();
+    node->msg = ft_strdup(av_next);
+    node->len = ft_strlen(node->msg);
+    node->name = ft_stradd_quote(node->msg, node->len);
 }
 
 Key_64bits  parse_keys(char *av_next)
@@ -114,10 +108,7 @@ int     param_handler(e_flags flag, char *av_next, int *i)
     if (flag & s)
         string_handler(NULL, av_next);
     else if (flag & i_)
-    {
-        if (file_handler(NULL, av_next))
-            return EXIT_FAILURE;
-    }
+        file_handler(NULL, av_next);
     else if (flag & o)
         ssl.output_file = av_next;
     else if (flag & k_des)
@@ -220,77 +211,119 @@ e_flags strToFlag(char *str)
     return 0;
 }
 
-int     hash_func_handler(char *str)
+int     hash_func_handler(char *cmd)
 {
-    if (!ft_strcmp(str, "md5"))
+    cmd = ft_lower(cmd);
+    if (!ft_strcmp(cmd, "md5"))
     {
-        ssl.command_title = "MD5";
+        ssl.command = MD5;
         ssl.command_addr = md5;
-        ssl.command_familly = MD;
+        ssl.command_title = "MD5";
     }
-    else if (!ft_strcmp(str, "sha256"))
+    else if (!ft_strcmp(cmd, "sha256"))
     {
-        ssl.command_title = "SHA256";
+        ssl.command = SHA256;
         ssl.command_addr = sha256;
-        ssl.command_familly = MD;
+        ssl.command_title = "SHA256";
     }
-    else if (!ft_strcmp(str, "base64"))
+    else if (!ft_strcmp(cmd, "base64"))
     {
-        ssl.command_title = "BASE64";
+        ssl.command = BASE64;
         ssl.command_addr = base64;
-        ssl.command_familly = CIPHER;
+        ssl.command_title = "BASE64";
     }
-    else if (!ft_strcmp(str, "des-ecb"))
+    else if (!ft_strcmp(cmd, "des-ecb"))
     {
-        ssl.command_title = "DES-ECB";
+        ssl.command = DESECB;
         ssl.command_addr = des;
-        ssl.command_familly = CIPHER;
+        ssl.command_title = "DES-ECB";
         ssl.command_data = ft_memnew(sizeof(t_des));
         ((t_des *)ssl.command_data)->mode = DESECB;
     }
-    else if (!ft_strcmp(str, "des") || !ft_strcmp(str, "des-cbc"))
+    else if (!ft_strcmp(cmd, "des") || !ft_strcmp(cmd, "des-cbc"))
     {
-        ssl.command_title = "DES-CBC";
+        ssl.command = DESCBC;
         ssl.command_addr = des;
-        ssl.command_familly = CIPHER;
+        ssl.command_title = "DES-CBC";
         ssl.command_data = ft_memnew(sizeof(t_des));
         ((t_des *)ssl.command_data)->mode = DESCBC;
     }
-    else if (!ft_strcmp(str, "isprime"))
+    else if (!ft_strcmp(cmd, "genprime"))
     {
-        ssl.command_title = "Is prime ? ";
+        ssl.command = GENPRIME;
+        ssl.command_addr = genprime;
+        ssl.command_title = "Generating a big prime number: ";
+    }
+    else if (!ft_strcmp(cmd, "isprime"))
+    {
+        ssl.command = ISPRIME;
         ssl.command_addr = isprime;
-        ssl.command_familly = STANDARD;
+        ssl.command_title = "Is that a prime number ? ";
         ssl.command_data = ft_memnew(sizeof(t_isprime));
+    }
+    else if (!ft_strcmp(cmd, "genrsa"))
+    {
+        ssl.command = GENRSA;
+        ssl.command_addr = genrsa;
+        ssl.command_title = "Generating RSA private key, 64 bit long modulus\n";
     }
     else
     {
         ft_putstderr("ft_ssl: Error: '");
-        ft_putstderr(str);
-        ft_putstderr("' is an invalid command_familly.\n\n");
-        return EXIT_FAILURE;
+        ft_putstderr(cmd);
+        ft_putstderr("' is an invalid command.\n\n");
+        free(cmd);
+        print_usage_exit();
     }
+    free(cmd);
     return 0;
 }
 
-int     stdin_handler()
+static char     *stdin_handler(char **data, int *data_len, char *msg_out, int only_one_read)
 {
-    t_hash      *node = addmsg_front();
+    /*
+        uilisateur doit renvoyer quune seule ligne
+        Mais read doit lire autant qu'il y en as
+        read renvoi pas toujours la taille max du buffer
+        ????
+    */
+    char    *msg = NULL;
     char    *tmp;
     char    buff[BUFF_SIZE];
     int     ret = BUFF_SIZE;
+    int     len = 0;
 
-    while (ret)
+    if (msg_out)
+        ft_putstderr(msg_out);
+
+    printf("stdin handler %d\n", only_one_read);
+    ft_bzero(buff, BUFF_SIZE);
+    while (ret && !(only_one_read && len != 0))                 // Work for echo
     {
-        if ((ret = read(0, buff, BUFF_SIZE)) == -1)
-            return EXIT_FAILURE;
+        if ((ret = read(STDIN, buff, BUFF_SIZE)) == -1)
+            read_failed("parsing failed: stdin_handler(): Unable to read stdin.\n", STDIN);
 
-        tmp = node->msg;
-        node->msg = ft_memjoin(tmp, node->len, buff, ret);
+        // printf("Hash(len=%d)= >%s<\n", ret, buff);
+        tmp = msg;
+        msg = ft_memjoin(tmp, len, buff, ret);
         if (tmp)
             free(tmp);
-        node->len += ret;
+        len += ret;
+        printf("%d / Hash(len=%d)= >%s<\n", only_one_read, len, msg);
     }
+    if (data)
+        *data = msg;
+    if (data_len)
+        *data_len = len;
+    return msg;
+}
+
+static void     add_thash_from_stdin()
+{
+    t_hash  *node = add_thash_front();
+    char    *tmp;
+
+    stdin_handler(&node->msg, &node->len, NULL, 0);
 
     // Pre-computing for output part
     node->stdin = 1;
@@ -298,7 +331,10 @@ int     stdin_handler()
     {
         tmp = ft_strdup(node->msg);
         if (tmp[node->len - 1] == '\n')
-            tmp[node->len - 1] = '\0'; //To remove \n, it's like 'echo -n <node->msg> | ./ft_ssl ...'
+        {
+            // printf("???????????????????????????????????????????????\n");
+            tmp[node->len - 1] = '\0'; // Remove '\n' for name displaying
+        }
 
         // q will not print name, but when q, r and p are True, stdin content without quote is required. Yes, I know, it's sucks
         if (ssl.flags & q)
@@ -311,7 +347,6 @@ int     stdin_handler()
     }
     else
         node->name = ft_strdup("stdin");
-    return node->name ? 0 : EXIT_FAILURE;
 }
 
 void    flags_conflicts()
@@ -338,32 +373,40 @@ void    flags_conflicts()
 int     parsing(int ac, char **av)
 {
     e_flags flag;
-    int     ret = 0;
+    char    *cmd;
+    int     cmd_len;
+    int     i = 1;
 
-    if (ac == 1 || hash_func_handler(ft_lower(av[1])))
-        print_usage_exit();
+    if (ac == 1)
+    {
+        i = 0;
+        stdin_handler(&cmd, &cmd_len, "Command> ", 1);
+        if (cmd[cmd_len - 1] == '\n')
+            cmd[cmd_len-- - 1] = '\0';      // To remove '\n' at the end from user validation ('enter' key) in command line
+    }
+    else
+        cmd = ft_strdup(av[1]);
+    hash_func_handler(cmd);
 
-    if (ac > 2)
-        for (int i = 2; i < ac; i++)
+    while (++i < ac)
+    {
+        // printf("arg %d: %s\n", i, av[i]);
+        if (av[i][0] == '-')
         {
-            if (av[i][0] == '-')
-            {
-                flag = strToFlag(av[i]);
-                // printf("Flag %d\n", flag);
-                if (flag & AVPARAM)
-                    ret = param_handler(flag, i + 1 < ac ? av[i + 1] : NULL, &i);
-                ssl.flags += ssl.flags & flag ? 0 : flag;
-            }
-            else
-                ret = file_handler(NULL, av[i]);
-            if (ret)
-                return EXIT_FAILURE;
+            flag = strToFlag(av[i]);
+            if (flag & AVPARAM)
+                param_handler(flag, i + 1 < ac ? av[i + 1] : NULL, &i);
+            ssl.flags += ssl.flags & flag ? 0 : flag;
         }
+        else
+            file_handler(NULL, av[i]);
+    }
 
+    // Only if command needs an input
     // Read on stdin if no hash found or p flags is provided
-    if (ssl.flags & p || !ssl.hash)
-        if (stdin_handler())
-            return EXIT_FAILURE;        
+    if (ssl.command & THASHNEED_COMMANDS &&\
+        (ssl.flags & p || !ssl.hash))
+        add_thash_from_stdin();
 
     flags_conflicts();
     return 0;
