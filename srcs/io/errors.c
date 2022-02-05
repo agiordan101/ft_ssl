@@ -44,7 +44,7 @@ void    malloc_failed(char *errormsg)
 void    pbkdf2_iter_error(int p)
 {
     ft_putstderr("ft_ssl: ");
-    ft_putstderr(ssl.command_title);
+    ft_putstderr(ssl.command.command_title);
     ft_putstderr(": Non-positive number \"");
     ft_putnbr(STDERR, p);
     ft_putstderr("\" for -iter\n");
@@ -54,7 +54,7 @@ void    pbkdf2_iter_error(int p)
 void    isprime_prob_error(int p)
 {
     ft_putstderr("ft_ssl: ");
-    ft_putstderr(ssl.command_title);
+    ft_putstderr(ssl.command.command_title);
     ft_putstderr(": flag -prob argument \"");
     ft_putnbr(STDERR, p);
     ft_putstderr("\" does not respect probabilities conditions: 0 < p <= 100\n");
@@ -64,7 +64,7 @@ void    isprime_prob_error(int p)
 void    file_not_found(char *file)
 {
     ft_putstderr("ft_ssl: ");
-    ft_putstderr(ssl.command_title);
+    ft_putstderr(ssl.command.command_title);
     ft_putstderr(": ");
     ft_putstderr(file);
     ft_putstderr(": No such file or directory\n");
@@ -73,11 +73,11 @@ void    file_not_found(char *file)
 
 void    unrecognized_flag(char *flag)
 {
-    ft_putstderr(ssl.command_title);
+    ft_putstderr(ssl.command.command_title);
     ft_putstderr(": Unrecognized flag ");
     ft_putstderr(flag);
     ft_putstderr("\n");
-    ft_putstderr(ssl.command_title);
+    ft_putstderr(ssl.command.command_title);
     ft_putstderr(": Use -help for summary.\n");
     freexit(EXIT_SUCCESS);
 }

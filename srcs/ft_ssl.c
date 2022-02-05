@@ -30,8 +30,8 @@ char    *ask_password()
     {
         char *secondmsg_1 = "Verifying - enter ";
         char *msg_2 = " encryption password:";
-        char *firstmsg = ft_strinsert(firstmsg_1, ssl.command_title, msg_2);
-        char *secondmsg = ft_strinsert(secondmsg_1, ssl.command_title, msg_2);
+        char *firstmsg = ft_strinsert(firstmsg_1, ssl.command.command_title, msg_2);
+        char *secondmsg = ft_strinsert(secondmsg_1, ssl.command.command_title, msg_2);
 
         char *password2 = ft_strdup(getpass(firstmsg));
         password = getpass(secondmsg);
@@ -49,21 +49,26 @@ char    *ask_password()
     else
     {
         char *msg_2 = " decryption password:";
-        char *msg = ft_strinsert(firstmsg_1, ssl.command_title, msg_2);   
+        char *msg = ft_strinsert(firstmsg_1, ssl.command.command_title, msg_2);   
         password = getpass(msg);
         free(msg);
     }
     return password;
 }
 
+void    t_command_free(t_command *cmd)
+{
+    if (cmd->command_addr == des && ((t_des *)cmd->command_data)->password)
+        free(((t_des *)cmd->command_data)->password);
+    if (cmd->command_data)
+        free(cmd->command_data);
+}
+
 void    ssl_free()
 {
-    if (ssl.command_data)
-    {
-        if (ssl.command_addr == des && ((t_des *)ssl.command_data)->password)
-            free(((t_des *)ssl.command_data)->password);
-        free(ssl.command_data);
-    }
+    t_command_free(&ssl.dec_i_cmd);
+    t_command_free(&ssl.command);
+    t_command_free(&ssl.enc_o_cmd);
 
     t_hash_free(ssl.hash);
 
@@ -86,9 +91,6 @@ int     main(int ac, char **av)
     if ((ret = parsing(ac, av)))
         freexit(ret);
 
-    if (ssl.flags & help)
-        print_global_usage();
-
     // Set output file descriptor (STDOUT as default)
     if (ssl.flags & o)
         if ((ssl.fd_out = open(ssl.output_file, O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU | S_IRWXG | S_IRWXO)) == -1)
@@ -96,13 +98,13 @@ int     main(int ac, char **av)
 
     // Base64 decode input
     if (ssl.flags & ai)
-        t_hash_base64_decode_inputs(ssl.hash);
+        t_hash_decode_inputs(ssl.hash);
 
     t_hash_hashing(ssl.hash);
 
     // Base64 encode output (Do not encode if command_familly is already base64 in encryption mode)
-    if (ssl.flags & ao && !(ssl.command_addr == base64 && ssl.flags & e))
-        t_hash_base64_encode_output(ssl.hash);
+    if (ssl.flags & ao && !(ssl.command.command_addr == base64 && ssl.flags & e))
+        t_hash_encode_output(ssl.hash);
 
     t_hash_output(ssl.hash);
 

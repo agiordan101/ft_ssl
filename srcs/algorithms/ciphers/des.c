@@ -157,10 +157,10 @@ static void             key_transformation(t_des *des)
     // exit(0);
 }
 
-static void             init_vars(t_des *des, Mem_8bits *plaintext)
+static void             init_vars(t_des *des, Mem_8bits *plaintext, e_flags flags)
 {
     if (!des->mode)
-        des->mode = ssl.command == DESECB ? DESECB : DESCBC;
+        des->mode = flags & DESECB ? DESECB : DESCBC;
 
     // Vector is only for CBC mode, ft_ssl failed if it's not provided
     if (des->vector)
@@ -494,7 +494,7 @@ Mem_8bits               *des(void *command_data, Mem_8bits **plaintext, Long_64b
     int         magic_number_case = magic_number_in(des_data, *plaintext);
 
     // Parse and initialize data
-    init_vars(des_data, *plaintext);
+    init_vars(des_data, *plaintext, way);
     if (way & P_des)
         des_P_flag_output(des_data);
 

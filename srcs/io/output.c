@@ -39,7 +39,7 @@ void    hash_8bits_output(t_hash *p)
 
     // 64-bytes blocs output is only for base64 format without -A flag
     if (~ssl.flags & A &&\
-        (ssl.flags & ao || (ssl.command_addr == base64 && ssl.flags & e)))
+        (ssl.flags & ao || (ssl.command.command_addr == base64 && ssl.flags & e)))
         hash_64bytesbloc_output(p);
     else
     {
@@ -55,14 +55,14 @@ void    hash_8bits_output(t_hash *p)
 
 void    hash_output(t_hash *hash)
 {
-    if (ssl.command & ~MD || ssl.flags & ao) //base64 command_familly  OR  des flag d  OR  a | ao flags (base64 output format)
+    if (ssl.command.command & ~MD || ssl.flags & ao) //base64 command_familly  OR  des flag d  OR  a | ao flags (base64 output format)
         hash_8bits_output(hash);
     else
         hash_32bits_output(hash);
     // Since isprime was added
-    // if (ssl.command == CIPHER || ssl.flags & ao) //base64 command_familly  OR  des flag d  OR  a | ao flags (base64 output format)
+    // if (ssl.command.command == CIPHER || ssl.flags & ao) //base64 command_familly  OR  des flag d  OR  a | ao flags (base64 output format)
     //     hash_8bits_output(hash);
-    // else if (ssl.command == MD)
+    // else if (ssl.command.command == MD)
     //     hash_32bits_output(hash);
 }
 
@@ -71,7 +71,7 @@ void    hash_output(t_hash *hash)
 
 void    genprime_output(t_hash *hash)
 {
-    ft_putstr(ssl.command_title);
+    ft_putstr(ssl.command.command_title);
     hash_output(hash);
     // ft_putstr(hash->hash);
 }
@@ -80,7 +80,7 @@ void    genprime_output(t_hash *hash)
 
 void    classic_output(t_hash *hash)
 {
-    ft_putstr(ssl.command_title);
+    ft_putstr(ssl.command.command_title);
     ft_putstr("(");
     ft_putstr(hash->name);
     ft_putstr(")= ");
@@ -115,11 +115,11 @@ void    output_hash_based_on_flags(t_hash *hash)
         stdin_quiet_output(hash);
     else if (ssl.flags & q)
         hash_output(hash);
-    else if (hash->stdin && ssl.command & MD)
+    else if (hash->stdin && ssl.command.command & MD)
         stdin_output(hash);
     else if (ssl.flags & r)
         reversed_output(hash);
-    else if (ssl.command & GENPRIME)
+    else if (ssl.command.command & GENPRIME)
         genprime_output(hash);
     else
         classic_output(hash);
@@ -131,10 +131,10 @@ void    output(t_hash *hash)
 {
     if (hash->error == FILENOTFOUND)
         file_not_found(hash->name);
-    // else if (ssl.command & THASHNEED_COMMANDS)
+    // else if (ssl.command.command & THASHNEED_COMMANDS)
     else
         output_hash_based_on_flags(hash);
 
-    if (ssl.command & ~CIPHERS)          // Very bad code
+    if (ssl.command.command & ~CIPHERS)          // Very bad code
         ft_putstr("\n");
 }

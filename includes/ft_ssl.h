@@ -34,26 +34,6 @@ typedef unsigned long   Long_64bits;
 # define HEXABASE       "0123456789abcdef"
 
 
-//  COMMANDS --------------------------------------------------------
-
-# define N_COMMANDS 7
-
-typedef enum    command {
-    MD5=1<<1, SHA256=1<<2,
-    BASE64=1, DESECB=1<<3, DESCBC=1<<4,
-    GENPRIME=1<<5, ISPRIME=1<<6,
-    // GENRSA=1<<7, RSA=1<<8, RSAUTL=1<<9
-}               e_command;
-# define MD                     (MD5 + SHA256)
-# define DES                    (DESECB + DESCBC)
-# define CIPHERS                (BASE64 + DES)
-# define PRIMES                 (GENPRIME + ISPRIME)
-// # define STANDARDS              (GENRSA)
-
-# define THASHNEED_COMMANDS     (MD + CIPHERS + ISPRIME)
-# define EXECONES_COMMANDS      (GENPRIME)
-
-
 //  FLAGS --------------------------------------------------------
 
 typedef enum    flags {
@@ -61,6 +41,7 @@ typedef enum    flags {
     i_=1<<1, o=1<<2,
     a=1<<4, ai=1<<5, ao=1<<6, A=1<<7,
     q=1<<3, r=1<<9,
+    deci=1<<25, enco=1<<26,
     help=1<<19,
 
     // All hashing commands
@@ -70,17 +51,22 @@ typedef enum    flags {
     d=1<<11, e=1<<12,
 
     // Only des
+    ecb=1<<23, cbc=1<<24,
     k_des=1<<13, p_des=1<<14, s_des=1<<15, v_des=1<<16,
     P_des=1<<17, nopad=1<<18, pbkdf2_iter=1<<20,
 
     // Only isprime command
     prob=1<<21,
-}               e_flags;
-# define AVFLAGS        (p + q + r + d + e + A + ai + ao + P_des + nopad + help)
-# define AVPARAM        (s + i_ + o + k_des + p_des + s_des + v_des + pbkdf2_iter + prob)
 
-# define GLOBAL_FLAGS   (i_ + o + a + ai + ao + A + q + r + help)
+    // Only genrsa command
+    des_=1<<22,
+}               e_flags;
+# define AVFLAGS        (help + p + q + r + d + e + A + ai + ao + P_des + nopad + des_ + ecb + cbc)
+# define AVPARAM        (s + i_ + o + deci + enco + k_des + p_des + s_des + v_des + pbkdf2_iter + prob)
+
+# define GLOBAL_FLAGS   (i_ + o + a + ai + ao + A + q + r + help + deci + enco)
 # define DATASTRINPUT_FLAGS  (s + p)
+# define DES_FLAGS      (ecb + cbc + k_des + p_des + s_des + v_des + P_des + nopad + pbkdf2_iter)
 
 
 //  COMMAND & FLAGS relationship --------------------------------------------------------
@@ -88,11 +74,40 @@ typedef enum    flags {
 typedef enum    command_flags {
     MD_flags=       GLOBAL_FLAGS + DATASTRINPUT_FLAGS,
     BASE64_flags=   GLOBAL_FLAGS + DATASTRINPUT_FLAGS + e + d,
-    DES_flags=      GLOBAL_FLAGS + DATASTRINPUT_FLAGS + e + d +\
-        k_des + p_des + s_des + v_des + P_des + nopad + pbkdf2_iter,
+    DES_flags=      GLOBAL_FLAGS + DATASTRINPUT_FLAGS + e + d + DES_FLAGS,
     GENPRIME_flags= GLOBAL_FLAGS,
     ISPRIME_flags=  GLOBAL_FLAGS + DATASTRINPUT_FLAGS,
+    GENRSA_flags= GLOBAL_FLAGS + des_ + DES_FLAGS,
 }               e_command_flags;
+
+
+//  COMMANDS --------------------------------------------------------
+
+# define N_COMMANDS 8
+
+typedef enum    command {
+    MD5=1<<1, SHA256=1<<2,
+    BASE64=1, DESECB=1<<3, DESCBC=1<<4,
+    GENPRIME=1<<5, ISPRIME=1<<6,
+    GENRSA=1<<7,
+    // RSA=1<<8, RSAUTL=1<<9
+}               e_command;
+# define MD                     (MD5 + SHA256)
+# define DES                    (DESECB + DESCBC)
+# define CIPHERS                (BASE64 + DES)
+# define PRIMES                 (GENPRIME + ISPRIME)
+# define STANDARDS              (GENRSA)
+
+# define THASHNEED_COMMANDS     (MD + CIPHERS + ISPRIME)
+# define EXECONES_COMMANDS      (GENPRIME + GENRSA)
+
+typedef struct  s_command {
+    e_command       command;
+    char            *command_title;
+    Mem_8bits       *(*command_addr)(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
+    void            *command_data;
+    e_command_flags command_flags;
+}               t_command;
 
 
 //  Others ft_ssl Data ----------------------------------------
@@ -118,6 +133,7 @@ typedef struct  s_hash
 
 char        *ask_password();
 t_hash *    add_thash_front();
+void        command_handler(t_command *command, char *cmd);
 int         parsing(int ac, char **av);
 void        output(t_hash *hash);
 
@@ -367,13 +383,22 @@ Mem_8bits   *genrsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByt
 
 typedef struct  s_ssl
 {
-    e_command       command;
-    char            *command_title;
-    Mem_8bits       *(*command_addr)(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
-    void            *command_data;
-    e_command_flags command_flags;
+    // e_command       command;
+    // char            *command_title;
+    // Mem_8bits       *(*command_addr)(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
+    // void            *command_data;
+    // e_command_flags command_flags;
+    t_command       dec_i_cmd;
+    t_command       command;
+    t_command       enc_o_cmd;
+
+    t_des           des_flagsdata;
 
     e_flags         flags;
+    // Key_64bits      key_arg;
+    // Key_64bits      salt_arg;
+    // Key_64bits      vector_arg;
+    // Mem_8bits       *pass_arg;
 
     t_hash      *hash;
     char        *output_file;
@@ -386,8 +411,8 @@ extern t_ssl    ssl;
 
 void    init_t_hash(t_hash *hash);
 void    t_hash_free(t_hash *hash);
-void    t_hash_base64_decode_inputs(t_hash *hash);
-void    t_hash_base64_encode_output(t_hash *hash);
+void    t_hash_decode_inputs(t_hash *hash);
+void    t_hash_encode_output(t_hash *hash);
 void    t_hash_hashing(t_hash *hash);
 void    t_hash_output(t_hash *hash);
 

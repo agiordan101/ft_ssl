@@ -111,27 +111,31 @@ int     param_handler(e_flags flag, char *av_next, int *i)
         file_handler(NULL, av_next);
     else if (flag & o)
         ssl.output_file = av_next;
+    else if (flag & deci)
+        command_handler(&ssl.dec_i_cmd, av_next);
+    else if (flag & enco)
+        command_handler(&ssl.enc_o_cmd, av_next);
     else if (flag & k_des)
-        ((t_des *)ssl.command_data)->key = parse_keys(av_next);
+        ssl.des_flagsdata.key = parse_keys(av_next);
     else if (flag & s_des)
-        ((t_des *)ssl.command_data)->salt = parse_keys(av_next);
+        ssl.des_flagsdata.salt = parse_keys(av_next);
     else if (flag & v_des)
-        ((t_des *)ssl.command_data)->vector = parse_keys(av_next);
+        ssl.des_flagsdata.vector = parse_keys(av_next);
     else if (flag & p_des)
-        ((t_des *)ssl.command_data)->password = (Mem_8bits *)ft_strdup(av_next);
+        ssl.des_flagsdata.password = (Mem_8bits *)ft_strdup(av_next);
     else if (flag & pbkdf2_iter)
     {
         int p = ft_atoi(av_next);
         if (p <= 0)
             pbkdf2_iter_error(p);
-        ((t_des *)ssl.command_data)->pbkdf2_iter = p;
+        ssl.des_flagsdata.pbkdf2_iter = p;
     }
     else if (flag & prob)
     {
         int p = ft_atoi(av_next);
         if (p <= 0 || 100 < p)
             isprime_prob_error(p);
-        ((t_isprime *)ssl.command_data)->prob_requested = (p == 100 ? PROBMIN_ISPRIME : 1 - (float)p / 100);
+        ((t_isprime *)ssl.command.command_data)->prob_requested = (p == 100 ? PROBMIN_ISPRIME : 1 - (float)p / 100);
     }
     (*i)++;
     return 0;
@@ -165,6 +169,10 @@ e_flags     strToFlag(char *str)
         return ai;
     if (!ft_strcmp(str, "-ao"))
         return ao;
+    if (!ft_strcmp(str, "-deci"))
+        return deci;
+    if (!ft_strcmp(str, "-enco"))
+        return enco;
     if (!ft_strcmp(str, "-A"))
         return A;
     if (!ft_strcmp(str, "-q"))
@@ -178,22 +186,29 @@ e_flags     strToFlag(char *str)
     if (!ft_strcmp(str, "-help"))
         return help;
 
-    if (ssl.command_addr == des)
+    if (!ft_strcmp(str, "des"))
+        return des_;
+    if (!ft_strcmp(str, "ecb"))
+        return ecb;
+    if (!ft_strcmp(str, "cbc"))
+        return cbc;
+    if (!ft_strcmp(str, "-P"))
+        return P_des;
+    if (!ft_strcmp(str, "-k"))
+        return k_des;
+    if (!ft_strcmp(str, "-v"))
+        return v_des;
+    if (!ft_strcmp(str, "-nopad"))
+        return nopad;
+    if (!ft_strcmp(str, "-iter"))
+        return pbkdf2_iter;
+
+    if (ssl.command.command_addr == des)
     {
         if (!ft_strcmp(str, "-s"))
             return s_des;
         if (!ft_strcmp(str, "-p"))
             return p_des;
-        if (!ft_strcmp(str, "-P"))
-            return P_des;
-        if (!ft_strcmp(str, "-k"))
-            return k_des;
-        if (!ft_strcmp(str, "-v"))
-            return v_des;
-        if (!ft_strcmp(str, "-nopad"))
-            return nopad;
-        if (!ft_strcmp(str, "-iter"))
-            return pbkdf2_iter;
     }
     else
     {
@@ -203,7 +218,7 @@ e_flags     strToFlag(char *str)
             return p;
     }
 
-    if (ssl.command_addr == isprime)
+    if (ssl.command.command_addr == isprime)
     {
         if (!ft_strcmp(str, "-prob"))
             return prob;
@@ -223,8 +238,8 @@ void        flags_handler(int ac, char **av, int i)
             flag = strToFlag(av[i]);
 
             if (flag & help)
-                print_command_usage(ssl.command);
-            else if (flag & ssl.command_flags)
+                print_command_usage(ssl.command.command);
+            else if (flag & (ssl.dec_i_cmd.command_flags | ssl.command.command_flags | ssl.enc_o_cmd.command_flags))
             {
                 if (flag & AVPARAM)
                     param_handler(flag, i + 1 < ac ? av[i + 1] : NULL, &i);
@@ -238,26 +253,27 @@ void        flags_handler(int ac, char **av, int i)
     }
 }
 
-void        hash_func_handler(char *cmd)
+void        command_handler(t_command *command, char *cmd)
 {
     static char         *commands_name[N_COMMANDS] = {
-        "md5", "sha256", "base64", "des-ecb", "des-cbc", "genprime", "isprime"
+        "md5", "sha256", "base64", "des-ecb", "des-cbc", "genprime", "isprime", "genrsa"
     };
     static e_command    commands[N_COMMANDS] = {
-        MD5, SHA256, BASE64, DESECB, DESCBC, GENPRIME, ISPRIME
+        MD5, SHA256, BASE64, DESECB, DESCBC, GENPRIME, ISPRIME, GENRSA
     };
     static void         *commands_addr[N_COMMANDS] = {
-        md5, sha256, base64, des, des, genprime, isprime
+        md5, sha256, base64, des, des, genprime, isprime, genrsa
     };
     static char         *commands_title[N_COMMANDS] = {
         "MD5", "SHA256", "BASE64", "DESECB", "DESCBC",
-        "Generating a big prime number: ", "Is that a prime number ? "
+        "Generating a big prime number: ", "Is that a prime number ? ",
+        "Generating RSA private key, 64-bits long modulus"
     };
     static unsigned long commands_dataSz[N_COMMANDS] = {
-        0, 0, 0, sizeof(t_des), sizeof(t_des), 0, sizeof(t_isprime),
+        0, 0, 0, sizeof(t_des), sizeof(t_des), 0, sizeof(t_isprime), sizeof(t_des)
     };
     static e_command    commands_flags[N_COMMANDS] = {
-        MD_flags, MD_flags, BASE64_flags, DES_flags, DES_flags, GENPRIME_flags, ISPRIME_flags
+        MD_flags, MD_flags, BASE64_flags, DES_flags, DES_flags, GENPRIME_flags, ISPRIME_flags, GENRSA_flags
     };
     int                 cmd_i = -1;
 
@@ -281,14 +297,14 @@ void        hash_func_handler(char *cmd)
             print_global_usage();
         }
     }
-    ssl.command = commands[cmd_i];
-    ssl.command_addr = commands_addr[cmd_i];
-    ssl.command_title = commands_title[cmd_i];
-    ssl.command_flags = commands_flags[cmd_i];
+    command->command = commands[cmd_i];
+    command->command_addr = commands_addr[cmd_i];
+    command->command_title = commands_title[cmd_i];
+    command->command_flags = commands_flags[cmd_i];
     if (commands_dataSz[cmd_i])
-        ssl.command_data = ft_memnew(commands_dataSz[cmd_i]);
+        command->command_data = ft_memnew(commands_dataSz[cmd_i]);
     free(cmd);
-
+    printf("command= %s\n", command->command_title);
 }
 
 static char     *stdin_handler(char **data, int *data_len, char *msg_out, int only_one_read)
@@ -380,6 +396,14 @@ void    flags_conflicts()
     }
     else
         ssl.flags += e;
+
+    // DES decryption input part, DES command and DES encryption output part use ssl.des_flagsdata
+    if (ssl.dec_i_cmd.command_addr == des)
+        ft_memcpy(&ssl.dec_i_cmd.command_data, &ssl.des_flagsdata, sizeof(t_des));
+    if (ssl.command.command_addr == des)
+        ft_memcpy(&ssl.command.command_data, &ssl.des_flagsdata, sizeof(t_des));
+    if (ssl.enc_o_cmd.command_addr == des)
+        ft_memcpy(&ssl.enc_o_cmd.command_data, &ssl.des_flagsdata, sizeof(t_des));
 }
 
 int     parsing(int ac, char **av)
@@ -399,12 +423,12 @@ int     parsing(int ac, char **av)
     else
         cmd = ft_strdup(av[1]);
 
-    hash_func_handler(cmd);
+    command_handler(&ssl.command, cmd);
     flags_handler(ac, av, i);
 
     // Only if command needs an input
     // Read on stdin if no hash found or p flags is provided
-    if (ssl.command & THASHNEED_COMMANDS &&\
+    if (ssl.command.command & THASHNEED_COMMANDS &&\
         (ssl.flags & p || !ssl.hash))
         add_thash_from_stdin();
 

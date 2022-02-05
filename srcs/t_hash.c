@@ -23,31 +23,51 @@ inline void t_hash_free(t_hash *hash)
     }
 }
 
-inline void t_hash_base64_decode_inputs(t_hash *hash)
+inline void t_hash_decode_inputs(t_hash *hash)
 {
     char    *tmp;
+    e_flags flags = ssl.flags & e ? ssl.flags - e : ssl.flags;
 
     while (hash)
     {
         // printf("Hash(len=%d)= >%s<\n", hash->len, hash->msg);
         tmp = hash->msg;
-        hash->msg = (char *)base64(NULL, (Mem_8bits **)&hash->msg, hash->len, (Long_64bits *)&hash->len, d);
+        // hash->msg = (char *)base64(NULL, (Mem_8bits **)&hash->msg, hash->len, (Long_64bits *)&hash->len, d);
+        
+        if (!hash->error)
+            hash->msg = ssl.dec_i_cmd.command_addr(
+                ssl.dec_i_cmd.command_data,
+                (Mem_8bits **)&hash->msg,
+                hash->len,
+                (Long_64bits *)&hash->len,
+                ssl.flags
+            );
 
         free(tmp);
         hash = hash->next;
     }
 }
 
-inline void t_hash_base64_encode_output(t_hash *hash)
+inline void t_hash_encode_output(t_hash *hash)
 {
     Mem_8bits   *tmp;
+    e_flags     flags = ssl.flags & d ? ssl.flags - d : ssl.flags;
 
     while (hash)
     {
         if (!hash->error)
         {
             tmp = hash->hash;
-            hash->hash = base64(NULL, &hash->hash, hash->hashByteSz, (Long_64bits *)&hash->hashByteSz, e);
+            // hash->hash = base64(NULL, &hash->hash, hash->hashByteSz, (Long_64bits *)&hash->hashByteSz, e);
+            
+            if (!hash->error)
+                hash->hash = ssl.enc_o_cmd.command_addr(
+                    ssl.enc_o_cmd.command_data,
+                    (Mem_8bits **)&hash->hash,
+                    hash->hashByteSz,
+                    (Long_64bits *)&hash->hashByteSz,
+                    flags
+                );
             free(tmp);
         }
         hash = hash->next;
@@ -57,7 +77,7 @@ inline void t_hash_base64_encode_output(t_hash *hash)
 inline void t_hash_hashing(t_hash *hash)
 {
     // EXECONES_COMMANDS commands doesn't need t_hash / any data input. Only one t_hash for printing
-    if (ssl.command & EXECONES_COMMANDS)
+    if (ssl.command.command & EXECONES_COMMANDS)
     {
         if (hash)
         {
@@ -71,8 +91,8 @@ inline void t_hash_hashing(t_hash *hash)
     while (hash)
     {
         if (!hash->error)
-            hash->hash = ssl.command_addr(
-                ssl.command_data,
+            hash->hash = ssl.command.command_addr(
+                ssl.command.command_data,
                 (Mem_8bits **)&hash->msg,
                 hash->len,
                 (Long_64bits *)&hash->hashByteSz,

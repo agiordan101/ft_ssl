@@ -168,30 +168,26 @@ static int  first_primes_multiple(Long_64bits p)
 Long_64bits prime_generator()
 {
     /*
-        Pick a number between
+        Generate big 64-bits random prime number.
     */
     Long_64bits p = LONG64_LEFTBITMASK | ulrandom();
 
     while (first_primes_multiple(p) ||\
             !miller_rabin_primality_test(p, PROBMIN_ISPRIME))
-    {
         p = LONG64_LEFTBITMASK | ulrandom();
-        // printf("rand & mask=\t%lu\n", p);
-    }
     return p;
 }
 
 Mem_8bits   *genprime(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way)
 {
     /*
-        "Wrapper" for prime_generator() function to compute genprime command"
+        "Wrapper" for prime_generator() function to compute genprime command
     */
     Long_64bits p = prime_generator();
     // printf("p = %lu\t(len=%d)\n", p, ft_unbrlen(p));
 
     Mem_8bits   *prime = ft_ulltoa(p);
     // printf("prime = %s\n", prime);
-    // Mem_8bits   *prime = ft_ulltoa(prime_generator());
 
     *hashByteSz = ft_strlen(prime);
     (void)command_data; // No data pass in needed
