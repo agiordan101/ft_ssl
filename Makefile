@@ -10,10 +10,11 @@ INCS		=	$(addprefix $(INC_PATH), $(INCLUDES))
 SRC_PATH	=	./srcs/
 SRC			=	$(NAME).c \
 				t_hash.c \
-				io/output.c \
-				io/errors.c \
 				io/parsing.c \
 				io/padding.c \
+				io/usages.c \
+				io/errors.c \
+				io/output.c \
 				io/verbose.c \
 				utils/libft.c \
 				calculations/maths.c \

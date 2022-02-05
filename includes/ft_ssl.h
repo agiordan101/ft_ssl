@@ -16,10 +16,6 @@
 # define    BIGENDIAN      0
 # define    LITTLEENDIAN   1
 
-/*
-    ft_ssl Data --------------------------------------
-*/
-
 typedef unsigned char   Mem_8bits;
 typedef unsigned int    Word_32bits;
 typedef unsigned long   Long_64bits;
@@ -38,14 +34,19 @@ typedef unsigned long   Long_64bits;
 # define HEXABASE       "0123456789abcdef"
 
 
+//  COMMANDS --------------------------------------------------------
+
+# define N_COMMANDS 7
+
 typedef enum    command {
     MD5=1<<1, SHA256=1<<2,
     BASE64=1, DESECB=1<<3, DESCBC=1<<4,
     GENPRIME=1<<5, ISPRIME=1<<6,
-    GENRSA=1<<7, RSA=1<<8, RSAUTL=1<<9
+    // GENRSA=1<<7, RSA=1<<8, RSAUTL=1<<9
 }               e_command;
 # define MD                     (MD5 + SHA256)
-# define CIPHERS                (BASE64 + DESECB + DESCBC)
+# define DES                    (DESECB + DESCBC)
+# define CIPHERS                (BASE64 + DES)
 # define PRIMES                 (GENPRIME + ISPRIME)
 // # define STANDARDS              (GENRSA)
 
@@ -53,25 +54,48 @@ typedef enum    command {
 # define EXECONES_COMMANDS      (GENPRIME)
 
 
+//  FLAGS --------------------------------------------------------
+
 typedef enum    flags {
-    i_=1<<1, o=1<<2, s=1<<10, p=1<<8,
+    // Global flags
+    i_=1<<1, o=1<<2,
     a=1<<4, ai=1<<5, ao=1<<6, A=1<<7,
     q=1<<3, r=1<<9,
     help=1<<19,
 
-    // Only Cypher
+    // All hashing commands
+    s=1<<10, p=1<<8,
+    
+    // Encyption & Decryption commands
     d=1<<11, e=1<<12,
-        // Only des
-        k_des=1<<13, p_des=1<<14, s_des=1<<15, v_des=1<<16,
-        P_des=1<<17, nopad=1<<18, pbkdf2_iter=1<<20,
+
+    // Only des
+    k_des=1<<13, p_des=1<<14, s_des=1<<15, v_des=1<<16,
+    P_des=1<<17, nopad=1<<18, pbkdf2_iter=1<<20,
 
     // Only isprime command
     prob=1<<21,
 }               e_flags;
 # define AVFLAGS        (p + q + r + d + e + A + ai + ao + P_des + nopad + help)
 # define AVPARAM        (s + i_ + o + k_des + p_des + s_des + v_des + pbkdf2_iter + prob)
-// # define N_FLAGS        21
 
+# define GLOBAL_FLAGS   (i_ + o + a + ai + ao + A + q + r + help)
+# define DATASTRINPUT_FLAGS  (s + p)
+
+
+//  COMMAND & FLAGS relationship --------------------------------------------------------
+
+typedef enum    command_flags {
+    MD_flags=       GLOBAL_FLAGS + DATASTRINPUT_FLAGS,
+    BASE64_flags=   GLOBAL_FLAGS + DATASTRINPUT_FLAGS + e + d,
+    DES_flags=      GLOBAL_FLAGS + DATASTRINPUT_FLAGS + e + d +\
+        k_des + p_des + s_des + v_des + P_des + nopad + pbkdf2_iter,
+    GENPRIME_flags= GLOBAL_FLAGS,
+    ISPRIME_flags=  GLOBAL_FLAGS + DATASTRINPUT_FLAGS,
+}               e_command_flags;
+
+
+//  Others ft_ssl Data ----------------------------------------
 
 typedef enum    error {
     FILENOTFOUND = 1 << 1,
@@ -97,7 +121,8 @@ t_hash *    add_thash_front();
 int         parsing(int ac, char **av);
 void        output(t_hash *hash);
 
-void        print_usage_exit();
+void        print_global_usage();
+void        print_command_usage(e_command cmd);
 void        freexit(int failure);
 
 void        open_failed(char *errormsg, char *file);
@@ -108,6 +133,7 @@ void        malloc_failed(char *errormsg);
 void        file_not_found(char *file);
 void        pbkdf2_iter_error();
 void        isprime_prob_error(int p);
+void        unrecognized_flag(char *flag);
 
 
 /*
@@ -341,12 +367,13 @@ Mem_8bits   *genrsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByt
 
 typedef struct  s_ssl
 {
-    e_command   command;
-    char        *command_title;
-    Mem_8bits   *(*command_addr)(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
-    void        *command_data;
+    e_command       command;
+    char            *command_title;
+    Mem_8bits       *(*command_addr)(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
+    void            *command_data;
+    e_command_flags command_flags;
 
-    e_flags     flags;
+    e_flags         flags;
 
     t_hash      *hash;
     char        *output_file;

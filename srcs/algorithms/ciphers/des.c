@@ -159,6 +159,9 @@ static void             key_transformation(t_des *des)
 
 static void             init_vars(t_des *des, Mem_8bits *plaintext)
 {
+    if (!des->mode)
+        des->mode = ssl.command == DESECB ? DESECB : DESCBC;
+
     // Vector is only for CBC mode, ft_ssl failed if it's not provided
     if (des->vector)
     {

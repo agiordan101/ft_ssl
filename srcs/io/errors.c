@@ -70,3 +70,14 @@ void    file_not_found(char *file)
     ft_putstderr(": No such file or directory\n");
     freexit(EXIT_SUCCESS);
 }
+
+void    unrecognized_flag(char *flag)
+{
+    ft_putstderr(ssl.command_title);
+    ft_putstderr(": Unrecognized flag ");
+    ft_putstderr(flag);
+    ft_putstderr("\n");
+    ft_putstderr(ssl.command_title);
+    ft_putstderr(": Use -help for summary.\n");
+    freexit(EXIT_SUCCESS);
+}

@@ -7,10 +7,10 @@
 
     To do :
 
+        Faire un enum <COMMAND>_flags, avec chaque nombre la liste des flags possible pour cette command
         //Leaks ft_stradd_quote ?
         inline keywords pour les prime peut etre et le dossier calculations
         INTMAXLESS1 enlever le pow
-        Faire la différence entre les command_familly et les commands (On peut pas comparer les adresses car plusieurs fonctions existe pour la meme commande)
         Enlever les protection useless dans le parsing
         Gerer les \n dans l'output (pas dans les ft hash)
         Afficher l'usage de la command_familly passé
@@ -87,7 +87,7 @@ int     main(int ac, char **av)
         freexit(ret);
 
     if (ssl.flags & help)
-        print_usage_exit();
+        print_global_usage();
 
     // Set output file descriptor (STDOUT as default)
     if (ssl.flags & o)

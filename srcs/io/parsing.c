@@ -153,7 +153,7 @@ int     param_handler(e_flags flag, char *av_next, int *i)
 //     }
 // }
 
-e_flags strToFlag(char *str)
+e_flags     strToFlag(char *str)
 {
     if (!ft_strcmp(str, "-i"))
         return i_;
@@ -211,72 +211,84 @@ e_flags strToFlag(char *str)
     return 0;
 }
 
-int     hash_func_handler(char *cmd)
+void        flags_handler(int ac, char **av, int i)
 {
+    e_flags flag;
+ 
+    while (++i < ac)
+    {
+        // printf("arg %d: %s\n", i, av[i]);
+        if (av[i][0] == '-')
+        {
+            flag = strToFlag(av[i]);
+
+            if (flag & help)
+                print_command_usage(ssl.command);
+            else if (flag & ssl.command_flags)
+            {
+                if (flag & AVPARAM)
+                    param_handler(flag, i + 1 < ac ? av[i + 1] : NULL, &i);
+                ssl.flags += ssl.flags & flag ? 0 : flag;
+            }
+            else
+                unrecognized_flag(av[i]);
+        }
+        else
+            file_handler(NULL, av[i]);
+    }
+}
+
+void        hash_func_handler(char *cmd)
+{
+    static char         *commands_name[N_COMMANDS] = {
+        "md5", "sha256", "base64", "des-ecb", "des-cbc", "genprime", "isprime"
+    };
+    static e_command    commands[N_COMMANDS] = {
+        MD5, SHA256, BASE64, DESECB, DESCBC, GENPRIME, ISPRIME
+    };
+    static void         *commands_addr[N_COMMANDS] = {
+        md5, sha256, base64, des, des, genprime, isprime
+    };
+    static char         *commands_title[N_COMMANDS] = {
+        "MD5", "SHA256", "BASE64", "DESECB", "DESCBC",
+        "Generating a big prime number: ", "Is that a prime number ? "
+    };
+    static unsigned long commands_dataSz[N_COMMANDS] = {
+        0, 0, 0, sizeof(t_des), sizeof(t_des), 0, sizeof(t_isprime),
+    };
+    static e_command    commands_flags[N_COMMANDS] = {
+        MD_flags, MD_flags, BASE64_flags, DES_flags, DES_flags, GENPRIME_flags, ISPRIME_flags
+    };
+    int                 cmd_i = -1;
+
     cmd = ft_lower(cmd);
-    if (!ft_strcmp(cmd, "md5"))
-    {
-        ssl.command = MD5;
-        ssl.command_addr = md5;
-        ssl.command_title = "MD5";
-    }
-    else if (!ft_strcmp(cmd, "sha256"))
-    {
-        ssl.command = SHA256;
-        ssl.command_addr = sha256;
-        ssl.command_title = "SHA256";
-    }
-    else if (!ft_strcmp(cmd, "base64"))
-    {
-        ssl.command = BASE64;
-        ssl.command_addr = base64;
-        ssl.command_title = "BASE64";
-    }
-    else if (!ft_strcmp(cmd, "des-ecb"))
-    {
-        ssl.command = DESECB;
-        ssl.command_addr = des;
-        ssl.command_title = "DES-ECB";
-        ssl.command_data = ft_memnew(sizeof(t_des));
-        ((t_des *)ssl.command_data)->mode = DESECB;
-    }
-    else if (!ft_strcmp(cmd, "des") || !ft_strcmp(cmd, "des-cbc"))
-    {
-        ssl.command = DESCBC;
-        ssl.command_addr = des;
-        ssl.command_title = "DES-CBC";
-        ssl.command_data = ft_memnew(sizeof(t_des));
-        ((t_des *)ssl.command_data)->mode = DESCBC;
-    }
-    else if (!ft_strcmp(cmd, "genprime"))
-    {
-        ssl.command = GENPRIME;
-        ssl.command_addr = genprime;
-        ssl.command_title = "Generating a big prime number: ";
-    }
-    else if (!ft_strcmp(cmd, "isprime"))
-    {
-        ssl.command = ISPRIME;
-        ssl.command_addr = isprime;
-        ssl.command_title = "Is that a prime number ? ";
-        ssl.command_data = ft_memnew(sizeof(t_isprime));
-    }
-    else if (!ft_strcmp(cmd, "genrsa"))
-    {
-        ssl.command = GENRSA;
-        ssl.command_addr = genrsa;
-        ssl.command_title = "Generating RSA private key, 64 bit long modulus\n";
-    }
+    if (!ft_strcmp(cmd, "help"))
+        print_global_usage();
+
+    if (!ft_strcmp(cmd, "des"))
+        cmd_i = 4;
     else
     {
-        ft_putstderr("ft_ssl: Error: '");
-        ft_putstderr(cmd);
-        ft_putstderr("' is an invalid command.\n\n");
-        free(cmd);
-        print_usage_exit();
+        while (++cmd_i < N_COMMANDS)
+            if (!ft_strcmp(cmd, commands_name[cmd_i]))
+                break ;
+        if (cmd_i == N_COMMANDS)
+        {
+            ft_putstderr("ft_ssl: Error: '");
+            ft_putstderr(cmd);
+            ft_putstderr("' is an invalid command.\n\n");
+            free(cmd);
+            print_global_usage();
+        }
     }
+    ssl.command = commands[cmd_i];
+    ssl.command_addr = commands_addr[cmd_i];
+    ssl.command_title = commands_title[cmd_i];
+    ssl.command_flags = commands_flags[cmd_i];
+    if (commands_dataSz[cmd_i])
+        ssl.command_data = ft_memnew(commands_dataSz[cmd_i]);
     free(cmd);
-    return 0;
+
 }
 
 static char     *stdin_handler(char **data, int *data_len, char *msg_out, int only_one_read)
@@ -296,7 +308,7 @@ static char     *stdin_handler(char **data, int *data_len, char *msg_out, int on
     if (msg_out)
         ft_putstderr(msg_out);
 
-    printf("stdin handler %d\n", only_one_read);
+    // printf("stdin handler %d\n", only_one_read);
     ft_bzero(buff, BUFF_SIZE);
     while (ret && !(only_one_read && len != 0))                 // Work for echo
     {
@@ -309,7 +321,7 @@ static char     *stdin_handler(char **data, int *data_len, char *msg_out, int on
         if (tmp)
             free(tmp);
         len += ret;
-        printf("%d / Hash(len=%d)= >%s<\n", only_one_read, len, msg);
+        // printf("%d / Hash(len=%d)= >%s<\n", only_one_read, len, msg);
     }
     if (data)
         *data = msg;
@@ -372,11 +384,11 @@ void    flags_conflicts()
 
 int     parsing(int ac, char **av)
 {
-    e_flags flag;
     char    *cmd;
     int     cmd_len;
     int     i = 1;
 
+    // Fetch command OR ask it
     if (ac == 1)
     {
         i = 0;
@@ -386,21 +398,9 @@ int     parsing(int ac, char **av)
     }
     else
         cmd = ft_strdup(av[1]);
-    hash_func_handler(cmd);
 
-    while (++i < ac)
-    {
-        // printf("arg %d: %s\n", i, av[i]);
-        if (av[i][0] == '-')
-        {
-            flag = strToFlag(av[i]);
-            if (flag & AVPARAM)
-                param_handler(flag, i + 1 < ac ? av[i + 1] : NULL, &i);
-            ssl.flags += ssl.flags & flag ? 0 : flag;
-        }
-        else
-            file_handler(NULL, av[i]);
-    }
+    hash_func_handler(cmd);
+    flags_handler(ac, av, i);
 
     // Only if command needs an input
     // Read on stdin if no hash found or p flags is provided

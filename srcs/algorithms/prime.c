@@ -165,23 +165,18 @@ static int  first_primes_multiple(Long_64bits p)
     return 0;
 }
 
-// Long_64bits prime_generator(Long_64bits min, Long_64bits max)
 Long_64bits prime_generator()
 {
     /*
         Pick a number between
     */
-    Long_64bits p = 4;
+    Long_64bits p = LONG64_LEFTBITMASK | ulrandom();
 
-    while (!miller_rabin_primality_test(p, PROBMIN_ISPRIME))
+    while (first_primes_multiple(p) ||\
+            !miller_rabin_primality_test(p, PROBMIN_ISPRIME))
     {
-        p = LONG64_LEFTBITMASK | ulrandom(LONG64_byteSz - 2);
-        while (first_primes_multiple(p))
-        {
-            p = LONG64_LEFTBITMASK | ulrandom(LONG64_byteSz - 2);
-            // printf("rand & mask=\t%lu\n", p);
-        }
-        // printf("Not first primes multiple=\t%lu\n", p);
+        p = LONG64_LEFTBITMASK | ulrandom();
+        // printf("rand & mask=\t%lu\n", p);
     }
     return p;
 }
@@ -192,10 +187,10 @@ Mem_8bits   *genprime(void *command_data, Mem_8bits **plaintext, Long_64bits ptB
         "Wrapper" for prime_generator() function to compute genprime command"
     */
     Long_64bits p = prime_generator();
-    printf("p = %lu\t(len=%d)\n", p, ft_unbrlen(p));
+    // printf("p = %lu\t(len=%d)\n", p, ft_unbrlen(p));
 
     Mem_8bits   *prime = ft_ulltoa(p);
-    printf("prime = %s\n", prime);
+    // printf("prime = %s\n", prime);
     // Mem_8bits   *prime = ft_ulltoa(prime_generator());
 
     *hashByteSz = ft_strlen(prime);

@@ -62,7 +62,7 @@ inline Long_64bits ulrandom()
         // printf("read / data_left=%d / fd=%d\n", data_left, fd);
         if ((ret = read(fd, buff, URANDBUFF)) == -1)
             read_failed("urandom() failed: Cannot read file '/dev/urandom'", fd);
-        data_left += ret;
+        data_left = ret;
         buff_offset = buff;
     }
     data_left -= LONG64_byteSz;

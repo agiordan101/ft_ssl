@@ -66,6 +66,18 @@ void    hash_output(t_hash *hash)
     //     hash_32bits_output(hash);
 }
 
+
+// ---------------------- Commands output ---------------------------
+
+void    genprime_output(t_hash *hash)
+{
+    ft_putstr(ssl.command_title);
+    hash_output(hash);
+    // ft_putstr(hash->hash);
+}
+
+// ---------------------- Outputs based on flags ---------------------------
+
 void    classic_output(t_hash *hash)
 {
     ft_putstr(ssl.command_title);
@@ -107,22 +119,10 @@ void    output_hash_based_on_flags(t_hash *hash)
         stdin_output(hash);
     else if (ssl.flags & r)
         reversed_output(hash);
+    else if (ssl.command & GENPRIME)
+        genprime_output(hash);
     else
         classic_output(hash);
-}
-
-// ---------------------- GLOBAL output ---------------------------
-
-void    genprime_output(t_hash *hash)
-{
-    ft_putstr(ssl.command_title);
-    ft_putstr(hash->hash);
-}
-
-void    output_data(t_hash *hash)
-{
-    if (ssl.command & GENPRIME)
-        genprime_output(hash);
 }
 
 // ---------------------- GLOBAL output ---------------------------
@@ -131,10 +131,9 @@ void    output(t_hash *hash)
 {
     if (hash->error == FILENOTFOUND)
         file_not_found(hash->name);
-    else if (ssl.command & THASHNEED_COMMANDS)
-        output_hash_based_on_flags(hash);
+    // else if (ssl.command & THASHNEED_COMMANDS)
     else
-        output_data(hash);
+        output_hash_based_on_flags(hash);
 
     if (ssl.command & ~CIPHERS)          // Very bad code
         ft_putstr("\n");
