@@ -7,7 +7,9 @@
 
     To do :
 
-        Faire un enum <COMMAND>_flags, avec chaque nombre la liste des flags possible pour cette command
+        retirer les flags ecb cbc
+        conflict flags s et p entre l command principale et les secondaires
+
         //Leaks ft_stradd_quote ?
         inline keywords pour les prime peut etre et le dossier calculations
         INTMAXLESS1 enlever le pow
@@ -86,8 +88,10 @@ int     main(int ac, char **av)
 {
     int     ret;
 
+    ft_bzero(&ssl, sizeof(t_ssl));
     ssl.fd_out = 1;
     srand(time(NULL));
+
     if ((ret = parsing(ac, av)))
         freexit(ret);
 
@@ -96,15 +100,17 @@ int     main(int ac, char **av)
         if ((ssl.fd_out = open(ssl.output_file, O_CREAT | O_WRONLY | O_TRUNC, S_IRWXU | S_IRWXG | S_IRWXO)) == -1)
             open_failed(" in ft_ssl main() function\n", ssl.output_file);
 
-    // Base64 decode input
-    if (ssl.flags & ai)
+    // Decode input
+    if (ssl.flags & deci)
         t_hash_decode_inputs(ssl.hash);
 
     t_hash_hashing(ssl.hash);
 
-    // Base64 encode output (Do not encode if command_familly is already base64 in encryption mode)
-    if (ssl.flags & ao && !(ssl.command.command_addr == base64 && ssl.flags & e))
+    // Encode output
+    if (ssl.flags & enco)
         t_hash_encode_output(ssl.hash);
+    // Base64 encode output (Do not encode if command_familly is already base64 in encryption mode)
+    // if (ssl.flags & ao && !(ssl.command.command_addr == base64 && ssl.flags & e))
 
     t_hash_output(ssl.hash);
 

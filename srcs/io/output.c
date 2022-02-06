@@ -37,33 +37,28 @@ void    hash_8bits_output(t_hash *p)
 {
     static int shitret;
 
-    // 64-bytes blocs output is only for base64 format without -A flag
-    if (~ssl.flags & A &&\
-        (ssl.flags & ao || (ssl.command.command_addr == base64 && ssl.flags & e)))
-        hash_64bytesbloc_output(p);
-    else
-    {
-        // Find number of padding bytes, to not print them
-        int     n_padByte = 0;
-        while (p->hash[p->hashByteSz - 1 - n_padByte] <= 0x08)
-            n_padByte++;
-        // Print one line
-        if ((shitret = write(ssl.fd_out, p->hash, p->hashByteSz - n_padByte)) < 0)
-            write_failed("write() failed in hash_8bits_output() function (plain part).\n", ssl.fd_out);
-    }
+    // Find number of padding bytes, to not print them
+    int     n_padByte = 0;
+    while (p->hash[p->hashByteSz - 1 - n_padByte] <= 0x08)
+        n_padByte++;
+    // Print one line
+    if ((shitret = write(ssl.fd_out, p->hash, p->hashByteSz - n_padByte)) < 0)
+        write_failed("write() failed in hash_8bits_output() function (plain part).\n", ssl.fd_out);
 }
 
 void    hash_output(t_hash *hash)
 {
-    if (ssl.command.command & ~MD || ssl.flags & ao) //base64 command_familly  OR  des flag d  OR  a | ao flags (base64 output format)
-        hash_8bits_output(hash);
-    else
+    //base64 command_familly  OR  des flag d  OR  a | ao flags (base64 output format)
+    // if (ssl.command.command & ~MD || ssl.flags & ao)
+
+    // 64-bytes blocs output is only for base64 format without -A flag
+    if (~ssl.flags & A &&\
+        ((ssl.enc_o_cmd.command & BASE64) || (ssl.enc_o_cmd.command == 0 && ssl.command.command & BASE64)))
+        hash_64bytesbloc_output(hash);
+    else if (ssl.command.command & MD)
         hash_32bits_output(hash);
-    // Since isprime was added
-    // if (ssl.command.command == CIPHER || ssl.flags & ao) //base64 command_familly  OR  des flag d  OR  a | ao flags (base64 output format)
-    //     hash_8bits_output(hash);
-    // else if (ssl.command.command == MD)
-    //     hash_32bits_output(hash);
+    else
+        hash_8bits_output(hash);
 }
 
 

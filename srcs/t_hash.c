@@ -28,6 +28,8 @@ inline void t_hash_decode_inputs(t_hash *hash)
     char    *tmp;
     e_flags flags = ssl.flags & e ? ssl.flags - e : ssl.flags;
 
+    // printf("ssl.dec_i_cmd.command_title: %s\n", ssl.dec_i_cmd.command_title);
+    // printf("ssl.dec_i_cmd.command_data: %p\n", ssl.dec_i_cmd.command_data);
     while (hash)
     {
         // printf("Hash(len=%d)= >%s<\n", hash->len, hash->msg);
@@ -53,13 +55,15 @@ inline void t_hash_encode_output(t_hash *hash)
     Mem_8bits   *tmp;
     e_flags     flags = ssl.flags & d ? ssl.flags - d : ssl.flags;
 
+    // printf("ssl.enc_o_cmd.command_title: %s\n", ssl.enc_o_cmd.command_title);
+    // printf("ssl.enc_o_cmd.command_data: %p\n", ssl.enc_o_cmd.command_data);
+    // printf("Encode output\n");
     while (hash)
     {
         if (!hash->error)
         {
             tmp = hash->hash;
             // hash->hash = base64(NULL, &hash->hash, hash->hashByteSz, (Long_64bits *)&hash->hashByteSz, e);
-            
             if (!hash->error)
                 hash->hash = ssl.enc_o_cmd.command_addr(
                     ssl.enc_o_cmd.command_data,
@@ -76,6 +80,9 @@ inline void t_hash_encode_output(t_hash *hash)
 
 inline void t_hash_hashing(t_hash *hash)
 {
+    // printf("ssl.command.command_title: %s\n", ssl.command.command_title);
+    // printf("ssl.command.command_data: %p\n", ssl.command.command_data);
+    // printf("HASH\n");
     // EXECONES_COMMANDS commands doesn't need t_hash / any data input. Only one t_hash for printing
     if (ssl.command.command & EXECONES_COMMANDS)
     {

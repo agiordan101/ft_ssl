@@ -81,7 +81,8 @@ void        des_unpadding(Long_64bits *lastbloc, int *ptSz)
     else if (~ssl.flags & nopad)
     {
         ft_putstderr("./ft_ssl: Bad decrypt: No padding found in decrypted data.\n");
-        freexit(EXIT_FAILURE);
+        // freexit(EXIT_FAILURE);
+        return ;
     }
     else
         return ;

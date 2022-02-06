@@ -36,13 +36,18 @@ typedef unsigned long   Long_64bits;
 
 //  FLAGS --------------------------------------------------------
 
+# define FLAG_HELP  1
+# define FLAG_I     2
+# define FLAG_O     3
+# define N_FLAGS    25
+
 typedef enum    flags {
     // Global flags
-    i_=1<<1, o=1<<2,
-    a=1<<4, ai=1<<5, ao=1<<6, A=1<<7,
-    q=1<<3, r=1<<9,
-    deci=1<<25, enco=1<<26,
     help=1<<19,
+    i_=1<<1, o=1<<2,
+    q=1<<3, r=1<<9,
+    a=1<<4, A=1<<7,
+    deci=1<<24, enco=1<<25,
 
     // All hashing commands
     s=1<<10, p=1<<8,
@@ -51,22 +56,18 @@ typedef enum    flags {
     d=1<<11, e=1<<12,
 
     // Only des
-    ecb=1<<23, cbc=1<<24,
     k_des=1<<13, p_des=1<<14, s_des=1<<15, v_des=1<<16,
     P_des=1<<17, nopad=1<<18, pbkdf2_iter=1<<20,
 
     // Only isprime command
     prob=1<<21,
-
-    // Only genrsa command
-    des_=1<<22,
 }               e_flags;
-# define AVFLAGS        (help + p + q + r + d + e + A + ai + ao + P_des + nopad + des_ + ecb + cbc)
+# define AVFLAGS        (help + p + q + r + d + e + A + P_des + nopad + des_)
 # define AVPARAM        (s + i_ + o + deci + enco + k_des + p_des + s_des + v_des + pbkdf2_iter + prob)
 
-# define GLOBAL_FLAGS   (i_ + o + a + ai + ao + A + q + r + help + deci + enco)
+# define GLOBAL_FLAGS   (i_ + o + a + A + q + r + help + deci + enco)
 # define DATASTRINPUT_FLAGS  (s + p)
-# define DES_FLAGS      (ecb + cbc + k_des + p_des + s_des + v_des + P_des + nopad + pbkdf2_iter)
+# define DES_FLAGS_ONLY      (k_des + p_des + s_des + v_des + P_des + nopad + pbkdf2_iter)
 
 
 //  COMMAND & FLAGS relationship --------------------------------------------------------
@@ -74,10 +75,10 @@ typedef enum    flags {
 typedef enum    command_flags {
     MD_flags=       GLOBAL_FLAGS + DATASTRINPUT_FLAGS,
     BASE64_flags=   GLOBAL_FLAGS + DATASTRINPUT_FLAGS + e + d,
-    DES_flags=      GLOBAL_FLAGS + DATASTRINPUT_FLAGS + e + d + DES_FLAGS,
+    DES_flags=      GLOBAL_FLAGS + DATASTRINPUT_FLAGS + e + d + DES_FLAGS_ONLY,
     GENPRIME_flags= GLOBAL_FLAGS,
     ISPRIME_flags=  GLOBAL_FLAGS + DATASTRINPUT_FLAGS,
-    GENRSA_flags= GLOBAL_FLAGS + des_ + DES_FLAGS,
+    GENRSA_flags=   GLOBAL_FLAGS,
 }               e_command_flags;
 
 
@@ -98,7 +99,8 @@ typedef enum    command {
 # define PRIMES                 (GENPRIME + ISPRIME)
 # define STANDARDS              (GENRSA)
 
-# define THASHNEED_COMMANDS     (MD + CIPHERS + ISPRIME)
+# define HASHING_COMMANDS       (MD + CIPHERS)
+# define THASHNEED_COMMANDS     (HASHING_COMMANDS + ISPRIME)
 # define EXECONES_COMMANDS      (GENPRIME + GENRSA)
 
 typedef struct  s_command {
@@ -133,11 +135,12 @@ typedef struct  s_hash
 
 char        *ask_password();
 t_hash *    add_thash_front();
-void        command_handler(t_command *command, char *cmd);
+// void        command_handler(t_command *command, char *cmd);
 int         parsing(int ac, char **av);
 void        output(t_hash *hash);
 
 void        print_global_usage();
+void        print_commands();
 void        print_command_usage(e_command cmd);
 void        freexit(int failure);
 

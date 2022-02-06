@@ -1,6 +1,6 @@
 #include "ft_ssl.h"
 
-static int              magic_number_in(t_des *des, Mem_8bits *plaintext)
+static int              magic_number_in(t_des *des, Mem_8bits *plaintext, e_flags flags)
 {
     /*
         Encryption:
@@ -10,14 +10,16 @@ static int              magic_number_in(t_des *des, Mem_8bits *plaintext)
             Magic number is always needed unless key is provide
             // Magic number is needed when salt/password are used in PBKDF2 (Even if a key is provided).
     */
-    if (ssl.flags & d)
+    if (flags & d)
     {
-        Mem_8bits *buff = ft_memdup(plaintext, MAGICNUMBER_byteSz);
+        // Mem_8bits *buff = ft_memdup(plaintext, MAGICNUMBER_byteSz);
+        Mem_8bits   buff[MAGICNUMBER_byteSz];
+        ft_memcpy(buff, plaintext, MAGICNUMBER_byteSz);
         // printf("*plaintext: %s\n", buff);
 
-        if (ft_strcmp((char *)buff, MAGICNUMBER))
+        if (ft_strcmp(buff, MAGICNUMBER))
         {
-            free(buff);
+            // free(buff);
             if (!des->key)
             {
                 ft_putstderr("bad magic number\n");
@@ -28,7 +30,7 @@ static int              magic_number_in(t_des *des, Mem_8bits *plaintext)
         else
         {
             // Fetch Salt
-            free(buff);
+            // free(buff);
             des->salt = *(Key_64bits *)(plaintext + MAGICNUMBER_byteSz);
             endianReverse((Mem_8bits *)&des->salt, KEY_byteSz);
         }
@@ -419,15 +421,15 @@ static Mem_8bits        *des_decryption(t_des *des, Mem_8bits *pt, Long_64bits p
     return ft_memdup((Mem_8bits *)ciphertext, *hashByteSz);
 }
 
-static Mem_8bits        *des_encryption(t_des *des, Mem_8bits *pt, Long_64bits ptByteSz, Long_64bits *hashByteSz)
+static Mem_8bits        *des_encryption(t_des *des, Mem_8bits *pt, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags flags)
 {
     // ptSz is the count of 64-bits bloc (Padding: Add one bloc if the lastest is full)
-    int         ptSz = (ptByteSz + (ssl.flags & nopad ? 7 : 8)) / 8;
+    int         ptSz = (ptByteSz + (flags & nopad ? 7 : 8)) / 8;
     Long_64bits ciphertext[ptSz];
     Long_64bits *plaintext = (Long_64bits *)pt;
     Long_64bits bloc;
 
-    if (ssl.flags & nopad && ptByteSz % 8)
+    if (flags & nopad && ptByteSz % 8)
     {
         ft_putstderr("Data not multiple of block length\n");
         freexit(EXIT_FAILURE);
@@ -484,6 +486,7 @@ Mem_8bits               *des(void *command_data, Mem_8bits **plaintext, Long_64b
 {
     t_des       *des_data = (t_des *)command_data;
 
+    // printf("command_data: %p\n", command_data);
     if (!command_data || !ptByteSz || !hashByteSz)
     {
         ft_putstderr("Parameters command_data, ptByteSz and hashByteSz can't be NULL in des() function.\n");
@@ -491,7 +494,7 @@ Mem_8bits               *des(void *command_data, Mem_8bits **plaintext, Long_64b
     }
 
     // Return 1 if magic number is needed (encryption) or seen (decryption)
-    int         magic_number_case = magic_number_in(des_data, *plaintext);
+    int         magic_number_case = magic_number_in(des_data, *plaintext, way);
 
     // Parse and initialize data
     init_vars(des_data, *plaintext, way);
@@ -504,10 +507,10 @@ Mem_8bits               *des(void *command_data, Mem_8bits **plaintext, Long_64b
         return magic_number_case ?\
             magic_number_out(
                 des_data,
-                des_encryption(des_data, *plaintext, ptByteSz, hashByteSz), //Merge 2 encryption calls
+                des_encryption(des_data, *plaintext, ptByteSz, hashByteSz, way), //Merge 2 encryption calls
                 hashByteSz
             ) :\
-            des_encryption(des_data, *plaintext, ptByteSz, hashByteSz);
+            des_encryption(des_data, *plaintext, ptByteSz, hashByteSz, way);
     else
     {
         set_keys_for_decryption(des_data);
