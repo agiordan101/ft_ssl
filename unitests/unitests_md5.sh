@@ -3,10 +3,9 @@ cp ../ft_ssl . > /dev/null
 
 echo "\n --- Unitests md5: This script will display differences if a potential error is found"
 
-echo "(stdin)= 35f1d6de0302e2086a4e472266efb3a9
+echo -n "(stdin)= 35f1d6de0302e2086a4e472266efb3a9
 (\"42 is nice\")= 35f1d6de0302e2086a4e472266efb3a9
-e20c3b973f63482a778f3fd1869b7f25
-MD5(file)= 53d53ea94217b259c11a5a2d104ec58a
+e20c3b973f63482a778f3fd1869b7f25MD5(file)= 53d53ea94217b259c11a5a2d104ec58a
 53d53ea94217b259c11a5a2d104ec58a file
 MD5(\"pity those that aren't following baerista on spotify.\")= a3c990a1964705d9bf0e602f44572f5f
 (\"be sure to handle edge cases carefully\")= 3553dc7dc5963b583c056d1b9fa3349c
@@ -40,4 +39,4 @@ echo "one more thing" | ./ft_ssl md5 -r -p -s "foo" file -s "bar" >> md5_respons
 echo "just to be extra clear" | ./ft_ssl md5 -r -q -p -s "foo" file >> md5_responses
 
 diff md5_responses md5_subject_responses
-# rm md5_responses md5_subject_responses file ft_ssl
+rm md5_responses md5_subject_responses file ft_ssl

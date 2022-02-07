@@ -26,26 +26,28 @@ inline void t_hash_free(t_hash *hash)
 inline void t_hash_decode_inputs(t_hash *hash)
 {
     char    *tmp;
-    e_flags flags = ssl.flags & e ? ssl.flags - e : ssl.flags;
+    e_flags flags = ssl.flags & e ? ssl.flags - e + d: ssl.flags;  //ssl.flags has d OR e
 
     // printf("ssl.dec_i_cmd.command_title: %s\n", ssl.dec_i_cmd.command_title);
     // printf("ssl.dec_i_cmd.command_data: %p\n", ssl.dec_i_cmd.command_data);
     while (hash)
     {
-        // printf("Hash(len=%d)= >%s<\n", hash->len, hash->msg);
-        tmp = hash->msg;
-        // hash->msg = (char *)base64(NULL, (Mem_8bits **)&hash->msg, hash->len, (Long_64bits *)&hash->len, d);
-        
         if (!hash->error)
+        {
+            // printf("Hash(len=%d)= >%s<\n", hash->len, hash->msg);
+            tmp = hash->msg;
+            // hash->msg = (char *)base64(NULL, (Mem_8bits **)&hash->msg, hash->len, (Long_64bits *)&hash->len, d);
+
             hash->msg = ssl.dec_i_cmd.command_addr(
                 ssl.dec_i_cmd.command_data,
-                (Mem_8bits **)&hash->msg,
+                (Mem_8bits **)&tmp,
                 hash->len,
                 (Long_64bits *)&hash->len,
                 ssl.flags
             );
-
-        free(tmp);
+            // if (tmp)
+            free(tmp);
+        }
         hash = hash->next;
     }
 }
@@ -53,7 +55,7 @@ inline void t_hash_decode_inputs(t_hash *hash)
 inline void t_hash_encode_output(t_hash *hash)
 {
     Mem_8bits   *tmp;
-    e_flags     flags = ssl.flags & d ? ssl.flags - d : ssl.flags;
+    e_flags     flags = ssl.flags & d ? ssl.flags - d + e: ssl.flags;  //ssl.flags has d OR e
 
     // printf("ssl.enc_o_cmd.command_title: %s\n", ssl.enc_o_cmd.command_title);
     // printf("ssl.enc_o_cmd.command_data: %p\n", ssl.enc_o_cmd.command_data);
@@ -62,16 +64,18 @@ inline void t_hash_encode_output(t_hash *hash)
     {
         if (!hash->error)
         {
+            // printf("Hash(len=%d)= >%s<\n", hash->hashByteSz, hash->hash);
             tmp = hash->hash;
+
             // hash->hash = base64(NULL, &hash->hash, hash->hashByteSz, (Long_64bits *)&hash->hashByteSz, e);
-            if (!hash->error)
-                hash->hash = ssl.enc_o_cmd.command_addr(
-                    ssl.enc_o_cmd.command_data,
-                    (Mem_8bits **)&hash->hash,
-                    hash->hashByteSz,
-                    (Long_64bits *)&hash->hashByteSz,
-                    flags
-                );
+            hash->hash = ssl.enc_o_cmd.command_addr(
+                ssl.enc_o_cmd.command_data,
+                (Mem_8bits **)&tmp,
+                hash->hashByteSz,
+                (Long_64bits *)&hash->hashByteSz,
+                flags
+            );
+            // if (tmp)
             free(tmp);
         }
         hash = hash->next;
@@ -97,6 +101,7 @@ inline void t_hash_hashing(t_hash *hash)
 
     while (hash)
     {
+        // printf("Hash(len=%d)= >%s<\n", hash->len, hash->msg);
         if (!hash->error)
             hash->hash = ssl.command.command_addr(
                 ssl.command.command_data,

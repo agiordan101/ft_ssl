@@ -41,7 +41,7 @@ static void     print_flag_usage(e_flags flag)
     else if (flag & p_des)
         ft_putstderr("\t-p\tsend password in ascii\t(Override the behavior of global flag -p)\n");
     else if (flag & s_des)
-        ft_putstderr("\t-s\tsend the salt in hex\t(Override the behavior of global flag -s)\n");
+        ft_putstderr("\t-s\tsend the salt in hex\t(Override the behavior of global flag -s if any des command is past)\n");
     else if (flag & v_des)
         ft_putstderr("\t-v\tsend initialization vector in hex\n");
     else if (flag & P_des)
@@ -52,6 +52,8 @@ static void     print_flag_usage(e_flags flag)
         ft_putstderr("\t-iter\tSpecify the iteration count of PBKDF2\n");
     else if (flag & prob)
         ft_putstderr("\t-prob\tprobability requested for Miller-Rabin primality test in percentile (0 < p <= 100)\n");
+    else if (flag & mask)
+        ft_putstderr("\t-mask\tmask in hex (force bits of random numbers before primality tests)\n");
     else
     {
         printf("WTFF ?\n");
@@ -90,7 +92,7 @@ static void     print_des_usage()
 static void     print_genprime_usage()
 {
     ft_putstderr("Usage: ./ft_ssl genprime [files] [flags]\n");
-    ft_putstderr("Generate big 64-bits random prime number.\n\n");
+    ft_putstderr("Generate 64-bits random prime number.\n\n");
     ft_putstderr("Valid flags are:\n");
     print_command_flags(GENPRIME_flags);
 }

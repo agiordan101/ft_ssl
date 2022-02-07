@@ -130,6 +130,7 @@ static Mem_8bits    *decode(Mem_8bits *plaintext, Long_64bits ptByteSz, Long_64b
     // printf("plaintext decode (len=%d): >%s<\n", ptByteSz, plaintext);
 
     int hashlen = get_len_decoded(plaintext, ptByteSz);
+    // printf("hashlen =%d\n", hashlen);
     Mem_8bits   bytecode[4];
     Mem_8bits   *hash = ft_memnew(hashlen);
     Mem_8bits   *hash_tmp = hash;
@@ -140,11 +141,16 @@ static Mem_8bits    *decode(Mem_8bits *plaintext, Long_64bits ptByteSz, Long_64b
         for (int i = 0; i < 4; i++)
             bytecode[i] = (pt_tmp[i] == '=') ? 0b0 : base64_to_bin(pt_tmp[i]);
 
+        // Create split4to3 func !
         // printBits(bytecode, 4);
         hash_tmp[0] = bytecode[0] << 2 | bytecode[1] >> 4;
-        hash_tmp[1] = bytecode[1] << 4 | bytecode[2] >> 2;
-        hash_tmp[2] = bytecode[2] << 6 | bytecode[3];
+        if (*(pt_tmp + 2) != '=')
+            hash_tmp[1] = bytecode[1] << 4 | bytecode[2] >> 2;
+        if (*(pt_tmp + 3) != '=')
+            hash_tmp[2] = bytecode[2] << 6 | bytecode[3];
         // printBits(hash_tmp, 3);
+        // printf("hash_tmp: %p\n", hash_tmp);
+        // printf("pt_tmp / pt_end: %p / %p\n", pt_tmp, pt_end);
         hash_tmp += 3;
     }
     if (hashByteSz)

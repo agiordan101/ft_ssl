@@ -116,11 +116,11 @@ static void     command_handler(t_command *command, char *cmd, e_command mask)
     };
     static char         *commands_title[N_COMMANDS] = {
         "MD5", "SHA256", "BASE64", "DESECB", "DESCBC",
-        "Generating a big prime number: ", "Is that a prime number ? ",
+        "Generating prime number ", "Is that a prime number ? ",
         "Generating RSA private key, 64-bits long modulus"
     };
     static unsigned long commands_dataSz[N_COMMANDS] = {
-        0, 0, 0, sizeof(t_des), sizeof(t_des), 0, sizeof(t_isprime), 0
+        0, 0, 0, sizeof(t_des), sizeof(t_des), sizeof(t_genprime), sizeof(t_isprime), 0
     };
     static e_command    commands_flags[N_COMMANDS] = {
         MD_flags, MD_flags, BASE64_flags, DES_flags, DES_flags, GENPRIME_flags, ISPRIME_flags, GENRSA_flags
@@ -163,9 +163,7 @@ static void     command_handler(t_command *command, char *cmd, e_command mask)
 
 int     param_handler(e_flags flag, char *av_next, int *i)
 {
-    if (flag & s)
-        string_handler(NULL, av_next);
-    else if (flag & i_)
+    if (flag & i_)
         file_handler(NULL, av_next);
     else if (flag & o)
         ssl.output_file = av_next;
@@ -173,10 +171,12 @@ int     param_handler(e_flags flag, char *av_next, int *i)
         command_handler(&ssl.dec_i_cmd, av_next, HASHING_COMMANDS);
     else if (flag & enco)
         command_handler(&ssl.enc_o_cmd, av_next, HASHING_COMMANDS);
-    else if (flag & k_des)
-        ssl.des_flagsdata.key = parse_keys(av_next);
+    else if (flag & s)
+        string_handler(NULL, av_next);
     else if (flag & s_des)
         ssl.des_flagsdata.salt = parse_keys(av_next);
+    else if (flag & k_des)
+        ssl.des_flagsdata.key = parse_keys(av_next);
     else if (flag & v_des)
         ssl.des_flagsdata.vector = parse_keys(av_next);
     else if (flag & p_des)
@@ -195,6 +195,9 @@ int     param_handler(e_flags flag, char *av_next, int *i)
             isprime_prob_error(p);
         ((t_isprime *)ssl.command.command_data)->prob_requested = (p == 100 ? PROBMIN_ISPRIME : 1 - (float)p / 100);
     }
+    else if (flag & mask)
+        ((t_genprime *)ssl.command.command_data)->mask = parse_keys(av_next);
+
     (*i)++;
     return 0;
 }
@@ -217,18 +220,20 @@ int     param_handler(e_flags flag, char *av_next, int *i)
 
 e_flags     strToFlag(char *str)
 {
+    if (!ft_strcmp(str, "-help"))
+        return help;
     if (!ft_strcmp(str, "-i"))
         return i_;
     if (!ft_strcmp(str, "-o"))
         return o;
     if (!ft_strcmp(str, "-a"))
         return a;
+    if (!ft_strcmp(str, "-A"))
+        return A;
     if (!ft_strcmp(str, "-deci"))
         return deci;
     if (!ft_strcmp(str, "-enco"))
         return enco;
-    if (!ft_strcmp(str, "-A"))
-        return A;
     if (!ft_strcmp(str, "-q"))
         return q;
     if (!ft_strcmp(str, "-r"))
@@ -237,13 +242,12 @@ e_flags     strToFlag(char *str)
         return d;
     if (!ft_strcmp(str, "-e"))
         return e;
-    if (!ft_strcmp(str, "-help"))
-        return help;
 
-    // if (!ft_strcmp(str, "ecb"))
-    //     return ecb;
-    // if (!ft_strcmp(str, "cbc"))
-    //     return cbc;
+    if (!ft_strcmp(str, "-s"))
+        return DES & (ssl.dec_i_cmd.command | ssl.command.command | ssl.enc_o_cmd.command) ? s_des : s;
+    if (!ft_strcmp(str, "-p"))
+        return DES & (ssl.dec_i_cmd.command | ssl.command.command | ssl.enc_o_cmd.command) ? p_des : p;
+    
     if (!ft_strcmp(str, "-P"))
         return P_des;
     if (!ft_strcmp(str, "-k"))
@@ -254,27 +258,12 @@ e_flags     strToFlag(char *str)
         return nopad;
     if (!ft_strcmp(str, "-iter"))
         return pbkdf2_iter;
-
-    if (ssl.command.command_addr == des)
-    {
-        if (!ft_strcmp(str, "-s"))
-            return s_des;
-        if (!ft_strcmp(str, "-p"))
-            return p_des;
-    }
-    else
-    {
-        if (!ft_strcmp(str, "-s"))
-            return s;
-        if (!ft_strcmp(str, "-p"))
-            return p;
-    }
-
-    if (ssl.command.command_addr == isprime)
-    {
-        if (!ft_strcmp(str, "-prob"))
-            return prob;
-    }
+    
+    if (!ft_strcmp(str, "-prob"))
+        return prob;
+    
+    if (!ft_strcmp(str, "-mask"))
+        return mask;
     return 0;
 }
 
@@ -411,35 +400,24 @@ void    flags_conflicts()
     }
     else
         ssl.flags += e;
+}
 
-    // DES decryption input part, DES command and DES encryption output part use ssl.des_inputdata key salt vector password
-    if (ssl.dec_i_cmd.command_addr == des)
-    {
-        t_des   *cmd = (t_des *)ssl.dec_i_cmd.command_data;
-        cmd->password = ssl.des_flagsdata.password;
-        cmd->key = ssl.des_flagsdata.key;
-        cmd->salt = ssl.des_flagsdata.salt;
-        cmd->vector = ssl.des_flagsdata.vector;
-        cmd->pbkdf2_iter = ssl.des_flagsdata.pbkdf2_iter;
-    }
-    if (ssl.command.command_addr == des)
-    {
-        t_des   *cmd = (t_des *)ssl.command.command_data;
-        cmd->password = ssl.des_flagsdata.password;
-        cmd->key = ssl.des_flagsdata.key;
-        cmd->salt = ssl.des_flagsdata.salt;
-        cmd->vector = ssl.des_flagsdata.vector;
-        cmd->pbkdf2_iter = ssl.des_flagsdata.pbkdf2_iter;
-    }
-    if (ssl.enc_o_cmd.command_addr == des)
-    {
-        t_des   *cmd = (t_des *)ssl.enc_o_cmd.command_data;
-        cmd->password = ssl.des_flagsdata.password;
-        cmd->key = ssl.des_flagsdata.key;
-        cmd->salt = ssl.des_flagsdata.salt;
-        cmd->vector = ssl.des_flagsdata.vector;
-        cmd->pbkdf2_iter = ssl.des_flagsdata.pbkdf2_iter;
-    }
+void    end_parse()
+{
+    // DES decryption input part, DES command and DES encryption output part use ssl.des_inputdata to fetch password key salt vector
+    t_command   *commands[3] = {&ssl.dec_i_cmd, &ssl.command, &ssl.enc_o_cmd};
+    t_des       *cmd;
+
+    for (int i = 0; i < 3; i++)
+        if (commands[i]->command_addr == des)
+        {
+            cmd = (t_des *)(commands[i]->command_data);
+            cmd->password = ssl.des_flagsdata.password;
+            cmd->key = ssl.des_flagsdata.key;
+            cmd->salt = ssl.des_flagsdata.salt;
+            cmd->vector = ssl.des_flagsdata.vector;
+            cmd->pbkdf2_iter = ssl.des_flagsdata.pbkdf2_iter;
+        }
 
     // printf("ssl.des_flagsdata.key: %lu\n", ssl.des_flagsdata.key);
     // printf("ssl.des_flagsdata.salt: %lu\n", ssl.des_flagsdata.salt);
@@ -478,5 +456,6 @@ int     parsing(int ac, char **av)
         add_thash_from_stdin();
 
     flags_conflicts();
+    end_parse();
     return 0;
 }

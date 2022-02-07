@@ -13,10 +13,12 @@ static int              magic_number_in(t_des *des, Mem_8bits *plaintext, e_flag
     if (flags & d)
     {
         // Mem_8bits *buff = ft_memdup(plaintext, MAGICNUMBER_byteSz);
-        Mem_8bits   buff[MAGICNUMBER_byteSz];
+        Mem_8bits   buff[MAGICNUMBER_byteSz + 1];
+        ft_bzero(buff, MAGICNUMBER_byteSz + 1);
         ft_memcpy(buff, plaintext, MAGICNUMBER_byteSz);
-        // printf("*plaintext: %s\n", buff);
 
+        // printf("buff: %s\n", buff);
+        // printf("plaintext: %s\n", plaintext);
         if (ft_strcmp(buff, MAGICNUMBER))
         {
             // free(buff);
@@ -431,7 +433,7 @@ static Mem_8bits        *des_encryption(t_des *des, Mem_8bits *pt, Long_64bits p
 
     if (flags & nopad && ptByteSz % 8)
     {
-        ft_putstderr("Data not multiple of block length\n");
+        ft_putstderr("Data not multiple of block length (8 bytes).\n");
         freexit(EXIT_FAILURE);
     }
     // printf("\n- DES ECRYPTION -\nptByteSz: %ld\tptSz: %d\n", ptByteSz, ptSz);
@@ -466,7 +468,7 @@ static Mem_8bits        *des_encryption(t_des *des, Mem_8bits *pt, Long_64bits p
 
         ciphertext[i] = feistel_algorithm(des, bloc);
 
-        // printf("ciphertext: %lx\n\n", ciphertext[i]);
+        // dprintf(2, "ciphertext: %lx\n\n", ciphertext[i]);
         plaintext++;
     }
 

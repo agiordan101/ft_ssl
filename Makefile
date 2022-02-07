@@ -62,4 +62,7 @@ fclean: clean
 	@rm -f $(NAME)
 	@echo "[REMOVING \"$(NAME)\"]"
 
+test: all
+	sh unitests_ft_ssl.sh Makefile
+
 re: fclean all

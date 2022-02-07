@@ -36,9 +36,9 @@ typedef unsigned long   Long_64bits;
 
 //  FLAGS --------------------------------------------------------
 
-# define FLAG_HELP  1
-# define FLAG_I     2
-# define FLAG_O     3
+// # define FLAG_HELP  1
+// # define FLAG_I     2
+// # define FLAG_O     3
 # define N_FLAGS    25
 
 typedef enum    flags {
@@ -59,11 +59,13 @@ typedef enum    flags {
     k_des=1<<13, p_des=1<<14, s_des=1<<15, v_des=1<<16,
     P_des=1<<17, nopad=1<<18, pbkdf2_iter=1<<20,
 
-    // Only isprime command
+    // Only isprime
     prob=1<<21,
+    // Only genprime
+    mask=1<<22,
 }               e_flags;
-# define AVFLAGS        (help + p + q + r + d + e + A + P_des + nopad + des_)
-# define AVPARAM        (s + i_ + o + deci + enco + k_des + p_des + s_des + v_des + pbkdf2_iter + prob)
+# define AVFLAGS        (help + p + q + r + d + e + A + P_des + nopad)
+# define AVPARAM        (s + i_ + o + deci + enco + k_des + p_des + s_des + v_des + pbkdf2_iter + prob + mask)
 
 # define GLOBAL_FLAGS   (i_ + o + a + A + q + r + help + deci + enco)
 # define DATASTRINPUT_FLAGS  (s + p)
@@ -75,9 +77,9 @@ typedef enum    flags {
 typedef enum    command_flags {
     MD_flags=       GLOBAL_FLAGS + DATASTRINPUT_FLAGS,
     BASE64_flags=   GLOBAL_FLAGS + DATASTRINPUT_FLAGS + e + d,
-    DES_flags=      GLOBAL_FLAGS + DATASTRINPUT_FLAGS + e + d + DES_FLAGS_ONLY,
-    GENPRIME_flags= GLOBAL_FLAGS,
-    ISPRIME_flags=  GLOBAL_FLAGS + DATASTRINPUT_FLAGS,
+    DES_flags=      GLOBAL_FLAGS + p + e + d + DES_FLAGS_ONLY,
+    GENPRIME_flags= GLOBAL_FLAGS + mask,
+    ISPRIME_flags=  GLOBAL_FLAGS + DATASTRINPUT_FLAGS + prob,
     GENRSA_flags=   GLOBAL_FLAGS,
 }               e_command_flags;
 
@@ -303,7 +305,7 @@ Mem_8bits   *base64(void *command_data, Mem_8bits **plaintext, Long_64bits ptByt
 */
 
 # define MAGICNUMBER        "Salted__"
-# define MAGICNUMBER_byteSz sizeof(MAGICNUMBER) - 1
+# define MAGICNUMBER_byteSz (sizeof(MAGICNUMBER) - 1)
 # define MAGICHEADER_byteSz (MAGICNUMBER_byteSz + KEY_byteSz)
 
 typedef struct  s_des
@@ -362,11 +364,14 @@ int         miller_rabin_primality_test(Long_64bits n, float p);
     genprime Data --------------------------------------
 */
 
+typedef struct  s_genprime {
+    Long_64bits mask;
+}               t_genprime;
+
 # define    LONG64_LEFTBITMASK  (1UL << 62)
 
 Mem_8bits   *genprime(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
-// Long_64bits prime_generator(Long_64bits min, Long_64bits max);
-Long_64bits prime_generator();
+Long_64bits prime_generator(Long_64bits requiredBits);
 
 
 /*

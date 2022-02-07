@@ -165,16 +165,17 @@ static int  first_primes_multiple(Long_64bits p)
     return 0;
 }
 
-Long_64bits prime_generator()
+Long_64bits prime_generator(Long_64bits requiredBits)
 {
     /*
-        Generate big 64-bits random prime number.
+        Generate 64-bits random prime number.
+        A mask can be past to force bits of selected random numbers before primality tests
     */
-    Long_64bits p = LONG64_LEFTBITMASK | ulrandom();
+    Long_64bits p = requiredBits | ulrandom();
 
     while (first_primes_multiple(p) ||\
             !miller_rabin_primality_test(p, PROBMIN_ISPRIME))
-        p = LONG64_LEFTBITMASK | ulrandom();
+        p = requiredBits | ulrandom();
     return p;
 }
 
@@ -183,7 +184,8 @@ Mem_8bits   *genprime(void *command_data, Mem_8bits **plaintext, Long_64bits ptB
     /*
         "Wrapper" for prime_generator() function to compute genprime command
     */
-    Long_64bits p = prime_generator();
+    t_genprime  *genprime_data = (t_genprime *)command_data;
+    Long_64bits p = prime_generator(genprime_data->mask);
     // printf("p = %lu\t(len=%d)\n", p, ft_unbrlen(p));
 
     Mem_8bits   *prime = ft_ulltoa(p);

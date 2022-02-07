@@ -55,7 +55,7 @@ void    hash_output(t_hash *hash)
     if (~ssl.flags & A &&\
         ((ssl.enc_o_cmd.command & BASE64) || (ssl.enc_o_cmd.command == 0 && ssl.command.command & BASE64)))
         hash_64bytesbloc_output(hash);
-    else if (ssl.command.command & MD)
+    else if (ssl.enc_o_cmd.command & MD || (ssl.enc_o_cmd.command == 0 && ssl.command.command & MD))
         hash_32bits_output(hash);
     else
         hash_8bits_output(hash);
@@ -130,6 +130,7 @@ void    output(t_hash *hash)
     else
         output_hash_based_on_flags(hash);
 
-    if (ssl.command.command & ~CIPHERS)          // Very bad code
+    // Always display '\n'. Except the last one if -q flag is up)
+    if (hash->next || ~ssl.flags & q)
         ft_putstr("\n");
 }

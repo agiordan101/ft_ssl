@@ -3,7 +3,7 @@ cp ../ft_ssl . > /dev/null
 
 echo "\n --- Unitests isprime: This script will display differences if a potential error is found"
 
-echo "False
+echo -n "False
 False
 False
 False
