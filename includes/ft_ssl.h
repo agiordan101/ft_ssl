@@ -24,9 +24,9 @@ typedef unsigned long   Long_64bits;
 # define WORD32_byteSz  sizeof(Word_32bits)      // 4 bytes or 32 bits
 # define LONG64_byteSz  sizeof(Long_64bits)      // 8 bytes or 64 bits
 
-# define ABS(x)          (x >= 0 ? x : -x)
+# define ABS(x)         (x >= 0 ? x : -x)
 # define INTMAXLESS1    (Word_32bits)pow(2, 32) - 1
-// # define BIG_LONG64     ((Long_64bits)1 << 63) - 1
+# define BIG_LONG64     ((Long_64bits)1 << 63) - 1
 
 # define BUFF_SIZE      420
 
@@ -39,33 +39,33 @@ typedef unsigned long   Long_64bits;
 // # define FLAG_HELP  1
 // # define FLAG_I     2
 // # define FLAG_O     3
-# define N_FLAGS    25
+# define N_FLAGS    23
 
 typedef enum    flags {
     // Global flags
-    help=1<<19,
-    i_=1<<1, o=1<<2,
-    q=1<<3, r=1<<9,
-    a=1<<4, A=1<<7,
-    deci=1<<24, enco=1<<25,
+    help=1<<1,
+    i_=1<<2, o=1<<3,
+    a=1<<4, A=1<<5,
+    deci=1<<6, enco=1<<7,
+    q=1<<8, r=1<<9,
 
     // All hashing commands
-    s=1<<10, p=1<<8,
+    s=1<<10, p=1<<11,
     
     // Encyption & Decryption commands
-    d=1<<11, e=1<<12,
+    e=1<<12, d=1<<13, 
 
     // Only des
-    k_des=1<<13, p_des=1<<14, s_des=1<<15, v_des=1<<16,
-    P_des=1<<17, nopad=1<<18, pbkdf2_iter=1<<20,
+    p_des=1<<14, s_des=1<<15, k_des=1<<16, v_des=1<<17,
+    P_des=1<<18, nopad=1<<19, pbkdf2_iter=1<<20,
 
     // Only isprime
     prob=1<<21,
     // Only genprime
-    mask=1<<22,
+    min=1<<22, max=1<<23,
 }               e_flags;
 # define AVFLAGS        (help + p + q + r + d + e + A + P_des + nopad)
-# define AVPARAM        (s + i_ + o + deci + enco + k_des + p_des + s_des + v_des + pbkdf2_iter + prob + mask)
+# define AVPARAM        (s + i_ + o + deci + enco + k_des + p_des + s_des + v_des + pbkdf2_iter + prob + min + max)
 
 # define GLOBAL_FLAGS   (i_ + o + a + A + q + r + help + deci + enco)
 # define DATASTRINPUT_FLAGS  (s + p)
@@ -78,7 +78,7 @@ typedef enum    command_flags {
     MD_flags=       GLOBAL_FLAGS + DATASTRINPUT_FLAGS,
     BASE64_flags=   GLOBAL_FLAGS + DATASTRINPUT_FLAGS + e + d,
     DES_flags=      GLOBAL_FLAGS + p + e + d + DES_FLAGS_ONLY,
-    GENPRIME_flags= GLOBAL_FLAGS + mask,
+    GENPRIME_flags= GLOBAL_FLAGS + min + max,
     ISPRIME_flags=  GLOBAL_FLAGS + DATASTRINPUT_FLAGS + prob,
     GENRSA_flags=   GLOBAL_FLAGS,
 }               e_command_flags;
@@ -212,6 +212,8 @@ Long_64bits     bits_permutations(Long_64bits mem, char *ptable, int bitLen);
 Long_64bits modular_exp(Long_64bits a, Long_64bits b, Long_64bits m);
 Long_64bits modular_mult(Long_64bits a, Long_64bits b, Long_64bits mod);
 Long_64bits ulrandom();
+Long_64bits ulrandom_range(Long_64bits min, Long_64bits max);
+int         ulmult_overflow(Long_64bits a, Long_64bits b);
 
 
 /*
@@ -365,22 +367,50 @@ int         miller_rabin_primality_test(Long_64bits n, float p);
 */
 
 typedef struct  s_genprime {
-    Long_64bits mask;
+    Long_64bits min;
+    Long_64bits max;
 }               t_genprime;
 
 # define    LONG64_LEFTBITMASK  (1UL << 62)
 
 Mem_8bits   *genprime(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
-Long_64bits prime_generator(Long_64bits requiredBits);
+Long_64bits prime_generator(Long_64bits min, Long_64bits max);
 
 
 /*
     RSA Data --------------------------------------
 */
 
+# define    RSA_CARMICHAEL_COPRIME   (1UL << 15 + 1)    // Arbitrary prime number coprime to Carmichael exponent choosen in every RSA cryptosystems
+
+typedef struct  s_rsa_private_key
+{
+    Long_64bits modulus;
+    Long_64bits d;
+}               t_rsa_private_key;
+
+typedef struct  s_rsa_public_key
+{
+    Long_64bits modulus;
+    Long_64bits e;
+}               t_rsa_public_key;
+
+typedef struct  s_rsa
+{
+    Long_64bits         p;
+    Long_64bits         q;
+    Long_64bits         modulus;        // p * q
+    Long_64bits         carmichael_exp;
+    Long_64bits         d;
+    t_rsa_private_key   privkey;
+    t_rsa_public_key    pubkey;
+}               t_rsa;
+
+
 Mem_8bits   *rsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
 Mem_8bits   *genrsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
 
+void        rsa_generation(t_rsa *rsa, t_rsa_private_key *privkey, t_rsa_public_key *pubkey);
 
 
 /*

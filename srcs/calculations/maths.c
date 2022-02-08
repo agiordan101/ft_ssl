@@ -44,13 +44,14 @@ inline Long_64bits modular_exp(Long_64bits a, Long_64bits b, Long_64bits mod)
     return res;
 }
 
-inline Long_64bits ulrandom()
+Long_64bits        ulrandom()
 {
     static int  fd = -2;
     static char buff[URANDBUFF];
     static char *buff_offset = buff;
     static int  data_left = 0;
     int         ret;
+    Long_64bits ulr;
 
     if (fd == -2)
         fd = open("/dev/urandom", O_RDONLY);
@@ -65,7 +66,46 @@ inline Long_64bits ulrandom()
         data_left = ret;
         buff_offset = buff;
     }
+    ulr = *((Long_64bits *)buff_offset);
     data_left -= LONG64_byteSz;
     buff_offset += LONG64_byteSz;
-    return *((Long_64bits *)buff_offset);
+    return ulr;
 }
+
+inline Long_64bits  ulrandom_range(Long_64bits min, Long_64bits max)
+{
+    return min + ulrandom() % (max - min);
+}
+
+inline int          ulmult_overflow(Long_64bits a, Long_64bits b)
+{
+    Long_64bits c = BIG_LONG64;
+    // printf("%lu\n/\n%lu\n<\n%lu ?\n", c, b, a);
+    c /= b;
+    // printf("%lu\n<\n%lu ? %d\n", c, a, c < a);
+    // b = b ? BIG_LONG64 / b : BIG_LONG64;
+    return c < a;
+}
+
+// int lpf(int n){
+// 	int Max = -1;
+// 	while(n % 2 == 0){
+// 		Max = 2;
+// 		n = n / 2;
+// 	}
+// 	for(int i = 3; i * i <= n; i += 2){
+// 		while(n % i == 0){
+// 			Max = i;
+// 			n = n / i;
+// 		}
+// 	}
+// 	if(n > 2 && n > Max)
+// 		Max = n;
+// 	return Max;
+// }
+ 
+// bool psmooth(int n, int p){
+// 	if(lpf(n) <= p)
+// 		return true;
+// 	return false;
+// }

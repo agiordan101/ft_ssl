@@ -195,8 +195,10 @@ int     param_handler(e_flags flag, char *av_next, int *i)
             isprime_prob_error(p);
         ((t_isprime *)ssl.command.command_data)->prob_requested = (p == 100 ? PROBMIN_ISPRIME : 1 - (float)p / 100);
     }
-    else if (flag & mask)
-        ((t_genprime *)ssl.command.command_data)->mask = parse_keys(av_next);
+    else if (flag & min)
+        ((t_genprime *)ssl.command.command_data)->min = ft_atoi(av_next);
+    else if (flag & max)
+        ((t_genprime *)ssl.command.command_data)->max = ft_atoi(av_next);
 
     (*i)++;
     return 0;
@@ -262,8 +264,10 @@ e_flags     strToFlag(char *str)
     if (!ft_strcmp(str, "-prob"))
         return prob;
     
-    if (!ft_strcmp(str, "-mask"))
-        return mask;
+    if (!ft_strcmp(str, "-min"))
+        return min;
+    if (!ft_strcmp(str, "-max"))
+        return max;
     return 0;
 }
 

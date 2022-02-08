@@ -10,20 +10,16 @@ static void     print_flag_usage(e_flags flag)
         ft_putstderr("\t-o\toutput file\n");
     else if (flag & a)
         ft_putstderr("\t-a\tdecode/encode the input/output in base64, depending on the encrypt mode\n");
-    // else if (flag & ai)
-    //     ft_putstderr("\t-ai\tdecode the input in base64\n");
-    // else if (flag & ao)
-    //     ft_putstderr("\t-ao\tencode the output in base64\n");
     else if (flag & A)
         ft_putstderr("\t-A\tUsed with -[a | -deci base64 | -enco base64] to specify base64 buffer as a single line\n");
-    else if (flag & q)
-        ft_putstderr("\t-q\tquiet mode\n");
-    else if (flag & r)
-        ft_putstderr("\t-r\treverse the format of the output\n");
     else if (flag & deci)
         ft_putstderr("\t-deci\tdecode the input with the given hashing command (command flags can be passed)\n");
     else if (flag & enco)
         ft_putstderr("\t-enco\tencode the output with the given hashing command (command flags can be passed)\n");
+    else if (flag & q)
+        ft_putstderr("\t-q\tquiet mode\n");
+    else if (flag & r)
+        ft_putstderr("\t-r\treverse the format of the output\n");
     else if (flag & s)
         ft_putstderr("\t-s\tinput data as string\n");
     else if (flag & p)
@@ -32,16 +28,12 @@ static void     print_flag_usage(e_flags flag)
         ft_putstderr("\t-e\tencrypt mode (default mode) (-e has priority over -d)\n");
     else if (flag & d)
         ft_putstderr("\t-d\tdecrypt mode\n");
-    // else if (flag & ecb)
-    //     ft_putstderr("\t-ecb\tECB mode of DES (Electronic Code Book)\n");
-    // else if (flag & cbc)
-    //     ft_putstderr("\t-cbc\tCBC mode of DES (Cipher Block Chaining)\n");
-    else if (flag & k_des)
-        ft_putstderr("\t-k\tsend the key in hex\n");
     else if (flag & p_des)
         ft_putstderr("\t-p\tsend password in ascii\t(Override the behavior of global flag -p)\n");
     else if (flag & s_des)
         ft_putstderr("\t-s\tsend the salt in hex\t(Override the behavior of global flag -s if any des command is past)\n");
+    else if (flag & k_des)
+        ft_putstderr("\t-k\tsend the key in hex\n");
     else if (flag & v_des)
         ft_putstderr("\t-v\tsend initialization vector in hex\n");
     else if (flag & P_des)
@@ -49,11 +41,13 @@ static void     print_flag_usage(e_flags flag)
     else if (flag & nopad)
         ft_putstderr("\t-nopad\tdisable standard block padding\n");
     else if (flag & pbkdf2_iter)
-        ft_putstderr("\t-iter\tSpecify the iteration count of PBKDF2\n");
+        ft_putstderr("\t-iter\tspecify the iteration count of PBKDF2\n");
     else if (flag & prob)
         ft_putstderr("\t-prob\tprobability requested for Miller-Rabin primality test in percentile (0 < p <= 100)\n");
-    else if (flag & mask)
-        ft_putstderr("\t-mask\tmask in hex (force bits of random numbers before primality tests)\n");
+    else if (flag & min)
+        ft_putstderr("\t-min\tsend lower bound for prime generation (Default as 0)\n");
+    else if (flag & max)
+        ft_putstderr("\t-max\tsend upper bound for prime generation (Default as 2^63 - 1)\n");
     else
     {
         printf("WTFF ?\n");
@@ -63,7 +57,7 @@ static void     print_flag_usage(e_flags flag)
 
 static void     print_command_flags(e_flags flags)
 {
-    for (int i = 0, flag = 1; i < N_FLAGS; i++, flag <<= 1)
+    for (int i = 1, flag = 1; i < N_FLAGS + 1; i++, flag <<= 1)
         if (flag & flags)
             print_flag_usage(flag);
 }
