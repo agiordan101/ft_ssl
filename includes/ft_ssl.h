@@ -214,6 +214,8 @@ Long_64bits modular_mult(Long_64bits a, Long_64bits b, Long_64bits mod);
 Long_64bits ulrandom();
 Long_64bits ulrandom_range(Long_64bits min, Long_64bits max);
 int         ulmult_overflow(Long_64bits a, Long_64bits b);
+Long_64bits gcd(Long_64bits a, Long_64bits b);
+Long_64bits mod_mult_inverse(Long_64bits a, Long_64bits b);
 
 
 /*
@@ -381,27 +383,25 @@ Long_64bits prime_generator(Long_64bits min, Long_64bits max);
     RSA Data --------------------------------------
 */
 
-# define    RSA_CARMICHAEL_COPRIME   (1UL << 15 + 1)    // Arbitrary prime number coprime to Carmichael exponent choosen in every RSA cryptosystems
+# define    RSA_ENC_EXP (1UL << 15 + 1)    // Arbitrary prime number, high chances to be coprime with Euler / Carmichael exp, choosen in every RSA cryptosystems
+// # define    RSA_ENC_EXP 3
 
 typedef struct  s_rsa_private_key
 {
-    Long_64bits modulus;
-    Long_64bits d;
+    Long_64bits modulus;    // p * q
+    Long_64bits dec_exp;    // Modular multiplicative inverse of RSA_ENC_EXP and Euler fonction
 }               t_rsa_private_key;
 
 typedef struct  s_rsa_public_key
 {
-    Long_64bits modulus;
-    Long_64bits e;
+    Long_64bits modulus;    // p * q
+    Long_64bits enc_exp;    // Default as 1 << 15 + 1 for faster modular exponentiation (Only 2 bits)
 }               t_rsa_public_key;
 
 typedef struct  s_rsa
 {
     Long_64bits         p;
     Long_64bits         q;
-    Long_64bits         modulus;        // p * q
-    Long_64bits         carmichael_exp;
-    Long_64bits         d;
     t_rsa_private_key   privkey;
     t_rsa_public_key    pubkey;
 }               t_rsa;

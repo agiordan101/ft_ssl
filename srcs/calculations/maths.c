@@ -87,6 +87,85 @@ inline int          ulmult_overflow(Long_64bits a, Long_64bits b)
     return c < a;
 }
 
+inline Long_64bits  gcd(Long_64bits a, Long_64bits b)
+{
+    /*
+        Euclidean algorithm
+            - a = a % b
+            - Swap a and b
+    */
+    while (b)
+    {
+        a %= b;
+        a ^= b;
+        b ^= a;
+        a ^= b;
+    }
+    printf("GCD = %lu\n", a);
+    return a;
+}
+
+Long_64bits         extended_euclide_algo(Long_64bits a, Long_64bits b, Long_64bits *u, Long_64bits *v)
+/*
+    Compute PGCD(a, b) and return it
+    Save value of one Bézout coefficents couple: (u, v)
+
+    fonction euclide-étendu(a, b)
+    si b = 0 alors
+          retourner (a, 1, 0)
+    sinon
+          (d', u', v') := euclide-étendu(b, a mod b)
+          retourner (d', v', u' - (a÷b)v')
+*/
+{
+    if (a == 0)
+    {
+        *u = 0;
+        *v = 1;
+        return b;
+    }
+  
+    Long_64bits u1, v1;
+    Long_64bits gcd = extended_euclide_algo(b % a, a, &u1, &v1);
+
+    *v = u1;
+    // if (ulmult_overflow(b / a, u1))
+    // {
+    //     printf("OVERFLOW\n");
+    //     exit(0);
+    // }
+    *u = v1 - (b / a) * u1;
+    // *u = v1 - modular_mult(b / a, u1, BIG_LONG64);
+    return gcd;
+}
+
+inline Long_64bits  mod_mult_inverse(Long_64bits a, Long_64bits b)
+/*
+    Compute PGCD(a, b), u and v like:
+    au + bv = PGCD(a, b)
+
+    With a and b primes, u is the modular multiplicative inverse of a and b
+*/
+{
+    Long_64bits u;
+    Long_64bits v;
+    Long_64bits g = extended_euclide_algo(a, b, &u, &v);
+    printf("a * u + b * v = PGCD(a, b)\n");
+    printf("%lu * %lu + %lu * %lu = %lu\n", a, u, b, v, g);
+    // Handle negative case
+    if (u < 0)
+    {
+        printf("NEGATIVE CASE MOD MULT INVERSE\n");
+        u = (u % b + b) % b;
+    }
+    if (g != gcd(a, b))
+    {
+        printf("pgcd fail\n");
+        exit(0);
+    }
+    return u;
+}
+
 // int lpf(int n){
 // 	int Max = -1;
 // 	while(n % 2 == 0){
