@@ -42,7 +42,7 @@ void        rsa_generation(t_rsa *rsa, t_rsa_private_key *privkey, t_rsa_public_
     {
         // Only 2 bits for faster modular exponentiations
         rsa->pubkey.enc_exp = rsa->pubkey.enc_exp == 2 ? 1 : (rsa->pubkey.enc_exp >> 1) + 1;
-        printf("RSA_ENC_EXP > euler_f, new e: %lu\n", rsa->pubkey.enc_exp);
+        printf("RSA_ENC_EXP > euler_f or PGCD != 1, new e: %lu\n", rsa->pubkey.enc_exp);
     }
 
     // porbleme from mod_mult_inverse
@@ -63,27 +63,28 @@ Mem_8bits   *genrsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByt
     Long_64bits pt;
 
     int c = 0;
-    int tot = 1000;
+    int tot = 100;
     for (int i = 0; i < tot; i++)
     {
         rsa_generation(&rsa, &rsa.privkey, &rsa.pubkey);
 
         // m = ulrandom();
-        m = 123;
+        m = 12345;
         
         if (rsa.privkey.modulus % m == 0)
         {
             printf("rsa.privkey.modulus %% %lu == 0\n", m);
             exit(0);
         }
-        printf("rsa.privkey.modulus %% %lu = %lu\n", m, rsa.privkey.modulus % m);
+        // printf("rsa.privkey.modulus %% %lu = %lu\n", m, rsa.privkey.modulus % m);
         
         ciphertext = modular_exp(m, rsa.pubkey.enc_exp, rsa.pubkey.modulus);
         pt = modular_exp(ciphertext, rsa.privkey.dec_exp, rsa.privkey.modulus);
-        printf("\nPlaintext in : %lu\n", m);
         // printf("%lu^%lu mod %lu = %lu\n", m, rsa.pubkey.enc_exp, rsa.pubkey.modulus, ciphertext);
         // printf("%lu^%lu mod %lu = %lu\n", ciphertext, rsa.privkey.dec_exp, rsa.privkey.modulus, pt);
-        printf("Plaintext out: %lu\n", pt);
+        printf("Plaintext in : %lu\n", m);
+        printf("Ciphertext   : %lu\n", ciphertext);
+        printf("Plaintext out: %lu\n\n", pt);
         if (m == pt)
             c++;
     }

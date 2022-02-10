@@ -12,7 +12,7 @@
 //     return a_pow;
 // }
 
-inline Long_64bits modular_mult(Long_64bits a, Long_64bits b, Long_64bits mod)
+inline long long modular_mult(long long a, Long_64bits b, Long_64bits mod)
 {
     Long_64bits res = 0;
  
@@ -101,14 +101,14 @@ inline Long_64bits  gcd(Long_64bits a, Long_64bits b)
         b ^= a;
         a ^= b;
     }
-    printf("GCD = %lu\n", a);
+    // printf("GCD = %lu\n", a);
     return a;
 }
 
-Long_64bits         extended_euclide_algo(Long_64bits a, Long_64bits b, Long_64bits *u, Long_64bits *v)
+Long_64bits         extended_euclide_algo(Long_64bits a, Long_64bits b, long long *u, long long *v)
 /*
     Compute PGCD(a, b) and return it
-    Save value of one Bézout coefficents couple: (u, v)
+    Save value of one Bézout coefficents couple: (u, v) (Signed numbers)
 
     fonction euclide-étendu(a, b)
     si b = 0 alors
@@ -118,73 +118,75 @@ Long_64bits         extended_euclide_algo(Long_64bits a, Long_64bits b, Long_64b
           retourner (d', v', u' - (a÷b)v')
 */
 {
+    long long u1;
+    long long v1;
+
     if (a == 0)
     {
         *u = 0;
         *v = 1;
         return b;
     }
-  
-    Long_64bits u1, v1;
     Long_64bits gcd = extended_euclide_algo(b % a, a, &u1, &v1);
-
-    *v = u1;
-    // if (ulmult_overflow(b / a, u1))
-    // {
-    //     printf("OVERFLOW\n");
-    //     exit(0);
-    // }
     *u = v1 - (b / a) * u1;
-    // *u = v1 - modular_mult(b / a, u1, BIG_LONG64);
+    *v = u1;
+
+    // if (b == 0)
+    // {
+    //     *u = 1;
+    //     *v = 0;
+    //     return a;
+    // }
+    // Long_64bits gcd = extended_euclide_algo(b, a % b, &u1, &v1);
+    // *u = v1;
+    // *v = u1 - (a / b) * v1;
+
+    // printf("%lu * %lld + %lu * %lld = %lld (Real GCD=%lu)\n", a, *u, b, *v, a*(*u)+b*(*v), gcd);
     return gcd;
 }
+    // *v = u1;
+    // *u = v1 - (a / b) * u1;
 
 inline Long_64bits  mod_mult_inverse(Long_64bits a, Long_64bits b)
 /*
-    Compute PGCD(a, b), u and v like:
-    au + bv = PGCD(a, b)
+    Thanks to extended Euclidean algorithm,
+    we can compute PGCD(a, b), u and v like:
+        au + bv = PGCD(a, b)
+    a and b are coprime so:
 
-    With a and b primes, u is the modular multiplicative inverse of a and b
+        a * u + b * v = 1
+        a * u = 1 - b * v
+        a * u = 1 mod b
+        u is the modular multiplicative inverse of a and b
 */
 {
-    Long_64bits u;
-    Long_64bits v;
+    long long u;
+    long long v;
     Long_64bits g = extended_euclide_algo(a, b, &u, &v);
-    printf("a * u + b * v = PGCD(a, b)\n");
-    printf("%lu * %lu + %lu * %lu = %lu\n", a, u, b, v, g);
-    // Handle negative case
-    if (u < 0)
-    {
-        printf("NEGATIVE CASE MOD MULT INVERSE\n");
-        u = (u % b + b) % b;
-    }
+
+    printf("[Modular multiplicative inverse of a and b]\n");
+    printf("%lu * %lld + %lu * %lld = %lld (Real gcd()=%lu)\n", a, u, b, v, a*u+b*v, gcd(a, b));
     if (g != gcd(a, b))
     {
-        printf("pgcd fail\n");
+        printf("a * u + b * v != PGCD(a, b) (real pgcd=1 fail)\n");
         exit(0);
     }
+    printf("a * u + b * v = PGCD(a, b)\n");
+
+    // Handle negative case: 1 mod b = 1 + kb with k relative integer (When u < 0, k = -1)
+    if (u < 0)
+        u += b;
+
+    long long mm = modular_mult(u, a, b);
+    printf("%lu * %lld = %lld mod %lu\n", a, u, mm, b);
+
+    if (mm != 1 && mm != -b - 1)
+    {
+        printf("a * u != 1 mod b\n");
+        printf("(%lu * %lld) != 1 mod %lu\n", a, u, b);
+        printf("(%lld * %lu) %% %lu = %lld\n", u, a, b, mm);
+        exit(0);
+    }
+    printf("a * u = 1 mod b\n");
     return u;
 }
-
-// int lpf(int n){
-// 	int Max = -1;
-// 	while(n % 2 == 0){
-// 		Max = 2;
-// 		n = n / 2;
-// 	}
-// 	for(int i = 3; i * i <= n; i += 2){
-// 		while(n % i == 0){
-// 			Max = i;
-// 			n = n / i;
-// 		}
-// 	}
-// 	if(n > 2 && n > Max)
-// 		Max = n;
-// 	return Max;
-// }
- 
-// bool psmooth(int n, int p){
-// 	if(lpf(n) <= p)
-// 		return true;
-// 	return false;
-// }

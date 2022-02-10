@@ -210,7 +210,8 @@ Long_64bits     bits_permutations(Long_64bits mem, char *ptable, int bitLen);
 
 // Long_64bits ft_pow(Long_64bits a, int pow);
 Long_64bits modular_exp(Long_64bits a, Long_64bits b, Long_64bits m);
-Long_64bits modular_mult(Long_64bits a, Long_64bits b, Long_64bits mod);
+// Long_64bits modular_mult(Long_64bits a, Long_64bits b, Long_64bits mod);
+long long   modular_mult(long long a, Long_64bits b, Long_64bits mod);
 Long_64bits ulrandom();
 Long_64bits ulrandom_range(Long_64bits min, Long_64bits max);
 int         ulmult_overflow(Long_64bits a, Long_64bits b);
