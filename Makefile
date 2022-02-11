@@ -25,7 +25,9 @@ SRC			=	$(NAME).c \
 				algorithms/md/md5.c \
 				algorithms/ciphers/des.c \
 				algorithms/ciphers/base64.c \
-				algorithms/standard/genrsa.c
+				algorithms/standard/rsa.c \
+				algorithms/standard/genrsa.c \
+				algorithms/standard/rsa_cryptosystem.c
 
 BIN_PATH	=	./bins/
 BIN			=	$(SRC:.c=.o)

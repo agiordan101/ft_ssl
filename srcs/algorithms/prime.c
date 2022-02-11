@@ -126,7 +126,7 @@ Mem_8bits   *isprime(void *command_data, Mem_8bits **plaintext, Long_64bits ptBy
             isprime_data->prob_requested ?\
                 isprime_data->prob_requested :\
                 PROBMIN_ISPRIME,
-            1
+            0
         )
     )
     {
@@ -189,12 +189,12 @@ Long_64bits prime_generator(Long_64bits min, Long_64bits max, int verbose)
     {
         p = ulrandom_range(min, max);
 
+        //OpenSSL '.' symbol, represents each number which has passed an initial sieve test
+        if (verbose)
+            ft_putstderr(".");
+
         if (first_primes_multiple(p))
             continue ;
-
-        //OpenSSL '\n' symbol, represents each number which has passed an initial sieve test
-        else if (verbose)
-            ft_putstderr(".");
 
         is_prime = miller_rabin_primality_test(p, PROBMIN_ISPRIME, verbose);
     }

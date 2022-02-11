@@ -208,7 +208,7 @@ void    	ft_putnbr(int fd, int n)
     }
 }
 
-// About hexadecimal conversions ------------------------------------------------------------------
+// About hexadecinmal conversions ------------------------------------------------------------------
 
 inline Long_64bits  ft_strtoHex(char *str)
 {

@@ -39,14 +39,14 @@ typedef unsigned long   Long_64bits;
 // # define FLAG_HELP  1
 // # define FLAG_I     2
 // # define FLAG_O     3
-# define N_FLAGS    23
+# define N_FLAGS        27
 
 typedef enum    flags {
     // Global flags
     help=1<<1,
     i_=1<<2, o=1<<3,
     a=1<<4, A=1<<5,
-    deci=1<<6, enco=1<<7,
+    decin=1<<6, encout=1<<7,
     q=1<<8, r=1<<9,
 
     // All hashing commands
@@ -54,6 +54,7 @@ typedef enum    flags {
     
     // Encyption & Decryption commands
     e=1<<12, d=1<<13, 
+    passin=1<<28, passout=1<<29,
 
     // Only des
     p_des=1<<14, s_des=1<<15, k_des=1<<16, v_des=1<<17,
@@ -63,14 +64,21 @@ typedef enum    flags {
     prob=1<<21,
     // Only genprime
     min=1<<22, max=1<<23,
+    
+    // For commands that use randomness
+    rand_path=1<<24,
+
+    // RSA cryptosystem
+    inform=1<<25, outform=1<<26,
+    check=1<<27,
 }               e_flags;
-# define AVFLAGS        (help + p + q + r + d + e + A + P_des + nopad)
-# define AVPARAM        (s + i_ + o + deci + enco + k_des + p_des + s_des + v_des + pbkdf2_iter + prob + min + max)
+# define AVFLAGS        (help + p + q + r + d + e + A + P_des + nopad + check)
+# define AVPARAM        (s + i_ + o + decin + encout + k_des + p_des + s_des + v_des + pbkdf2_iter + prob + min + max + rand_path + inform + outform + passin + passout)
 
-# define GLOBAL_FLAGS   (i_ + o + a + A + q + r + help + deci + enco)
-# define DATASTRINPUT_FLAGS  (s + p)
-# define DES_FLAGS_ONLY      (k_des + p_des + s_des + v_des + P_des + nopad + pbkdf2_iter)
-
+# define GLOBAL_FLAGS           (help + i_ + o + a + A + q + r + decin + encout + passin + passout)
+# define DATASTRINPUT_FLAGS     (s + p)
+# define DES_FLAGS_ONLY         (k_des + p_des + s_des + v_des + P_des + nopad + pbkdf2_iter)
+# define RSA_FLAGS_ONLY         (inform + outform + check)
 
 //  COMMAND & FLAGS relationship --------------------------------------------------------
 
@@ -78,28 +86,30 @@ typedef enum    command_flags {
     MD_flags=       GLOBAL_FLAGS + DATASTRINPUT_FLAGS,
     BASE64_flags=   GLOBAL_FLAGS + DATASTRINPUT_FLAGS + e + d,
     DES_flags=      GLOBAL_FLAGS + p + e + d + DES_FLAGS_ONLY,
-    GENPRIME_flags= GLOBAL_FLAGS + min + max,
+    GENPRIME_flags= help + o + q + encout + passout + min + max + rand_path,
     ISPRIME_flags=  GLOBAL_FLAGS + DATASTRINPUT_FLAGS + prob,
-    GENRSA_flags=   GLOBAL_FLAGS,
+    GENRSA_flags=   help + o + q + encout + passout + rand_path,
+    RSA_flags=      GLOBAL_FLAGS + RSA_FLAGS_ONLY,
 }               e_command_flags;
 
 
 //  COMMANDS --------------------------------------------------------
 
-# define N_COMMANDS 8
+# define N_COMMANDS 9
 
 typedef enum    command {
     MD5=1<<1, SHA256=1<<2,
     BASE64=1, DESECB=1<<3, DESCBC=1<<4,
     GENPRIME=1<<5, ISPRIME=1<<6,
     GENRSA=1<<7,
-    // RSA=1<<8, RSAUTL=1<<9
+    RSA=1<<8,
+    // RSAUTL=1<<9
 }               e_command;
 # define MD                     (MD5 + SHA256)
 # define DES                    (DESECB + DESCBC)
 # define CIPHERS                (BASE64 + DES)
 # define PRIMES                 (GENPRIME + ISPRIME)
-# define STANDARDS              (GENRSA)
+# define STANDARDS              (GENRSA + RSA)
 
 # define HASHING_COMMANDS       (MD + CIPHERS)
 # define THASHNEED_COMMANDS     (HASHING_COMMANDS + ISPRIME)
@@ -107,10 +117,10 @@ typedef enum    command {
 
 typedef struct  s_command {
     e_command       command;
+    e_command_flags command_flags;
     char            *command_title;
     Mem_8bits       *(*command_addr)(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
     void            *command_data;
-    e_command_flags command_flags;
 }               t_command;
 
 
@@ -384,6 +394,12 @@ Long_64bits prime_generator(Long_64bits min, Long_64bits max, int verbose);
     RSA Data --------------------------------------
 */
 
+typedef enum    rsa_form
+{
+    PEM=1<<1,   
+    DER=1<<2,
+}               e_rsa_form;
+
 # define    RSA_ENC_EXP (1UL << 15 + 1)    // Arbitrary prime number, high chances to be coprime with Euler / Carmichael exp, choosen in every RSA cryptosystems
 
 typedef struct  s_rsa_private_key
@@ -398,19 +414,28 @@ typedef struct  s_rsa_public_key
     Long_64bits enc_exp;    // Default as 1 << 15 + 1 for faster modular exponentiation (Only 2 bits)
 }               t_rsa_public_key;
 
-typedef struct  s_rsa
+typedef struct  s_rsa_keys
 {
     Long_64bits         p;
     Long_64bits         q;
     t_rsa_private_key   privkey;
     t_rsa_public_key    pubkey;
-}               t_rsa;
+}               t_rsa_keys;
 
+typedef struct  s_rsa
+{
+    int         check;
+    e_rsa_form  inform;
+    e_rsa_form  outform;
+    t_rsa_keys  keys;
+}               t_rsa;
 
 Mem_8bits   *rsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
 Mem_8bits   *genrsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
 
-void        rsa_generation(t_rsa *rsa, t_rsa_private_key *privkey, t_rsa_public_key *pubkey);
+void        rsa_generation(t_rsa_keys *rsa, t_rsa_private_key *privkey, t_rsa_public_key *pubkey);
+Long_64bits rsa_encryption(t_rsa_public_key *pubkey, Long_64bits m);
+Long_64bits rsa_decryption(t_rsa_private_key *privkey, Long_64bits ciphertext);
 
 
 /*
@@ -431,18 +456,17 @@ typedef struct  s_ssl
     t_command       enc_o_cmd;
 
     t_des           des_flagsdata;
+    Mem_8bits       *passin;
+    Mem_8bits       *passout;
 
     e_flags         flags;
-    // Key_64bits      key_arg;
-    // Key_64bits      salt_arg;
-    // Key_64bits      vector_arg;
-    // Mem_8bits       *pass_arg;
 
     t_hash      *hash;
     char        *output_file;
     int         fd_out;
     
-    int         urandom_fd;
+    char        *ulrandom_path;
+    int         ulrandom_fd;
 }               t_ssl;
 
 extern t_ssl    ssl;

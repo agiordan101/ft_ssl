@@ -46,23 +46,22 @@ inline Long_64bits modular_exp(Long_64bits a, Long_64bits b, Long_64bits mod)
 
 Long_64bits        ulrandom()
 {
-    static int  fd = -2;
     static char buff[URANDBUFF];
     static char *buff_offset = buff;
     static int  data_left = 0;
     int         ret;
     Long_64bits ulr;
 
-    if (fd == -2)
-        fd = open("/dev/urandom", O_RDONLY);
-    if (fd == -1)
-        open_failed("urandom() failed: Cannot open file '/dev/urandom' in O_RDONLY mode", "/dev/urandom");
+    if (ssl.ulrandom_fd == -2)
+        ssl.ulrandom_fd = open(ssl.ulrandom_path, O_RDONLY);
+    if (ssl.ulrandom_fd == -1)
+        open_failed("ulrandom() failed: Cannot open random data file in O_RDONLY mode", ssl.ulrandom_path);
 
     if (data_left < LONG64_byteSz)
     {
-        // printf("read / data_left=%d / fd=%d\n", data_left, fd);
-        if ((ret = read(fd, buff, URANDBUFF)) == -1)
-            read_failed("urandom() failed: Cannot read file '/dev/urandom'", fd);
+        // printf("read / data_left=%d / ssl.ulrandom_fd=%d\n", data_left, ssl.ulrandom_fd);
+        if ((ret = read(ssl.ulrandom_fd, buff, URANDBUFF)) == -1)
+            read_failed("ulrandom() failed: Cannot read file '/dev/urandom' or -rand file pass in arg", ssl.ulrandom_fd);
         data_left = ret;
         buff_offset = buff;
     }

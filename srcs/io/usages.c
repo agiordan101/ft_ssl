@@ -11,11 +11,11 @@ static void     print_flag_usage(e_flags flag)
     else if (flag & a)
         ft_putstderr("\t-a\tdecode/encode the input/output in base64, depending on the encrypt mode\n");
     else if (flag & A)
-        ft_putstderr("\t-A\tUsed with -[a | -deci base64 | -enco base64] to specify base64 buffer as a single line\n");
-    else if (flag & deci)
-        ft_putstderr("\t-deci\tdecode the input with the given hashing command (command flags can be passed)\n");
-    else if (flag & enco)
-        ft_putstderr("\t-enco\tencode the output with the given hashing command (command flags can be passed)\n");
+        ft_putstderr("\t-A\tUsed with -[a | -decin base64 | -encout base64] to specify base64 buffer as a single line\n");
+    else if (flag & decin)
+        ft_putstderr("\t-decin\tdecode the input with the given hashing command (command flags can be passed)\n");
+    else if (flag & encout)
+        ft_putstderr("\t-encout\tencode the output with the given hashing command (command flags can be passed)\n");
     else if (flag & q)
         ft_putstderr("\t-q\tquiet mode\n");
     else if (flag & r)
@@ -28,8 +28,10 @@ static void     print_flag_usage(e_flags flag)
         ft_putstderr("\t-e\tencrypt mode (default mode) (-e has priority over -d)\n");
     else if (flag & d)
         ft_putstderr("\t-d\tdecrypt mode\n");
-    else if (flag & p_des)
-        ft_putstderr("\t-p\tsend password in ascii\t(Override the behavior of global flag -p)\n");
+    else if (flag & passin)
+        ft_putstderr("\t-p\tsend password for des input decryption\n");
+    else if (flag & passout)
+        ft_putstderr("\t-p\tsend password for des output encryption\n");
     else if (flag & s_des)
         ft_putstderr("\t-s\tsend the salt in hex\t(Override the behavior of global flag -s if any des command is past)\n");
     else if (flag & k_des)
@@ -45,9 +47,17 @@ static void     print_flag_usage(e_flags flag)
     else if (flag & prob)
         ft_putstderr("\t-prob\tprobability requested for Miller-Rabin primality test in percentile (0 < p <= 100)\n");
     else if (flag & min)
-        ft_putstderr("\t-min\tsend lower bound for prime generation (Default as 0)\n");
+        ft_putstderr("\t-min\tlower bound for prime generation (Default as 0)\n");
     else if (flag & max)
-        ft_putstderr("\t-max\tsend upper bound for prime generation (Default as 2^63 - 1)\n");
+        ft_putstderr("\t-max\tupper bound for prime generation (Default as 2^63 - 1)\n");
+    else if (flag & rand_path)
+        ft_putstderr("\t-rand\tA file containing random data used to seed the random number generator\n");
+    else if (flag & inform)
+        ft_putstderr("\t-inform\tinput format [PEM | DER] (Default as PEM)\n");
+    else if (flag & outform)
+        ft_putstderr("\t-outform\toutput format [PEM | DER] (Default as PEM)\n");
+    else if (flag & check)
+        ft_putstderr("\t-check\tverify key consistency\n");
     else
     {
         printf("WTFF ?\n");
@@ -57,9 +67,12 @@ static void     print_flag_usage(e_flags flag)
 
 static void     print_command_flags(e_flags flags)
 {
-    for (int i = 1, flag = 1; i < N_FLAGS + 1; i++, flag <<= 1)
+    for (int i = 1, flag = 2; i < N_FLAGS + 1; i++, flag <<= 1)
+    {
+        // printf("flag %d: %d & %d = %d\n", i, flag, rand_path, flag & flags);
         if (flag & flags)
             print_flag_usage(flag);
+    }
 }
 
 static void     print_md_usage()
@@ -102,7 +115,7 @@ static void     print_isprime_usage()
 static void     print_genrsa_usage()
 {
     ft_putstderr("Usage: ./ft_ssl genrsa [files] [flags]\n");
-    ft_putstderr("Generating RSA private key, 64-bits long modulus.\n\n");
+    ft_putstderr("Generating RSA private key, 64 bit long modulus.\n\n");
     ft_putstderr("Valid flags are:\n");
     print_command_flags(GENRSA_flags);
 }

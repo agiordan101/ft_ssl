@@ -23,7 +23,7 @@
 
 t_ssl    ssl;
 
-char    *ask_password()
+char        *ask_password(t_command *cmd)
 {
     char *firstmsg_1 = "enter ";
     char *password;
@@ -32,8 +32,8 @@ char    *ask_password()
     {
         char *secondmsg_1 = "Verifying - enter ";
         char *msg_2 = " encryption password:";
-        char *firstmsg = ft_strinsert(firstmsg_1, ssl.command.command_title, msg_2);
-        char *secondmsg = ft_strinsert(secondmsg_1, ssl.command.command_title, msg_2);
+        char *firstmsg = ft_strinsert(firstmsg_1, cmd->command_title, msg_2);
+        char *secondmsg = ft_strinsert(secondmsg_1, cmd->command_title, msg_2);
 
         char *password2 = ft_strdup(getpass(firstmsg));
         password = getpass(secondmsg);
@@ -58,7 +58,7 @@ char    *ask_password()
     return password;
 }
 
-void    t_command_free(t_command *cmd)
+static void    t_command_free(t_command *cmd)
 {
     if (cmd->command_addr == des && ((t_des *)cmd->command_data)->password)
         free(((t_des *)cmd->command_data)->password);
@@ -66,7 +66,7 @@ void    t_command_free(t_command *cmd)
         free(cmd->command_data);
 }
 
-void    ssl_free()
+static void    ssl_free()
 {
     t_command_free(&ssl.dec_i_cmd);
     t_command_free(&ssl.command);
@@ -74,24 +74,34 @@ void    ssl_free()
 
     t_hash_free(ssl.hash);
 
+    free(ssl.ulrandom_path);
+    if (ssl.ulrandom_fd > 0)
+        close(ssl.ulrandom_fd);
+
     if (ssl.flags & o)
         close(ssl.fd_out);
 }
 
-void    freexit(int exit_state)
+void          freexit(int exit_state)
 {
     ssl_free();
     exit(exit_state);
+}
+
+static void    t_ssl_init(t_ssl *ssl)
+{
+    ft_bzero(ssl, sizeof(t_ssl));
+    ssl->fd_out = 1;
+    ssl->ulrandom_path = ft_strdup("/dev/urandom");
+    ssl->ulrandom_fd = -2;      // Arbitrary value, no random file is open
 }
 
 int     main(int ac, char **av)
 {
     int     ret;
 
-    ft_bzero(&ssl, sizeof(t_ssl));
-    ssl.fd_out = 1;
     srand(time(NULL));
-
+    t_ssl_init(&ssl);
     if ((ret = parsing(ac, av)))
         freexit(ret);
 
@@ -101,13 +111,13 @@ int     main(int ac, char **av)
             open_failed(" in ft_ssl main() function\n", ssl.output_file);
 
     // Decode input
-    if (ssl.flags & deci)
+    if (ssl.flags & decin)
         t_hash_decode_inputs(ssl.hash);
 
     t_hash_hashing(ssl.hash);
 
     // Encode output
-    if (ssl.flags & enco)
+    if (ssl.flags & encout)
         t_hash_encode_output(ssl.hash);
     // Base64 encode output (Do not encode if command_familly is already base64 in encryption mode)
     // if (ssl.flags & ao && !(ssl.command.command_addr == base64 && ssl.flags & e))

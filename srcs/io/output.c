@@ -16,8 +16,9 @@ void    hash_64bytesbloc_output(t_hash *p)
                 hash + 64 < p->hash + p->hashByteSz ? 64 : p->hash + p->hashByteSz - hash
             )) < 0)
             write_failed("write() failed in hash_8bits_output() function (64-bits bloc part).\n", ssl.fd_out);
-        ft_putstr("\n");
         hash += 64;
+        if (hash < p->hash + p->hashByteSz)
+            ft_putstr("\n");
     }
 }
 
@@ -74,10 +75,9 @@ void    genprime_output(t_hash *hash)
 
 void    genrsa_output(t_hash *hash)
 {
-    ft_putstr(ssl.command.command_title);
-    
+    ft_putstr("-----BEGIN RSA PRIVATE KEY-----\n");
     hash_output(hash);
-    // ft_putstr(hash->hash);
+    ft_putstr("\n-----END RSA PRIVATE KEY-----");
 }
 
 // ---------------------- Outputs based on flags ---------------------------

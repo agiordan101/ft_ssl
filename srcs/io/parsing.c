@@ -106,24 +106,24 @@ Key_64bits  parse_keys(char *av_next)
 static void     command_handler(t_command *command, char *cmd, e_command mask)
 {
     static char         *commands_name[N_COMMANDS] = {
-        "md5", "sha256", "base64", "des-ecb", "des-cbc", "genprime", "isprime", "genrsa"
+        "md5", "sha256", "base64", "des-ecb", "des-cbc", "genprime", "isprime", "genrsa", "rsa",
     };
     static e_command    commands[N_COMMANDS] = {
-        MD5, SHA256, BASE64, DESECB, DESCBC, GENPRIME, ISPRIME, GENRSA
+        MD5, SHA256, BASE64, DESECB, DESCBC, GENPRIME, ISPRIME, GENRSA, RSA
     };
     static void         *commands_addr[N_COMMANDS] = {
-        md5, sha256, base64, des, des, genprime, isprime, genrsa
+        md5, sha256, base64, des, des, genprime, isprime, genrsa, rsa
     };
     static char         *commands_title[N_COMMANDS] = {
         "MD5", "SHA256", "BASE64", "DESECB", "DESCBC",
         "Generating prime number ", "Is that a prime number ? ",
-        "Generating RSA private key "
+        "Generating RSA private key ", "RSA keys visualization"
     };
     static unsigned long commands_dataSz[N_COMMANDS] = {
-        0, 0, 0, sizeof(t_des), sizeof(t_des), sizeof(t_genprime), sizeof(t_isprime), 0
+        0, 0, 0, sizeof(t_des), sizeof(t_des), sizeof(t_genprime), sizeof(t_isprime), 0, sizeof(t_rsa)
     };
     static e_command    commands_flags[N_COMMANDS] = {
-        MD_flags, MD_flags, BASE64_flags, DES_flags, DES_flags, GENPRIME_flags, ISPRIME_flags, GENRSA_flags
+        MD_flags, MD_flags, BASE64_flags, DES_flags, DES_flags, GENPRIME_flags, ISPRIME_flags, GENRSA_flags, RSA_flags
     };
     int                 cmd_i = -1;
 
@@ -167,9 +167,9 @@ int     param_handler(e_flags flag, char *av_next, int *i)
         file_handler(NULL, av_next);
     else if (flag & o)
         ssl.output_file = av_next;
-    else if (flag & deci)
+    else if (flag & decin)
         command_handler(&ssl.dec_i_cmd, av_next, HASHING_COMMANDS);
-    else if (flag & enco)
+    else if (flag & encout)
         command_handler(&ssl.enc_o_cmd, av_next, HASHING_COMMANDS);
     else if (flag & s)
         string_handler(NULL, av_next);
@@ -180,7 +180,7 @@ int     param_handler(e_flags flag, char *av_next, int *i)
     else if (flag & v_des)
         ssl.des_flagsdata.vector = parse_keys(av_next);
     else if (flag & p_des)
-        ssl.des_flagsdata.password = (Mem_8bits *)ft_strdup(av_next);
+        ssl.des_flagsdata.password = ft_strdup(av_next);
     else if (flag & pbkdf2_iter)
     {
         int p = ft_atoi(av_next);
@@ -199,7 +199,29 @@ int     param_handler(e_flags flag, char *av_next, int *i)
         ((t_genprime *)ssl.command.command_data)->min = ft_atoi(av_next);
     else if (flag & max)
         ((t_genprime *)ssl.command.command_data)->max = ft_atoi(av_next);
-
+    else if (flag & rand_path)
+    {
+        free(ssl.ulrandom_path);
+        ssl.ulrandom_path = ft_strdup(av_next);
+    }
+    else if (flag & (inform | outform))
+    {
+        e_rsa_form form;
+        if (!ft_strcmp(av_next, "PEM"))
+            form = PEM;
+        else if (!ft_strcmp(av_next, "DER"))
+            form = DER;
+        else
+            form = 0;
+        if (flag & inform)
+            ((t_rsa *)ssl.command.command_data)->inform = form;
+        else
+            ((t_rsa *)ssl.command.command_data)->outform = form;
+    }
+    else if (flag & passin)
+        ssl.passin = ft_strdup(av_next);
+    else if (flag & passout)
+        ssl.passout = ft_strdup(av_next);
     (*i)++;
     return 0;
 }
@@ -232,10 +254,10 @@ e_flags     strToFlag(char *str)
         return a;
     if (!ft_strcmp(str, "-A"))
         return A;
-    if (!ft_strcmp(str, "-deci"))
-        return deci;
-    if (!ft_strcmp(str, "-enco"))
-        return enco;
+    if (!ft_strcmp(str, "-decin"))
+        return decin;
+    if (!ft_strcmp(str, "-encout"))
+        return encout;
     if (!ft_strcmp(str, "-q"))
         return q;
     if (!ft_strcmp(str, "-r"))
@@ -244,6 +266,10 @@ e_flags     strToFlag(char *str)
         return d;
     if (!ft_strcmp(str, "-e"))
         return e;
+    if (!ft_strcmp(str, "-passin"))
+        return passin;
+    if (!ft_strcmp(str, "-passout"))
+        return passout;
 
     if (!ft_strcmp(str, "-s"))
         return DES & (ssl.dec_i_cmd.command | ssl.command.command | ssl.enc_o_cmd.command) ? s_des : s;
@@ -263,11 +289,20 @@ e_flags     strToFlag(char *str)
     
     if (!ft_strcmp(str, "-prob"))
         return prob;
-    
     if (!ft_strcmp(str, "-min"))
         return min;
     if (!ft_strcmp(str, "-max"))
         return max;
+    
+    if (!ft_strcmp(str, "-rand"))
+        return rand_path;
+    
+    if (!ft_strcmp(str, "-inform"))
+        return inform;
+    if (!ft_strcmp(str, "-outform"))
+        return outform;
+    if (!ft_strcmp(str, "-check"))
+        return check;
     return 0;
 }
 
@@ -370,31 +405,7 @@ static void     add_thash_from_stdin()
 
 void    flags_conflicts()
 {
-    // Active base64 input decode / output encode in respect to encryption/decryption mode
-    if (ssl.flags & a)
-    {
-        char command[] = "base64";
-        if (ssl.flags & d)
-        {
-            if (ssl.flags & deci)
-            {
-                ft_putstderr("Flags -a, in decryption mode, and -deci are conflicting.\n");
-                freexit(EXIT_SUCCESS);
-            }
-            ssl.flags += deci;
-            command_handler(&ssl.dec_i_cmd, command, 0);
-        }
-        else
-        {
-            if (ssl.flags & enco)
-            {
-                ft_putstderr("Flags -a, in encryption mode, and -enco are conflicting.\n");
-                freexit(EXIT_SUCCESS);
-            }
-            ssl.flags += enco;
-            command_handler(&ssl.enc_o_cmd, command, 0);
-        }
-    }
+    char base64_str[] = "base64";
 
     // Handle conflict between e and d flags (Set encryption by default)
     if (ssl.flags & (e | d))
@@ -404,6 +415,37 @@ void    flags_conflicts()
     }
     else
         ssl.flags += e;
+
+    // Active base64 input decode / output encode in respect to encryption/decryption mode
+    if (ssl.flags & a)
+    {
+        if (ssl.flags & d)
+        {
+            if (ssl.flags & decin)
+            {
+                ft_putstderr("Flags -a, in decryption mode, and -decin are conflicting.\n");
+                freexit(EXIT_SUCCESS);
+            }
+            ssl.flags += decin;
+            command_handler(&ssl.dec_i_cmd, base64_str, 0);
+        }
+        else
+        {
+            if (ssl.flags & encout)
+            {
+                ft_putstderr("Flags -a, in encryption mode, and -encout are conflicting.\n");
+                freexit(EXIT_SUCCESS);
+            }
+            ssl.flags += encout;
+            command_handler(&ssl.enc_o_cmd, base64_str, 0);
+        }
+    }
+
+    if (ssl.command.command & GENRSA && ~ssl.flags & encout)
+    {
+        ssl.flags += encout;
+        command_handler(&ssl.enc_o_cmd, base64_str, 0);
+    }
 }
 
 void    end_parse()
@@ -416,12 +458,18 @@ void    end_parse()
         if (commands[i]->command_addr == des)
         {
             cmd = (t_des *)(commands[i]->command_data);
-            cmd->password = ssl.des_flagsdata.password;
             cmd->key = ssl.des_flagsdata.key;
             cmd->salt = ssl.des_flagsdata.salt;
             cmd->vector = ssl.des_flagsdata.vector;
             cmd->pbkdf2_iter = ssl.des_flagsdata.pbkdf2_iter;
         }
+
+    if (commands[0]->command_addr == des)
+        ((t_des *)(commands[0]->command_data))->password = ssl.passin ? ssl.passin : ssl.des_flagsdata.password;
+    if (commands[1]->command_addr == des)
+        ((t_des *)(commands[1]->command_data))->password = ssl.des_flagsdata.password;
+    if (commands[2]->command_addr == des)
+        ((t_des *)(commands[2]->command_data))->password = ssl.passout ? ssl.passout : ssl.des_flagsdata.password;
 
     // printf("ssl.des_flagsdata.key: %lu\n", ssl.des_flagsdata.key);
     // printf("ssl.des_flagsdata.salt: %lu\n", ssl.des_flagsdata.salt);
