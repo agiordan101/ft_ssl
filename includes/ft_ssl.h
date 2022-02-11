@@ -349,12 +349,14 @@ Mem_8bits   *pbkdf2_sha256_hmac(Mem_8bits *key, int keyByteSz, Mem_8bits *msg, i
     ----------------------------------------------------
 */
 
-# define    PROBMIN_ISPRIME 0.0001
+# define    LONG64_LEFTBITMASK  (1UL << 62)
+
 
 /*
     isprime Data --------------------------------------
 */
 
+# define    PROBMIN_ISPRIME 0.001
 # define    ISPRIMEMEMSZ    10
 
 typedef struct  s_isprime {
@@ -362,7 +364,7 @@ typedef struct  s_isprime {
 }               t_isprime;
 
 Mem_8bits   *isprime(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
-int         miller_rabin_primality_test(Long_64bits n, float p);
+int         miller_rabin_primality_test(Long_64bits n, float p, int verbose);
 
 
 /*
@@ -374,10 +376,8 @@ typedef struct  s_genprime {
     Long_64bits max;
 }               t_genprime;
 
-# define    LONG64_LEFTBITMASK  (1UL << 62)
-
 Mem_8bits   *genprime(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
-Long_64bits prime_generator(Long_64bits min, Long_64bits max);
+Long_64bits prime_generator(Long_64bits min, Long_64bits max, int verbose);
 
 
 /*
@@ -385,7 +385,6 @@ Long_64bits prime_generator(Long_64bits min, Long_64bits max);
 */
 
 # define    RSA_ENC_EXP (1UL << 15 + 1)    // Arbitrary prime number, high chances to be coprime with Euler / Carmichael exp, choosen in every RSA cryptosystems
-// # define    RSA_ENC_EXP 3
 
 typedef struct  s_rsa_private_key
 {

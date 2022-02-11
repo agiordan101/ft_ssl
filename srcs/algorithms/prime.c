@@ -43,7 +43,32 @@ static int  miller_rabin_witness_test(Long_64bits n, Long_64bits a, Long_64bits 
     return 1;
 }
 
-int         miller_rabin_primality_test(Long_64bits n, float p)
+static Long_64bits  miller_rabin_witness_generator(Long_64bits n, Long_64bits *rand_save, int save_sz)
+{
+    int         i_tmp = 42;
+    Long_64bits witness;
+    int         is_valid_w = 0;
+
+    // Generate random number until get one witch is never seen
+    while (!is_valid_w)
+    {
+        witness = ulrandom_range(2, n - 1);   // 2 <= a < n - 1
+
+        // printf("n = %lu / witness: %lu\n", n, witness);
+        // Check in memory if a is already seen
+        i_tmp = 0;
+        while (i_tmp < save_sz &&\
+            i_tmp < ISPRIMEMEMSZ &&\
+            rand_save[i_tmp] != witness)
+            i_tmp++;
+
+        // If we reach end of memory -> New a value is found
+        is_valid_w = (i_tmp == save_sz) || (i_tmp == ISPRIMEMEMSZ);
+    }
+    return witness;
+}
+
+int         miller_rabin_primality_test(Long_64bits n, float p, int verbose)
 {
     /*
         http://defeo.lu/in420/DM3%20-%20Test%20de%20Miller-Rabin
@@ -55,12 +80,9 @@ int         miller_rabin_primality_test(Long_64bits n, float p)
     */
     float       error_prob = 1;
 
-    Long_64bits a;
-    Long_64bits a_save[ISPRIMEMEMSZ];
-    int         i_a_save = 0;
-    
-    int         is_valid_rand = 1;
-    int         i_tmp;
+    Long_64bits witness;
+    Long_64bits witness_save[ISPRIMEMEMSZ];
+    int         save_sz = 0;
 
     Long_64bits d;
     int         s;
@@ -71,34 +93,21 @@ int         miller_rabin_primality_test(Long_64bits n, float p)
 
     fermat_test_solver(n, &d, &s); // n has to be odd
 
-    // Handle case where all possible a values were tested (i_a_save = n - 3 -> No more random witness)
-    while (error_prob > p && i_a_save < n - 3)
+    // Handle case where all possible a values were tested (save_sz = n - 3 -> No more random witness)
+    while (error_prob > p && save_sz < n - 3)
     {
-        // Generate random number until get one witch is never seen
-        is_valid_rand = 0;
-        while (!is_valid_rand)
-        {
-            a = rand() % (n - 3) + 2; // 1 < a < n - 1
+        //OpenSSL '\n' symbol, means a number has passed a single round of the Miller-Rabin primality test
+        if (verbose)
+            ft_putstderr("+");
 
-            // Check in memory if a is already seen
-            i_tmp = 0;
-            while (i_tmp < i_a_save && i_tmp < ISPRIMEMEMSZ && a_save[i_tmp] != a)
-            {
-                // printf("a_save[i_tmp]=%lu\n", a_save[i_tmp]);
-                i_tmp++;
-            }
+        witness = miller_rabin_witness_generator(n, witness_save, save_sz);
+        witness_save[save_sz++ % ISPRIMEMEMSZ] = witness;
 
-            // If we reach end of memory -> New a value is found
-            is_valid_rand = (i_tmp == i_a_save) || (i_tmp == ISPRIMEMEMSZ);
-            // printf("a=%lu\ti_tmp=%d\ti_a_save=%d\tvalid: %d\n", a, i_tmp, i_a_save, is_valid_rand);
-        }
-        a_save[(i_a_save++) % ISPRIMEMEMSZ] = a;
-
-        // Test of the witness/a
-        if (miller_rabin_witness_test(n, a, d, s))
+        // printf("n = %lu / witness: %lu\n", n, witness);
+        // Test of the witness
+        if (miller_rabin_witness_test(n, witness, d, s))
             return 0;
         error_prob *= 0.25;
-        // printf("error_prob=%f\n", error_prob);
     }
     return 1;
 }
@@ -108,14 +117,16 @@ Mem_8bits   *isprime(void *command_data, Mem_8bits **plaintext, Long_64bits ptBy
     /*
         "Wrapper" for miller_rabin_primality_test() function to compute isprime command"
     */
+    t_isprime   *isprime_data = (t_isprime *)command_data;
     Mem_8bits   *result;
     Long_64bits n = ft_atoi(*plaintext);
 
     if (miller_rabin_primality_test(
             n,
-            command_data && ((t_isprime *)command_data)->prob_requested ?\
-                ((t_isprime *)command_data)->prob_requested :\
-                PROBMIN_ISPRIME
+            isprime_data->prob_requested ?\
+                isprime_data->prob_requested :\
+                PROBMIN_ISPRIME,
+            1
         )
     )
     {
@@ -165,18 +176,30 @@ static int  first_primes_multiple(Long_64bits p)
     return 0;
 }
 
-Long_64bits prime_generator(Long_64bits min, Long_64bits max)
+Long_64bits prime_generator(Long_64bits min, Long_64bits max, int verbose)
 {
     /*
         Generate 64-bits random prime number.
     */
     Long_64bits p = ulrandom_range(min, max);
     int         i = 1;
+    int         is_prime = 0;
 
-    while (i++ < max / 2 &&\
-            (first_primes_multiple(p) ||\
-            !miller_rabin_primality_test(p, PROBMIN_ISPRIME)))
+    while (i++ < max / 2 && !is_prime)
+    {
         p = ulrandom_range(min, max);
+
+        if (first_primes_multiple(p))
+            continue ;
+
+        //OpenSSL '\n' symbol, represents each number which has passed an initial sieve test
+        else if (verbose)
+            ft_putstderr(".");
+
+        is_prime = miller_rabin_primality_test(p, PROBMIN_ISPRIME, verbose);
+    }
+    if (verbose)
+        ft_putstderr("\n"); // OpenSSL '\n' symbol, mean that the number has passed all the prime tests 
     return p;
 }
 
@@ -186,7 +209,7 @@ Mem_8bits   *genprime(void *command_data, Mem_8bits **plaintext, Long_64bits ptB
         "Wrapper" for prime_generator() function to compute genprime command
     */
     t_genprime  *genprime_data = (t_genprime *)command_data;
-    Long_64bits p = prime_generator(genprime_data->min, genprime_data->max ? genprime_data->max : BIG_LONG64);
+    Long_64bits p = prime_generator(genprime_data->min, genprime_data->max ? genprime_data->max : BIG_LONG64, 0);
     // printf("p = %lu\t(len=%d)\n", p, ft_unbrlen(p));
 
     Mem_8bits   *prime = ft_ulltoa(p);

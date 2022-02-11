@@ -52,6 +52,7 @@ void    hash_output(t_hash *hash)
     // if (ssl.command.command & ~MD || ssl.flags & ao)
 
     // 64-bytes blocs output is only for base64 format without -A flag
+    // if 
     if (~ssl.flags & A &&\
         ((ssl.enc_o_cmd.command & BASE64) || (ssl.enc_o_cmd.command == 0 && ssl.command.command & BASE64)))
         hash_64bytesbloc_output(hash);
@@ -67,6 +68,14 @@ void    hash_output(t_hash *hash)
 void    genprime_output(t_hash *hash)
 {
     ft_putstr(ssl.command.command_title);
+    hash_output(hash);
+    // ft_putstr(hash->hash);
+}
+
+void    genrsa_output(t_hash *hash)
+{
+    ft_putstr(ssl.command.command_title);
+    
     hash_output(hash);
     // ft_putstr(hash->hash);
 }
@@ -116,6 +125,8 @@ void    output_hash_based_on_flags(t_hash *hash)
         reversed_output(hash);
     else if (ssl.command.command & GENPRIME)
         genprime_output(hash);
+    else if (ssl.command.command & GENRSA)
+        genrsa_output(hash);
     else
         classic_output(hash);
 }

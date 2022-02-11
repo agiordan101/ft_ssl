@@ -74,6 +74,9 @@ Long_64bits        ulrandom()
 
 inline Long_64bits  ulrandom_range(Long_64bits min, Long_64bits max)
 {
+    /*
+        min <= ulrand < max
+    */
     return min + ulrandom() % (max - min);
 }
 
@@ -130,30 +133,16 @@ Long_64bits         extended_euclide_algo(Long_64bits a, Long_64bits b, long lon
     Long_64bits gcd = extended_euclide_algo(b % a, a, &u1, &v1);
     *u = v1 - (b / a) * u1;
     *v = u1;
-
-    // if (b == 0)
-    // {
-    //     *u = 1;
-    //     *v = 0;
-    //     return a;
-    // }
-    // Long_64bits gcd = extended_euclide_algo(b, a % b, &u1, &v1);
-    // *u = v1;
-    // *v = u1 - (a / b) * v1;
-
-    // printf("%lu * %lld + %lu * %lld = %lld (Real GCD=%lu)\n", a, *u, b, *v, a*(*u)+b*(*v), gcd);
     return gcd;
 }
-    // *v = u1;
-    // *u = v1 - (a / b) * u1;
 
 inline Long_64bits  mod_mult_inverse(Long_64bits a, Long_64bits b)
 /*
     Thanks to extended Euclidean algorithm,
-    we can compute PGCD(a, b), u and v like:
+    we can compute natural number PGCD(a, b) and relative integers u and v like:
         au + bv = PGCD(a, b)
-    a and b are coprime so:
 
+    a and b are coprime so:
         a * u + b * v = 1
         a * u = 1 - b * v
         a * u = 1 mod b
@@ -164,29 +153,30 @@ inline Long_64bits  mod_mult_inverse(Long_64bits a, Long_64bits b)
     long long v;
     Long_64bits g = extended_euclide_algo(a, b, &u, &v);
 
-    printf("[Modular multiplicative inverse of a and b]\n");
-    printf("%lu * %lld + %lu * %lld = %lld (Real gcd()=%lu)\n", a, u, b, v, a*u+b*v, gcd(a, b));
+    // printf("\n[Modular multiplicative inverse of a and b]\n");
+    // printf("%lu * %lld + %lu * %lld = %lld (Real gcd()=%lu)\n", a, u, b, v, a*u+b*v, gcd(a, b));
     if (g != gcd(a, b))
     {
         printf("a * u + b * v != PGCD(a, b) (real pgcd=1 fail)\n");
         exit(0);
     }
-    printf("a * u + b * v = PGCD(a, b)\n");
+    // printf("a * u + b * v = PGCD(a, b)\n");
 
     // Handle negative case: 1 mod b = 1 + kb with k relative integer (When u < 0, k = -1)
     if (u < 0)
         u += b;
 
     long long mm = modular_mult(u, a, b);
-    printf("%lu * %lld = %lld mod %lu\n", a, u, mm, b);
+    // printf("%lu * %lld = %lld mod %lu\n", a, u, mm, b);
 
-    if (mm != 1 && mm != -b - 1)
+    // if (mm != 1 && mm != -b - 1)
+    if (mm != 1)
     {
         printf("a * u != 1 mod b\n");
         printf("(%lu * %lld) != 1 mod %lu\n", a, u, b);
         printf("(%lld * %lu) %% %lu = %lld\n", u, a, b, mm);
         exit(0);
     }
-    printf("a * u = 1 mod b\n");
+    // printf("a * u = 1 mod b\n");
     return u;
 }
