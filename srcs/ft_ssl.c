@@ -9,6 +9,7 @@
 
         retirer les flags ecb cbc
         conflict flags s et p entre l command principale et les secondaires
+        Renommer les "way" en un truc plus pertinant pour la command en question
 
         //Leaks ft_stradd_quote ?
         inline keywords pour les prime peut etre et le dossier calculations
@@ -80,6 +81,10 @@ static void    ssl_free()
 
     if (ssl.flags & o)
         close(ssl.fd_out);
+    // if (ssl.passin)
+    //     free(ssl.passin)
+    // if (ssl.passout)
+    //     free(ssl.passout)
 }
 
 void          freexit(int exit_state)

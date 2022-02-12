@@ -13,9 +13,9 @@ static void     print_flag_usage(e_flags flag)
     else if (flag & A)
         ft_putstderr("\t-A\tUsed with -[a | -decin base64 | -encout base64] to specify base64 buffer as a single line\n");
     else if (flag & decin)
-        ft_putstderr("\t-decin\tdecode the input with the given hashing command (command flags can be passed)\n");
+        ft_putstderr("\t-decin\tdecode the input with the given hashing command (command flags can ONLY be passed after)\n");
     else if (flag & encout)
-        ft_putstderr("\t-encout\tencode the output with the given hashing command (command flags can be passed)\n");
+        ft_putstderr("\t-encout\tencode the output with the given hashing command (command flags can ONLY be passed after)\n");
     else if (flag & q)
         ft_putstderr("\t-q\tquiet mode\n");
     else if (flag & r)
@@ -29,9 +29,9 @@ static void     print_flag_usage(e_flags flag)
     else if (flag & d)
         ft_putstderr("\t-d\tdecrypt mode\n");
     else if (flag & passin)
-        ft_putstderr("\t-p\tsend password for des input decryption\n");
+        ft_putstderr("\t-p\tsend password for input decryption (flag -decin <cmd> needs to exist before)\n");
     else if (flag & passout)
-        ft_putstderr("\t-p\tsend password for des output encryption\n");
+        ft_putstderr("\t-p\tsend password for output encryption (flag -encout <cmd> needs to exist before)\n");
     else if (flag & s_des)
         ft_putstderr("\t-s\tsend the salt in hex\t(Override the behavior of global flag -s if any des command is past)\n");
     else if (flag & k_des)
@@ -58,6 +58,16 @@ static void     print_flag_usage(e_flags flag)
         ft_putstderr("\t-outform\toutput format [PEM | DER] (Default as PEM)\n");
     else if (flag & check)
         ft_putstderr("\t-check\tverify key consistency\n");
+    else if (flag & noout)
+        ft_putstderr("\t-noout\tdon't print key out\n");
+    else if (flag & text)
+        ft_putstderr("\t-text\tprint key propoerties in hex\n");
+    else if (flag & modulus)
+        ft_putstderr("       -modulus print RSA key modulus in hex\n");
+    else if (flag & pubin)
+        ft_putstderr("\t-pubin\texpect a public key in input file (private key by default)\n");
+    else if (flag & pubout)
+        ft_putstderr("\t-pubout\toutput a public key (private key by default). This option is automatically set if the input is a public key.\n");
     else
     {
         printf("WTFF ?\n");
@@ -67,7 +77,7 @@ static void     print_flag_usage(e_flags flag)
 
 static void     print_command_flags(e_flags flags)
 {
-    for (int i = 1, flag = 2; i < N_FLAGS + 1; i++, flag <<= 1)
+    for (Long_64bits i = 1, flag = 1<<1; i < N_FLAGS + 1; i++, flag <<= 1)
     {
         // printf("flag %d: %d & %d = %d\n", i, flag, rand_path, flag & flags);
         if (flag & flags)
@@ -120,8 +130,17 @@ static void     print_genrsa_usage()
     print_command_flags(GENRSA_flags);
 }
 
+static void     print_rsa_usage()
+{
+    ft_putstderr("Usage: ./ft_ssl rsa [files] [flags]\n");
+    ft_putstderr("RSA keys visualization.\n\n");
+    ft_putstderr("Valid flags are:\n");
+    print_command_flags(RSA_flags);
+}
+
 void    print_command_usage(e_command cmd)
 {
+    // Transform to list of function pt
     if (cmd & MD)
         print_md_usage();
     else if (cmd & BASE64)
@@ -134,6 +153,8 @@ void    print_command_usage(e_command cmd)
         print_isprime_usage();
     else if (cmd & GENRSA)
         print_genrsa_usage();
+    else if (cmd & RSA)
+        print_rsa_usage();
     freexit(EXIT_SUCCESS);
 }
 

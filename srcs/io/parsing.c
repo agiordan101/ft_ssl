@@ -81,7 +81,7 @@ void    string_handler(t_hash *node, char *av_next)
     node->name = ft_stradd_quote(node->msg, node->len);
 }
 
-Key_64bits  parse_keys(char *av_next)
+Key_64bits  parse_keys_des(char *av_next)
 {
     Key_64bits  key = ft_strtoHex(av_next);
     int         str_zero_count = 0;
@@ -99,7 +99,7 @@ Key_64bits  parse_keys(char *av_next)
         ft_putstderr("hex string is too short, padding with zero bytes to length\n");
         key <<= (hex_zero_count - str_zero_count) * 4;
     }
-    // printf("parse_keys: %lx\n", key);
+    // printf("parse_keys_des: %lx\n", key);
     return key;
 }
 
@@ -122,7 +122,7 @@ static void     command_handler(t_command *command, char *cmd, e_command mask)
     static unsigned long commands_dataSz[N_COMMANDS] = {
         0, 0, 0, sizeof(t_des), sizeof(t_des), sizeof(t_genprime), sizeof(t_isprime), 0, sizeof(t_rsa)
     };
-    static e_command    commands_flags[N_COMMANDS] = {
+    static e_command_flags  commands_flags[N_COMMANDS] = {
         MD_flags, MD_flags, BASE64_flags, DES_flags, DES_flags, GENPRIME_flags, ISPRIME_flags, GENRSA_flags, RSA_flags
     };
     int                 cmd_i = -1;
@@ -153,11 +153,11 @@ static void     command_handler(t_command *command, char *cmd, e_command mask)
     command->command_flags = commands_flags[cmd_i];
     if (commands_dataSz[cmd_i])
         command->command_data = ft_memnew(commands_dataSz[cmd_i]);
+
     if (commands[cmd_i] & DESECB)
         ((t_des *)(command->command_data))->mode = DESECB;
     if (commands[cmd_i] & DESCBC)
         ((t_des *)(command->command_data))->mode = DESCBC;
-
     // printf("command= %s\n", command->command_title);
 }
 
@@ -174,11 +174,11 @@ int     param_handler(e_flags flag, char *av_next, int *i)
     else if (flag & s)
         string_handler(NULL, av_next);
     else if (flag & s_des)
-        ssl.des_flagsdata.salt = parse_keys(av_next);
+        ssl.des_flagsdata.salt = parse_keys_des(av_next);
     else if (flag & k_des)
-        ssl.des_flagsdata.key = parse_keys(av_next);
+        ssl.des_flagsdata.key = parse_keys_des(av_next);
     else if (flag & v_des)
-        ssl.des_flagsdata.vector = parse_keys(av_next);
+        ssl.des_flagsdata.vector = parse_keys_des(av_next);
     else if (flag & p_des)
         ssl.des_flagsdata.password = ft_strdup(av_next);
     else if (flag & pbkdf2_iter)
@@ -188,6 +188,10 @@ int     param_handler(e_flags flag, char *av_next, int *i)
             pbkdf2_iter_error(p);
         ssl.des_flagsdata.pbkdf2_iter = p;
     }
+    else if (flag & passin)
+        ssl.passin = ft_strdup(av_next);
+    else if (flag & passout)
+        ssl.passout = ft_strdup(av_next);
     else if (flag & prob)
     {
         int p = ft_atoi(av_next);
@@ -212,16 +216,12 @@ int     param_handler(e_flags flag, char *av_next, int *i)
         else if (!ft_strcmp(av_next, "DER"))
             form = DER;
         else
-            form = 0;
+            rsa_format_error(av_next);
         if (flag & inform)
             ((t_rsa *)ssl.command.command_data)->inform = form;
         else
             ((t_rsa *)ssl.command.command_data)->outform = form;
     }
-    else if (flag & passin)
-        ssl.passin = ft_strdup(av_next);
-    else if (flag & passout)
-        ssl.passout = ft_strdup(av_next);
     (*i)++;
     return 0;
 }
@@ -303,6 +303,18 @@ e_flags     strToFlag(char *str)
         return outform;
     if (!ft_strcmp(str, "-check"))
         return check;
+    if (!ft_strcmp(str, "-pubin"))
+        return pubin;
+    if (!ft_strcmp(str, "-pubout"))
+        return pubout;
+    if (!ft_strcmp(str, "-noout"))
+        return noout;
+    if (!ft_strcmp(str, "-text"))
+        return text;
+    if (!ft_strcmp(str, "-modulus"))
+        return modulus;
+    if (!ft_strcmp(str, "-hexdump"))
+        return hexdump;
     return 0;
 }
 
@@ -317,6 +329,7 @@ void        flags_handler(int ac, char **av, int i)
         {
             flag = strToFlag(av[i]);
 
+            // printf("flag compatible ? %d\n", flag & (ssl.dec_i_cmd.command_flags | ssl.command.command_flags | ssl.enc_o_cmd.command_flags));
             if (flag & help)
                 print_command_usage(ssl.command.command);
             else if (flag & (ssl.dec_i_cmd.command_flags | ssl.command.command_flags | ssl.enc_o_cmd.command_flags))
@@ -441,11 +454,19 @@ void    flags_conflicts()
         }
     }
 
-    if (ssl.command.command & GENRSA && ~ssl.flags & encout)
+    if (ssl.command.command & GENRSA)
     {
-        ssl.flags += encout;
-        command_handler(&ssl.enc_o_cmd, base64_str, 0);
+        if (~ssl.flags & encout)
+        {
+            ssl.flags += encout;
+            command_handler(&ssl.enc_o_cmd, base64_str, 0);
+        }
     }
+    // else if (ssl.command.command & RSA)
+    // {
+    //     // if (ssl.flags & pubout &&)
+        
+    // }
 }
 
 void    end_parse()

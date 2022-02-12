@@ -39,22 +39,22 @@ typedef unsigned long   Long_64bits;
 // # define FLAG_HELP  1
 // # define FLAG_I     2
 // # define FLAG_O     3
-# define N_FLAGS        27
+# define N_FLAGS        36
 
 typedef enum    flags {
     // Global flags
     help=1<<1,
     i_=1<<2, o=1<<3,
-    a=1<<4, A=1<<5,
+    q=1<<4, r=1<<5,
     decin=1<<6, encout=1<<7,
-    q=1<<8, r=1<<9,
+    a=1<<8, A=1<<9,
 
     // All hashing commands
     s=1<<10, p=1<<11,
     
     // Encyption & Decryption commands
     e=1<<12, d=1<<13, 
-    passin=1<<28, passout=1<<29,
+    passin=1<<25, passout=1<<26,
 
     // Only des
     p_des=1<<14, s_des=1<<15, k_des=1<<16, v_des=1<<17,
@@ -69,27 +69,32 @@ typedef enum    flags {
     rand_path=1<<24,
 
     // RSA cryptosystem
-    inform=1<<25, outform=1<<26,
-    check=1<<27,
+    pubin=1UL<<31, pubout=1UL<<32,
+    check=1<<27, text=1<<28, noout=1<<29, modulus=1<<30,
+    inform=1UL<<33, outform=1UL<<34,
+    hexdump=1UL<<35, // rsault
 }               e_flags;
-# define AVFLAGS        (help + p + q + r + d + e + A + P_des + nopad + check)
+# define AVFLAGS        (help + p + q + r + d + e + A + P_des + nopad + check + text + noout + modulus + pubin + pubout)
 # define AVPARAM        (s + i_ + o + decin + encout + k_des + p_des + s_des + v_des + pbkdf2_iter + prob + min + max + rand_path + inform + outform + passin + passout)
 
-# define GLOBAL_FLAGS           (help + i_ + o + a + A + q + r + decin + encout + passin + passout)
+# define GLOBAL_FLAGS_IN        (i_ + decin + passin)
+# define GLOBAL_FLAGS_OUT       (o + encout + passout + a + A)
+# define GLOBAL_FLAGS           (help + GLOBAL_FLAGS_IN + GLOBAL_FLAGS_OUT + q + r)
 # define DATASTRINPUT_FLAGS     (s + p)
 # define DES_FLAGS_ONLY         (k_des + p_des + s_des + v_des + P_des + nopad + pbkdf2_iter)
-# define RSA_FLAGS_ONLY         (inform + outform + check)
+# define RSA_FLAGS_ONLY         (inform + outform + check + text + noout + modulus + pubin + pubout)
 
 //  COMMAND & FLAGS relationship --------------------------------------------------------
 
 typedef enum    command_flags {
     MD_flags=       GLOBAL_FLAGS + DATASTRINPUT_FLAGS,
     BASE64_flags=   GLOBAL_FLAGS + DATASTRINPUT_FLAGS + e + d,
-    DES_flags=      GLOBAL_FLAGS + p + e + d + DES_FLAGS_ONLY,
-    GENPRIME_flags= help + o + q + encout + passout + min + max + rand_path,
+    DES_flags=      GLOBAL_FLAGS + DES_FLAGS_ONLY + p + e + d,
+    GENPRIME_flags= GLOBAL_FLAGS_OUT + help + q + min + max + rand_path,
     ISPRIME_flags=  GLOBAL_FLAGS + DATASTRINPUT_FLAGS + prob,
-    GENRSA_flags=   help + o + q + encout + passout + rand_path,
+    GENRSA_flags=   GLOBAL_FLAGS_OUT + help + q + rand_path,
     RSA_flags=      GLOBAL_FLAGS + RSA_FLAGS_ONLY,
+    // RSAUTL=         ,
 }               e_command_flags;
 
 
@@ -162,9 +167,10 @@ void        read_failed(char *errormsg, int fd);
 void        malloc_failed(char *errormsg);
 
 void        file_not_found(char *file);
+void        unrecognized_flag(char *flag);
 void        pbkdf2_iter_error();
 void        isprime_prob_error(int p);
-void        unrecognized_flag(char *flag);
+void        rsa_format_error(char *form);
 
 
 /*
@@ -394,6 +400,16 @@ Long_64bits prime_generator(Long_64bits min, Long_64bits max, int verbose);
     RSA Data --------------------------------------
 */
 
+# define        RSA_PRIVATE_HEADER          "-----BEGIN RSA PRIVATE KEY-----"
+# define        RSA_PRIVATE_FOOTER          "-----END RSA PRIVATE KEY-----"
+# define        RSA_PRIVATE_HEADER_byteSz   sizeof(RSA_PRIVATE_HEADER)
+# define        RSA_PRIVATE_FOOTER_byteSz   sizeof(RSA_PRIVATE_FOOTER)
+
+# define        RSA_PUBLIC_HEADER  "-----BEGIN PUBLIC KEY-----"
+# define        RSA_PUBLIC_FOOTER  "-----END PUBLIC KEY-----"
+# define        RSA_PUBLIC_HEADER_byteSz   sizeof(RSA_PUBLIC_HEADER)
+# define        RSA_PUBLIC_FOOTER_byteSz   sizeof(RSA_PUBLIC_FOOTER)
+
 typedef enum    rsa_form
 {
     PEM=1<<1,   
@@ -424,7 +440,6 @@ typedef struct  s_rsa_keys
 
 typedef struct  s_rsa
 {
-    int         check;
     e_rsa_form  inform;
     e_rsa_form  outform;
     t_rsa_keys  keys;
@@ -433,7 +448,7 @@ typedef struct  s_rsa
 Mem_8bits   *rsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
 Mem_8bits   *genrsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
 
-void        rsa_generation(t_rsa_keys *rsa, t_rsa_private_key *privkey, t_rsa_public_key *pubkey);
+void        rsa_keys_generation(t_rsa_keys *rsa);
 Long_64bits rsa_encryption(t_rsa_public_key *pubkey, Long_64bits m);
 Long_64bits rsa_decryption(t_rsa_private_key *privkey, Long_64bits ciphertext);
 
