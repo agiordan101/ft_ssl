@@ -87,9 +87,9 @@ int         miller_rabin_primality_test(Long_64bits n, float p, int verbose)
     Long_64bits d;
     int         s;
 
-    // Handle obvious not prime number: Even number (except 2) | 1
-    if ((n != 2 && n % 2 == 0) || n == 1)
-        return 0;
+    // Handle obvious numbers: 0, 1 and even numbers (except 2) are not prime
+    if (n % 2 == 0 || n < 3)
+        return n == 2;
 
     fermat_test_solver(n, &d, &s); // n has to be odd
 

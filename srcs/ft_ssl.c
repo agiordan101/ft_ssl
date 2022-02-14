@@ -20,6 +20,10 @@
         Boucler pour les flags parsing pt sur ft
         -nosalt             Do not use salt in the KDF
 
+    Crashs :
+
+        ./ft_ssl genprime -q -help | ./ft_ssl isprime -p
+
 */
 
 t_ssl    ssl;

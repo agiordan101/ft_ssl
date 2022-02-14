@@ -3,7 +3,7 @@
 static void     print_flag_usage(e_flags flag)
 {
     if (flag & help)
-        ft_putstderr("\t-help\tDisplay this summary and exit\n");
+        ft_putstderr("\t-help\tdisplay this summary and exit\n");
     else if (flag & i_)
         ft_putstderr("\t-i\tinput data as file\n");
     else if (flag & o)
@@ -11,7 +11,7 @@ static void     print_flag_usage(e_flags flag)
     else if (flag & a)
         ft_putstderr("\t-a\tdecode/encode the input/output in base64, depending on the encrypt mode\n");
     else if (flag & A)
-        ft_putstderr("\t-A\tUsed with -[a | -decin base64 | -encout base64] to specify base64 buffer as a single line\n");
+        ft_putstderr("\t-A\tused with -[a | -decin base64 | -encout base64] to specify base64 buffer as a single line\n");
     else if (flag & decin)
         ft_putstderr("\t-decin\tdecode the input with the given hashing command (command flags can ONLY be passed after)\n");
     else if (flag & encout)
@@ -29,9 +29,11 @@ static void     print_flag_usage(e_flags flag)
     else if (flag & d)
         ft_putstderr("\t-d\tdecrypt mode\n");
     else if (flag & passin)
-        ft_putstderr("\t-p\tsend password for input decryption (flag -decin <cmd> needs to exist before)\n");
+        ft_putstderr("\t-passin\tsend password for input decryption (flag -decin <cmd> needs to exist before)\n");
     else if (flag & passout)
-        ft_putstderr("\t-p\tsend password for output encryption (flag -encout <cmd> needs to exist before)\n");
+        ft_putstderr("\t-passout\tsend password for output encryption (flag -encout <cmd> needs to exist before)\n");
+    else if (flag & p_des)
+        ft_putstderr("\t-p\tsend the password in hex\t(Override the behavior of global flag -p if any des command is past)\n");
     else if (flag & s_des)
         ft_putstderr("\t-s\tsend the salt in hex\t(Override the behavior of global flag -s if any des command is past)\n");
     else if (flag & k_des)
@@ -51,7 +53,7 @@ static void     print_flag_usage(e_flags flag)
     else if (flag & max)
         ft_putstderr("\t-max\tupper bound for prime generation (Default as 2^63 - 1)\n");
     else if (flag & rand_path)
-        ft_putstderr("\t-rand\tA file containing random data used to seed the random number generator\n");
+        ft_putstderr("\t-rand\ta file containing random data used to seed the random number generator\n");
     else if (flag & inform)
         ft_putstderr("\t-inform\tinput format [PEM | DER] (Default as PEM)\n");
     else if (flag & outform)
@@ -63,7 +65,7 @@ static void     print_flag_usage(e_flags flag)
     else if (flag & text)
         ft_putstderr("\t-text\tprint key propoerties in hex\n");
     else if (flag & modulus)
-        ft_putstderr("       -modulus print RSA key modulus in hex\n");
+        ft_putstderr("\t-modulus print RSA key modulus in hex\n");
     else if (flag & pubin)
         ft_putstderr("\t-pubin\texpect a public key in input file (private key by default)\n");
     else if (flag & pubout)
