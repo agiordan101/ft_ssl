@@ -1,29 +1,47 @@
 #include "ft_ssl.h"
 
-int         parse_private_key_header(char *firstline, char header[RSA_PRIVATE_HEADER_byteSz])
+static inline int           rsa_public_key_header(char *file_content, Long_64bits fileSz)
 {
-
+    return (fileSz < RSA_PUBLIC_HEADER_byteSz ||\
+        ft_strncmp(file_content, RSA_PUBLIC_HEADER, RSA_PUBLIC_HEADER_byteSz)) ?\
+        1 : 0;
+}
+static inline int           rsa_public_key_footer(char *file_content, Long_64bits fileSz)
+{
+    return (fileSz < RSA_PUBLIC_FOOTER_byteSz ||\
+        ft_strncmp(file_content, RSA_PUBLIC_FOOTER, RSA_PUBLIC_FOOTER_byteSz)) ?\
+        1 : 0;
 }
 
-Key_64bits  parse_keys_rsa(t_rsa *rsa, char *content, e_flags flags)
+static inline int           rsa_private_key_header(char *file_content, Long_64bits fileSz)
 {
-    char    header[RSA_PRIVATE_HEADER_byteSz];
-    char    footer[RSA_PRIVATE_HEADER_byteSz];
+    return (fileSz < RSA_PRIVATE_HEADER_byteSz ||\
+        ft_strncmp(file_content, RSA_PRIVATE_HEADER, RSA_PRIVATE_HEADER_byteSz)) ?\
+        1 : 0;
+}
+static inline int           rsa_private_key_footer(char *file_content, Long_64bits fileSz)
+{
+    return (fileSz < RSA_PRIVATE_FOOTER_byteSz ||\
+        ft_strncmp(file_content, RSA_PRIVATE_FOOTER, RSA_PRIVATE_FOOTER_byteSz)) ?\
+        1 : 0;
+}
 
-    if (flags & pubin)
-    {
-        ft_memcpy(header, RSA_PUBLIC_HEADER, RSA_PUBLIC_HEADER_byteSz);
-        ft_memcpy(footer, RSA_PUBLIC_FOOTER, RSA_PUBLIC_FOOTER_byteSz);
-    }
-    else
-    {
-        ft_memcpy(header, RSA_PRIVATE_HEADER, RSA_PRIVATE_HEADER_byteSz);
-        ft_memcpy(footer, RSA_PRIVATE_FOOTER, RSA_PRIVATE_FOOTER_byteSz);
-    }
+static inline Key_64bits    parse_keys_rsa(char *file_content, Long_64bits fileSz, e_flags flags)
+{
+    int header_error = flags & pubin ?\
+        rsa_public_key_header(file_content, fileSz) :\
+        rsa_private_key_header(file_content, fileSz);
+    
+    int footer_error = flags & pubin ?\
+        rsa_public_key_footer(file_content, fileSz) :\
+        rsa_private_key_footer(file_content, fileSz);
 
-    // printf("header: %s\n", header);
-    // printf("footer: %s\n", footer);
-    return 0;
+    printf("header: %d\n", header_error);
+    printf("footer: %d\n", footer_error);
+    return header_error + footer_error;
+    // return flags & pubin ?\
+    //     rsa_public_key_header(file_content, fileSz) + rsa_public_key_footer(file_content, fileSz) :\
+    //     rsa_private_key_header(file_content, fileSz) + rsa_private_key_footer(file_content, fileSz);
 }
 
 Mem_8bits   *rsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way)
@@ -39,7 +57,7 @@ Mem_8bits   *rsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz
     printf("rsa_data->inform: %d\n", rsa_data->inform);
     printf("rsa_data->outform: %d\n", rsa_data->outform);
     
-    parse_keys_rsa(rsa_data, *plaintext, way);
+    parse_keys_rsa(*plaintext, ptByteSz, way);
 
     if (~way & noout)
     {

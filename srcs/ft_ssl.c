@@ -7,8 +7,6 @@
 
     To do :
 
-        retirer les flags ecb cbc
-        conflict flags s et p entre l command principale et les secondaires
         Renommer les "way" en un truc plus pertinant pour la command en question
 
         //Leaks ft_stradd_quote ?
@@ -16,13 +14,11 @@
         INTMAXLESS1 enlever le pow
         Enlever les protection useless dans le parsing
         Gerer les \n dans l'output (pas dans les ft hash)
-        Afficher l'usage de la command_familly passé
         Boucler pour les flags parsing pt sur ft
         -nosalt             Do not use salt in the KDF
 
     Crashs :
 
-        ./ft_ssl genprime -q -help | ./ft_ssl isprime -p
 
 */
 
@@ -77,7 +73,7 @@ static void    ssl_free()
     t_command_free(&ssl.command);
     t_command_free(&ssl.enc_o_cmd);
 
-    t_hash_free(ssl.hash);
+    t_hash_list_free(ssl.hash);
 
     free(ssl.ulrandom_path);
     if (ssl.ulrandom_fd > 0)
@@ -99,6 +95,7 @@ void          freexit(int exit_state)
 
 static void    t_ssl_init(t_ssl *ssl)
 {
+    srand(time(NULL));
     ft_bzero(ssl, sizeof(t_ssl));
     ssl->fd_out = 1;
     ssl->ulrandom_path = ft_strdup("/dev/urandom");
@@ -109,7 +106,6 @@ int     main(int ac, char **av)
 {
     int     ret;
 
-    srand(time(NULL));
     t_ssl_init(&ssl);
     if ((ret = parsing(ac, av)))
         freexit(ret);

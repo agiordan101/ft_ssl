@@ -7,19 +7,24 @@ inline void init_t_hash(t_hash *hash)
 
 inline void t_hash_free(t_hash *hash)
 {
-    t_hash  *tmp;
+    if (hash->name)
+        free(hash->name);
+    if (hash->msg)
+        free(hash->msg);
+    if (hash->hash)
+        free(hash->hash);
+    free(hash);
+}
+
+inline void t_hash_list_free(t_hash *hash)
+{
+    t_hash  *next;
 
     while (hash)
     {
-        if (hash->name)
-            free(hash->name);
-        if (hash->msg)
-            free(hash->msg);
-        if (hash->hash)
-            free(hash->hash);
-        tmp = hash;
-        hash = hash->next;
-        free(tmp);
+        next = hash->next;
+        t_hash_free(hash);
+        hash = next;
     }
 }
 

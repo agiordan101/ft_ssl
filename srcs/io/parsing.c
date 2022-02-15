@@ -392,28 +392,37 @@ static void     add_thash_from_stdin()
 
     stdin_handler(&node->msg, &node->len, NULL, 0);
 
-    // Pre-computing for output part
-    node->stdin = 1;
-    if (ssl.flags & p)
+    if (node->len)
     {
-        tmp = ft_strdup(node->msg);
-        if (tmp[node->len - 1] == '\n')
+        // Pre-computing for output part
+        node->stdin = 1;
+        if (ssl.flags & p)
         {
-            // printf("???????????????????????????????????????????????\n");
-            tmp[node->len - 1] = '\0'; // Remove '\n' for name displaying
-        }
+            tmp = ft_strdup(node->msg);
+            if (tmp[node->len - 1] == '\n')
+            {
+                // printf("???????????????????????????????????????????????\n");
+                tmp[node->len - 1] = '\0'; // Remove '\n' for name displaying
+            }
 
-        // q will not print name, but when q, r and p are True, stdin content without quote is required. Yes, I know, it's sucks
-        if (ssl.flags & q)
-            node->name = tmp;
-        else
-        {
-            node->name = ft_stradd_quote(tmp, node->len - (tmp[node->len - 1] == '\0' ? 1 : 0));
-            free(tmp);
+            // q will not print name, but when q, r and p are True, stdin content without quote is required. Yes, I know, it's sucks
+            if (ssl.flags & q)
+                node->name = tmp;
+            else
+            {
+                node->name = ft_stradd_quote(tmp, node->len - (tmp[node->len - 1] == '\0' ? 1 : 0));
+                free(tmp);
+            }
         }
+        else
+            node->name = ft_strdup("stdin");
     }
     else
-        node->name = ft_strdup("stdin");
+    {
+        ft_putstderr("[PARSING WARNING] No data fetch from STDIN.\n");
+        ssl.hash = node->next;
+        t_hash_free(node);
+    }
 }
 
 void    flags_conflicts()

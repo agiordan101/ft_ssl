@@ -151,8 +151,7 @@ typedef struct  s_hash
 }               t_hash;
 
 char        *ask_password();
-t_hash *    add_thash_front();
-// void        command_handler(t_command *command, char *cmd);
+t_hash      *add_thash_front();
 int         parsing(int ac, char **av);
 void        output(t_hash *hash);
 
@@ -189,6 +188,7 @@ char	    *ft_strdup(char *src);
 char    	*ft_strinsert(char *str1, char *toinsert, char *str2);
 int		    ft_strlen(char *p);
 int         ft_strcmp(const char *s1, const char *s2);
+int     	ft_strncmp(const char *s1, const char *s2, size_t n);
 char        *ft_stradd_quote(char *str, int len);
 char	    *ft_lower(char *str);
 
@@ -402,13 +402,13 @@ Long_64bits prime_generator(Long_64bits min, Long_64bits max, int verbose);
 
 # define        RSA_PRIVATE_HEADER          "-----BEGIN RSA PRIVATE KEY-----"
 # define        RSA_PRIVATE_FOOTER          "-----END RSA PRIVATE KEY-----"
-# define        RSA_PRIVATE_HEADER_byteSz   sizeof(RSA_PRIVATE_HEADER)
-# define        RSA_PRIVATE_FOOTER_byteSz   sizeof(RSA_PRIVATE_FOOTER)
+# define        RSA_PRIVATE_HEADER_byteSz   (sizeof(RSA_PRIVATE_HEADER) - 1)
+# define        RSA_PRIVATE_FOOTER_byteSz   (sizeof(RSA_PRIVATE_FOOTER) - 1)
 
-# define        RSA_PUBLIC_HEADER  "-----BEGIN PUBLIC KEY-----"
-# define        RSA_PUBLIC_FOOTER  "-----END PUBLIC KEY-----"
-# define        RSA_PUBLIC_HEADER_byteSz   sizeof(RSA_PUBLIC_HEADER)
-# define        RSA_PUBLIC_FOOTER_byteSz   sizeof(RSA_PUBLIC_FOOTER)
+# define        RSA_PUBLIC_HEADER           "-----BEGIN PUBLIC KEY-----"
+# define        RSA_PUBLIC_FOOTER           "-----END PUBLIC KEY-----"
+# define        RSA_PUBLIC_HEADER_byteSz    (sizeof(RSA_PUBLIC_HEADER) - 1)
+# define        RSA_PUBLIC_FOOTER_byteSz    (sizeof(RSA_PUBLIC_FOOTER) - 1)
 
 typedef enum    rsa_form
 {
@@ -488,6 +488,7 @@ extern t_ssl    ssl;
 
 void    init_t_hash(t_hash *hash);
 void    t_hash_free(t_hash *hash);
+void    t_hash_list_free(t_hash *hash);
 void    t_hash_decode_inputs(t_hash *hash);
 void    t_hash_encode_output(t_hash *hash);
 void    t_hash_hashing(t_hash *hash);

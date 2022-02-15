@@ -3,73 +3,73 @@
 static void     print_flag_usage(e_flags flag)
 {
     if (flag & help)
-        ft_putstderr("\t-help\tdisplay this summary and exit\n");
+        ft_putstderr("\t-help\t\tdisplay this summary and exit\n");
     else if (flag & i_)
-        ft_putstderr("\t-i\tinput data as file\n");
+        ft_putstderr("\t-i\t\tinput data as file\n");
     else if (flag & o)
-        ft_putstderr("\t-o\toutput file\n");
+        ft_putstderr("\t-o\t\toutput file\n");
     else if (flag & a)
-        ft_putstderr("\t-a\tdecode/encode the input/output in base64, depending on the encrypt mode\n");
+        ft_putstderr("\t-a\t\tdecode/encode the input/output in base64, depending on the encrypt mode\n");
     else if (flag & A)
-        ft_putstderr("\t-A\tused with -[a | -decin base64 | -encout base64] to specify base64 buffer as a single line\n");
+        ft_putstderr("\t-A\t\tused with -[a | -decin base64 | -encout base64] to specify base64 buffer as a single line\n");
     else if (flag & decin)
-        ft_putstderr("\t-decin\tdecode the input with the given hashing command (command flags can ONLY be passed after)\n");
+        ft_putstderr("\t-decin\t\tdecode the input with the given hashing command (command flags can ONLY be passed after)\n");
     else if (flag & encout)
-        ft_putstderr("\t-encout\tencode the output with the given hashing command (command flags can ONLY be passed after)\n");
+        ft_putstderr("\t-encout\t\tencode the output with the given hashing command (command flags can ONLY be passed after)\n");
     else if (flag & q)
-        ft_putstderr("\t-q\tquiet mode\n");
+        ft_putstderr("\t-q\t\tquiet mode\n");
     else if (flag & r)
-        ft_putstderr("\t-r\treverse the format of the output\n");
+        ft_putstderr("\t-r\t\treverse the format of the output\n");
     else if (flag & s)
-        ft_putstderr("\t-s\tinput data as string\n");
+        ft_putstderr("\t-s\t\tinput data as string\n");
     else if (flag & p)
-        ft_putstderr("\t-p\tforce data reception in stdin\n");
+        ft_putstderr("\t-p\t\tforce data reception in stdin\n");
     else if (flag & e)
-        ft_putstderr("\t-e\tencrypt mode (default mode) (-e has priority over -d)\n");
+        ft_putstderr("\t-e\t\tencrypt mode (default mode) (-e has priority over -d)\n");
     else if (flag & d)
-        ft_putstderr("\t-d\tdecrypt mode\n");
+        ft_putstderr("\t-d\t\tdecrypt mode\n");
     else if (flag & passin)
-        ft_putstderr("\t-passin\tsend password for input decryption (flag -decin <cmd> needs to exist before)\n");
+        ft_putstderr("\t-passin\t\tsend password for input decryption (flag -decin <cmd> needs to exist before)\n");
     else if (flag & passout)
         ft_putstderr("\t-passout\tsend password for output encryption (flag -encout <cmd> needs to exist before)\n");
     else if (flag & p_des)
-        ft_putstderr("\t-p\tsend the password in hex\t(Override the behavior of global flag -p if any des command is past)\n");
+        ft_putstderr("\t-p\t\tsend the password in hex\t(Override the behavior of global flag -p if any des command is past)\n");
     else if (flag & s_des)
-        ft_putstderr("\t-s\tsend the salt in hex\t(Override the behavior of global flag -s if any des command is past)\n");
+        ft_putstderr("\t-s\t\tsend the salt in hex\t(Override the behavior of global flag -s if any des command is past)\n");
     else if (flag & k_des)
-        ft_putstderr("\t-k\tsend the key in hex\n");
+        ft_putstderr("\t-k\t\tsend the key in hex\n");
     else if (flag & v_des)
-        ft_putstderr("\t-v\tsend initialization vector in hex\n");
+        ft_putstderr("\t-v\t\tsend initialization vector in hex\n");
     else if (flag & P_des)
-        ft_putstderr("\t-P\tprint the vector/key and exit\n");
+        ft_putstderr("\t-P\t\tprint the vector/key and exit\n");
     else if (flag & nopad)
-        ft_putstderr("\t-nopad\tdisable standard block padding\n");
+        ft_putstderr("\t-nopad\t\tdisable standard block padding\n");
     else if (flag & pbkdf2_iter)
-        ft_putstderr("\t-iter\tspecify the iteration count of PBKDF2\n");
+        ft_putstderr("\t-iter\t\tspecify the iteration count of PBKDF2\n");
     else if (flag & prob)
-        ft_putstderr("\t-prob\tprobability requested for Miller-Rabin primality test in percentile (0 < p <= 100)\n");
+        ft_putstderr("\t-prob\t\tprobability requested for Miller-Rabin primality test in percentile (0 < p <= 100)\n");
     else if (flag & min)
-        ft_putstderr("\t-min\tlower bound for prime generation (Default as 0)\n");
+        ft_putstderr("\t-min\t\tlower bound for prime generation (Default as 0)\n");
     else if (flag & max)
-        ft_putstderr("\t-max\tupper bound for prime generation (Default as 2^63 - 1)\n");
+        ft_putstderr("\t-max\t\tupper bound for prime generation (Default as 2^63 - 1)\n");
     else if (flag & rand_path)
-        ft_putstderr("\t-rand\ta file containing random data used to seed the random number generator\n");
+        ft_putstderr("\t-rand\t\ta file containing random data used to seed the random number generator\n");
     else if (flag & inform)
-        ft_putstderr("\t-inform\tinput format [PEM | DER] (Default as PEM)\n");
+        ft_putstderr("\t-inform\t\tinput format [PEM | DER] (Default as PEM)\n");
     else if (flag & outform)
         ft_putstderr("\t-outform\toutput format [PEM | DER] (Default as PEM)\n");
     else if (flag & check)
-        ft_putstderr("\t-check\tverify key consistency\n");
+        ft_putstderr("\t-check\t\tverify key consistency\n");
     else if (flag & noout)
-        ft_putstderr("\t-noout\tdon't print key out\n");
+        ft_putstderr("\t-noout\t\tdon't print key out\n");
     else if (flag & text)
-        ft_putstderr("\t-text\tprint key propoerties in hex\n");
+        ft_putstderr("\t-text\t\tprint key propoerties in hex\n");
     else if (flag & modulus)
-        ft_putstderr("\t-modulus print RSA key modulus in hex\n");
+        ft_putstderr("\t-modulus\tprint RSA key modulus in hex\n");
     else if (flag & pubin)
-        ft_putstderr("\t-pubin\texpect a public key in input file (private key by default)\n");
+        ft_putstderr("\t-pubin\t\texpect a public key in input file (private key by default)\n");
     else if (flag & pubout)
-        ft_putstderr("\t-pubout\toutput a public key (private key by default). This option is automatically set if the input is a public key.\n");
+        ft_putstderr("\t-pubout\t\toutput a public key (private key by default). This option is automatically set if the input is a public key.\n");
     else
     {
         printf("WTFF ?\n");
@@ -157,6 +157,7 @@ void    print_command_usage(e_command cmd)
         print_genrsa_usage();
     else if (cmd & RSA)
         print_rsa_usage();
+    // ft_putstrfd(STDOUT, "\n");            // Output at least one \n on STDOUT to handle redirection cases correctly
     freexit(EXIT_SUCCESS);
 }
 
@@ -168,11 +169,15 @@ void    print_commands()
     ft_putstderr("\nCipher commands:\n\tbase64\n\tdes\t(Default as des-cbc)\n\tdes-ecb\n\tdes-cbc\n");
     ft_putstderr("\nPrime numbers commands:\n\tgenprime\n\tisprime\n");
     ft_putstderr("\nStandard commands:\n\tgenrsa\n");
+    ft_putstrfd(STDOUT, "\n");            // Output at least one \n on STDOUT to handle redirection cases correctly
+    // ft_putstr("\n");
     freexit(EXIT_SUCCESS);
 }
 
 void    print_global_usage()
 {
     ft_putstderr("Type './ft_ssl help' for commands list.\n");
+    ft_putstrfd(STDOUT, "\n");            // Output at least one \n on STDOUT to handle redirection cases correctly
+    // ft_putstr("\n");
     freexit(EXIT_SUCCESS);
 }
