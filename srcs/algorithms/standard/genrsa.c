@@ -91,6 +91,7 @@ Mem_8bits   *genrsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByt
     ft_putnbr(STDERR, rsa.pubkey.enc_exp);
     ft_putstderr("\n");
 
+    (void)command_data;
     (void)plaintext;
     (void)ptByteSz;
     (void)way;

@@ -7,6 +7,8 @@
 
     To do :
 
+        base64 + -p output cheum ???????
+
         Renommer les "way" en un truc plus pertinant pour la command en question
 
         //Leaks ft_stradd_quote ?

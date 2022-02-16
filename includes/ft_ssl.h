@@ -400,15 +400,17 @@ Long_64bits prime_generator(Long_64bits min, Long_64bits max, int verbose);
     RSA Data --------------------------------------
 */
 
-# define        RSA_PRIVATE_HEADER          "-----BEGIN RSA PRIVATE KEY-----"
-# define        RSA_PRIVATE_FOOTER          "-----END RSA PRIVATE KEY-----"
-# define        RSA_PRIVATE_HEADER_byteSz   (sizeof(RSA_PRIVATE_HEADER) - 1)
-# define        RSA_PRIVATE_FOOTER_byteSz   (sizeof(RSA_PRIVATE_FOOTER) - 1)
+# define        RSA_PRIVATE_KEY_HEADER          "-----BEGIN RSA PRIVATE KEY-----"
+# define        RSA_PRIVATE_KEY_FOOTER          "-----END RSA PRIVATE KEY-----"
+# define        RSA_PRIVATE_KEY_HEADER_byteSz   (sizeof(RSA_PRIVATE_KEY_HEADER) - 1)
+# define        RSA_PRIVATE_KEY_FOOTER_byteSz   (sizeof(RSA_PRIVATE_KEY_FOOTER) - 1)
+# define        RSA_PRIVATE_KEY_DATA_byteSz     1000
 
-# define        RSA_PUBLIC_HEADER           "-----BEGIN PUBLIC KEY-----"
-# define        RSA_PUBLIC_FOOTER           "-----END PUBLIC KEY-----"
-# define        RSA_PUBLIC_HEADER_byteSz    (sizeof(RSA_PUBLIC_HEADER) - 1)
-# define        RSA_PUBLIC_FOOTER_byteSz    (sizeof(RSA_PUBLIC_FOOTER) - 1)
+# define        RSA_PUBLIC_KEY_HEADER           "-----BEGIN PUBLIC KEY-----"
+# define        RSA_PUBLIC_KEY_FOOTER           "-----END PUBLIC KEY-----"
+# define        RSA_PUBLIC_KEY_HEADER_byteSz    (sizeof(RSA_PUBLIC_KEY_HEADER) - 1)
+# define        RSA_PUBLIC_KEY_FOOTER_byteSz    (sizeof(RSA_PUBLIC_KEY_FOOTER) - 1)
+# define        RSA_PUBLIC_KEY_DATA_byteSz      1000
 
 typedef enum    rsa_form
 {
@@ -416,18 +418,39 @@ typedef enum    rsa_form
     DER=1<<2,
 }               e_rsa_form;
 
-# define    RSA_ENC_EXP (1UL << 15 + 1)    // Arbitrary prime number, high chances to be coprime with Euler / Carmichael exp, choosen in every RSA cryptosystems
+# define        RSA_ENC_EXP (1UL << 15 + 1)    // Arbitrary prime number, high chances to be coprime with Euler / Carmichael exp, choosen in every RSA cryptosystems
+
+
+
+// RSAPrivateKey ::= SEQUENCE {
+//     version           Version,
+//     modulus           INTEGER,  -- n
+//     publicExponent    INTEGER,  -- e
+//     privateExponent   INTEGER,  -- d
+//     prime1            INTEGER,  -- p
+//     prime2            INTEGER,  -- q
+//     exponent1         INTEGER,  -- d mod (p-1)
+//     exponent2         INTEGER,  -- d mod (q-1)
+//     coefficient       INTEGER,  -- (inverse of q) mod p
+//     otherPrimeInfos   OtherPrimeInfos OPTIONAL
+// }
+
+
+// RSAPublicKey ::= SEQUENCE {
+//     modulus           INTEGER,  -- n
+//     publicExponent    INTEGER   -- e
+// }
 
 typedef struct  s_rsa_private_key
 {
     Long_64bits modulus;    // p * q
-    Long_64bits dec_exp;    // Modular multiplicative inverse of RSA_ENC_EXP and Euler fonction
+    Long_64bits dec_exp;    // d: Modular multiplicative inverse of RSA_ENC_EXP and Euler fonction
 }               t_rsa_private_key;
 
 typedef struct  s_rsa_public_key
 {
     Long_64bits modulus;    // p * q
-    Long_64bits enc_exp;    // Default as 1 << 15 + 1 for faster modular exponentiation (Only 2 bits)
+    Long_64bits enc_exp;    // e: Default as 1 << 15 + 1 for faster modular exponentiation (Only 2 bits)
 }               t_rsa_public_key;
 
 typedef struct  s_rsa_keys
@@ -461,11 +484,6 @@ Long_64bits rsa_decryption(t_rsa_private_key *privkey, Long_64bits ciphertext);
 
 typedef struct  s_ssl
 {
-    // e_command       command;
-    // char            *command_title;
-    // Mem_8bits       *(*command_addr)(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
-    // void            *command_data;
-    // e_command_flags command_flags;
     t_command       dec_i_cmd;
     t_command       command;
     t_command       enc_o_cmd;

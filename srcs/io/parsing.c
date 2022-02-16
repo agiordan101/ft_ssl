@@ -471,11 +471,9 @@ void    flags_conflicts()
             command_handler(&ssl.enc_o_cmd, base64_str, 0);
         }
     }
-    // else if (ssl.command.command & RSA)
-    // {
-    //     // if (ssl.flags & pubout &&)
-        
-    // }
+    else if (ssl.command.command & RSA)
+        if (ssl.flags & pubin && ~ssl.flags & pubout)
+            ssl.flags += pubout;    // pubout option is automatically set if the input is a public key
 }
 
 void    end_parse()

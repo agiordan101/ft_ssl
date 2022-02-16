@@ -169,7 +169,7 @@ void    print_commands()
     ft_putstderr("\nCipher commands:\n\tbase64\n\tdes\t(Default as des-cbc)\n\tdes-ecb\n\tdes-cbc\n");
     ft_putstderr("\nPrime numbers commands:\n\tgenprime\n\tisprime\n");
     ft_putstderr("\nStandard commands:\n\tgenrsa\n");
-    ft_putstrfd(STDOUT, "\n");            // Output at least one \n on STDOUT to handle redirection cases correctly
+    // ft_putstrfd(STDOUT, "\n");            // Output at least one \n on STDOUT to handle redirection cases correctly
     // ft_putstr("\n");
     freexit(EXIT_SUCCESS);
 }
@@ -177,7 +177,7 @@ void    print_commands()
 void    print_global_usage()
 {
     ft_putstderr("Type './ft_ssl help' for commands list.\n");
-    ft_putstrfd(STDOUT, "\n");            // Output at least one \n on STDOUT to handle redirection cases correctly
+    // ft_putstrfd(STDOUT, "\n");            // Output at least one \n on STDOUT to handle redirection cases correctly
     // ft_putstr("\n");
     freexit(EXIT_SUCCESS);
 }
