@@ -1,5 +1,5 @@
 #include "ft_ssl.h"
-
+/*
 static inline void  rsa_test()
 {
     t_rsa_keys       rsa;
@@ -75,6 +75,7 @@ static inline void  rsa_test()
 
     exit(0);
 }
+*/
 
 Mem_8bits   *genrsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way)
 {

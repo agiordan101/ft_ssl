@@ -83,10 +83,6 @@ static void    ssl_free()
 
     if (ssl.flags & o)
         close(ssl.fd_out);
-    // if (ssl.passin)
-    //     free(ssl.passin)
-    // if (ssl.passout)
-    //     free(ssl.passout)
 }
 
 void          freexit(int exit_state)

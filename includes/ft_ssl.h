@@ -423,15 +423,6 @@ typedef enum    rsa_form
 
 
 // RSAPrivateKey ::= SEQUENCE {
-//     version           Version,
-//     modulus           INTEGER,  -- n
-//     publicExponent    INTEGER,  -- e
-//     privateExponent   INTEGER,  -- d
-//     prime1            INTEGER,  -- p
-//     prime2            INTEGER,  -- q
-//     exponent1         INTEGER,  -- d mod (p-1)
-//     exponent2         INTEGER,  -- d mod (q-1)
-//     coefficient       INTEGER,  -- (inverse of q) mod p
 //     otherPrimeInfos   OtherPrimeInfos OPTIONAL
 // }
 
@@ -441,16 +432,25 @@ typedef enum    rsa_form
 //     publicExponent    INTEGER   -- e
 // }
 
+//  RFC 3447: ASN.1 type RSAPrivateKey structure
 typedef struct  s_rsa_private_key
 {
-    Long_64bits modulus;    // p * q
-    Long_64bits dec_exp;    // d: Modular multiplicative inverse of RSA_ENC_EXP and Euler fonction
+    Long_64bits version;           // Two primes ? 0 : 1
+    Long_64bits modulus;           // n = p * q
+    Long_64bits enc_exp;           // Public exponent e (Default as 1 << 15 + 1 for faster modular exponentiation (Only 2 bits))
+    Long_64bits dec_exp;           // Private exponent d (Modular multiplicative inverse of RSA_ENC_EXP and Euler fonction)
+    Long_64bits p;                 // prime1
+    Long_64bits q;                 // prime2
+    Long_64bits exponent1;         // d mod (p-1)
+    Long_64bits exponent2;         // d mod (q-1)
+    Long_64bits coefficient;       // (inverse of q) mod p
 }               t_rsa_private_key;
 
+//  RFC 3447: ASN.1 type RSAPublicKey structure
 typedef struct  s_rsa_public_key
 {
-    Long_64bits modulus;    // p * q
-    Long_64bits enc_exp;    // e: Default as 1 << 15 + 1 for faster modular exponentiation (Only 2 bits)
+    Long_64bits modulus;    // n = p * q
+    Long_64bits enc_exp;    // Public exponent e (Default as 1 << 15 + 1 for faster modular exponentiation (Only 2 bits))
 }               t_rsa_public_key;
 
 typedef struct  s_rsa_keys

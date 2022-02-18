@@ -1,6 +1,12 @@
 #include "ft_ssl.h"
 
 /*
+    Road map
+        tout bien parser priv / pub
+        tout append dans une string ? Permet de gérer plusieurs clef en meme temps
+*/
+
+/*
     Key parsing ---------------------------------------
 */
 
