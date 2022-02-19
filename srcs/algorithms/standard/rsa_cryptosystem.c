@@ -9,7 +9,7 @@
 
 */
 
-void        rsa_keys_generation(t_rsa_keys *rsa)
+void        rsa_keys_generation(t_rsa *rsa)
 {
     /*
         For security purposes :
@@ -22,39 +22,43 @@ void        rsa_keys_generation(t_rsa_keys *rsa)
                 d > (1/3)(n ^ (1/4))
                 e
     */
-    if (!rsa->p)
-        rsa->p = prime_generator(1UL<<10, 1UL<<32, 1);
-    if (!rsa->q)
-        rsa->q = prime_generator(1UL<<10, 1UL<<31, 1);
+    rsa->privkey.version = 0;
+    if (!rsa->privkey.p)
+        rsa->privkey.p = prime_generator(1UL<<10, 1UL<<32, 1);
+    if (!rsa->privkey.q)
+        rsa->privkey.q = prime_generator(1UL<<10, 1UL<<31, 1);
 
-    rsa->privkey.modulus = rsa->p * rsa->q;
-    rsa->pubkey.modulus = rsa->privkey.modulus;
+    rsa->privkey.modulus = rsa->privkey.p * rsa->privkey.q;
 
-    if (ulmult_overflow(rsa->p, rsa->q))
+    if (ulmult_overflow(rsa->privkey.p, rsa->privkey.q))
     {
         printf("genrsa p and q primes multiplication OVERFLOW\n");
         exit(0);
     }
 
-    Long_64bits euler_f = (rsa->p - 1) * (rsa->q - 1);
+    Long_64bits euler_f = (rsa->privkey.p - 1) * (rsa->privkey.q - 1);
 
     // Choose e value that satisfy conditions
-    if (!rsa->pubkey.enc_exp)
-        rsa->pubkey.enc_exp = RSA_ENC_EXP;
-    while (rsa->pubkey.enc_exp >= euler_f || gcd(rsa->pubkey.enc_exp, euler_f) != 1)
+    if (!rsa->privkey.enc_exp)
+        rsa->privkey.enc_exp = RSA_ENC_EXP;
+    while (rsa->privkey.enc_exp >= euler_f || gcd(rsa->privkey.enc_exp, euler_f) != 1)
     {
         // Only 2 bits for faster modular exponentiations
-        rsa->pubkey.enc_exp = rsa->pubkey.enc_exp == 2 ? 1 : (rsa->pubkey.enc_exp >> 1) + 1;
-        // printf("RSA_ENC_EXP > euler_f or PGCD != 1, new e: %lu\n", rsa->pubkey.enc_exp);
+        rsa->privkey.enc_exp = rsa->privkey.enc_exp == 2 ? 1 : (rsa->privkey.enc_exp >> 1) + 1;
+        // printf("RSA_ENC_EXP > euler_f or PGCD != 1, new e: %lu\n", rsa->privkey.enc_exp);
     }
 
-    // porbleme from mod_mult_inverse
-    rsa->privkey.dec_exp = mod_mult_inverse(rsa->pubkey.enc_exp, euler_f);
-    // printf("rsa->p : %lu\n", rsa->p);
-    // printf("rsa->q : %lu\n", rsa->q);
+    rsa->privkey.dec_exp = mod_mult_inverse(rsa->privkey.enc_exp, euler_f);
+    
+    // Create public key with private key data
+    rsa->pubkey.modulus = rsa->privkey.modulus;
+    rsa->pubkey.enc_exp = rsa->privkey.enc_exp;
+    
+    // printf("rsa->privkey.p : %lu\n", rsa->privkey.p);
+    // printf("rsa->privkey.q : %lu\n", rsa->privkey.q);
     // printf("rsa->n : %lu\n", rsa->privkey.modulus);
     // printf("euler_f : %lu\n", euler_f);
-    // printf("rsa->pubkey.enc_exp : %lu\n", rsa->pubkey.enc_exp);
+    // printf("rsa->privkey.enc_exp : %lu\n", rsa->privkey.enc_exp);
     // printf("rsa->privkey.dec_exp : %lu\n\n", rsa->privkey.dec_exp);
 }
 

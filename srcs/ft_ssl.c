@@ -7,6 +7,8 @@
 
     To do :
 
+        RSA nsm les keys juste concat
+
         base64 + -p output cheum ???????
 
         Renommer les "way" en un truc plus pertinant pour la command en question

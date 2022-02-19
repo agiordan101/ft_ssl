@@ -435,7 +435,7 @@ typedef enum    rsa_form
 //  RFC 3447: ASN.1 type RSAPrivateKey structure
 typedef struct  s_rsa_private_key
 {
-    Long_64bits version;           // Two primes ? 0 : 1
+    Long_64bits version;           // Two primes: 0 / Multi primes: 1
     Long_64bits modulus;           // n = p * q
     Long_64bits enc_exp;           // Public exponent e (Default as 1 << 15 + 1 for faster modular exponentiation (Only 2 bits))
     Long_64bits dec_exp;           // Private exponent d (Modular multiplicative inverse of RSA_ENC_EXP and Euler fonction)
@@ -453,25 +453,27 @@ typedef struct  s_rsa_public_key
     Long_64bits enc_exp;    // Public exponent e (Default as 1 << 15 + 1 for faster modular exponentiation (Only 2 bits))
 }               t_rsa_public_key;
 
-typedef struct  s_rsa_keys
-{
-    Long_64bits         p;
-    Long_64bits         q;
-    t_rsa_private_key   privkey;
-    t_rsa_public_key    pubkey;
-}               t_rsa_keys;
+// typedef struct  s_rsa_keys
+// {
+//     Long_64bits         p;
+//     Long_64bits         q;
+//     t_rsa_private_key   privkey;
+//     t_rsa_public_key    pubkey;
+// }               t_rsa_keys;
 
 typedef struct  s_rsa
 {
-    e_rsa_form  inform;
-    e_rsa_form  outform;
-    t_rsa_keys  keys;
+    e_rsa_form          inform;
+    e_rsa_form          outform;
+    t_rsa_private_key   privkey;
+    t_rsa_public_key    pubkey;
+    // t_rsa_keys  keys;
 }               t_rsa;
 
 Mem_8bits   *rsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
 Mem_8bits   *genrsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
 
-void        rsa_keys_generation(t_rsa_keys *rsa);
+void        rsa_keys_generation(t_rsa *rsa);
 Long_64bits rsa_encryption(t_rsa_public_key *pubkey, Long_64bits m);
 Long_64bits rsa_decryption(t_rsa_private_key *privkey, Long_64bits ciphertext);
 
