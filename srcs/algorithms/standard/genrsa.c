@@ -79,8 +79,8 @@ static inline void  rsa_test()
 
 Mem_8bits   *genrsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way)
 {
-    t_rsa_keys   rsa;
-    ft_bzero(&rsa, sizeof(t_rsa_keys));
+    t_rsa   rsa;
+    ft_bzero(&rsa, sizeof(t_rsa));
 
     // rsa_test();
     ft_putstderr("Generating RSA private key, 64 bit long modulus (2 primes)\n");
@@ -92,9 +92,12 @@ Mem_8bits   *genrsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByt
     ft_putnbr(STDERR, rsa.pubkey.enc_exp);
     ft_putstderr("\n");
 
+    Mem_8bits *der_privkey = DER_generate_public_key(&rsa.pubkey, hashByteSz);
+    printf("der_privkey: %s\n", der_privkey);
+
     (void)command_data;
     (void)plaintext;
     (void)ptByteSz;
     (void)way;
-    return ft_memdup(&rsa.privkey.dec_exp, LONG64_byteSz);
+    return der_privkey;
 }

@@ -73,11 +73,22 @@ void    genprime_output(t_hash *hash)
     // ft_putstr(hash->hash);
 }
 
-void    genrsa_output(t_hash *hash)
+void    rsa_output(t_hash *hash)
 {
-    ft_putstr("-----BEGIN RSA PRIVATE KEY-----\n");
-    hash_output(hash);
-    ft_putstr("\n-----END RSA PRIVATE KEY-----");
+    if (~ssl.flags & noout)
+    {
+        ft_putstderr("writing RSA key\n");
+        if (((t_rsa *)ssl.command.command_data)->outform == PEM)
+        {
+            ft_putstr(ssl.flags & pubout ? RSA_PUBLIC_KEY_HEADER : RSA_PRIVATE_KEY_HEADER);
+            ft_putstr("\n");
+            hash_output(hash);
+            ft_putstr("\n");
+            ft_putstr(ssl.flags & pubout ? RSA_PUBLIC_KEY_FOOTER : RSA_PRIVATE_KEY_FOOTER);
+        }
+        else
+            hash_output(hash);
+    }
 }
 
 // ---------------------- Outputs based on flags ---------------------------
@@ -121,12 +132,12 @@ void    output_hash_based_on_flags(t_hash *hash)
         hash_output(hash);
     else if (hash->stdin && ssl.command.command & MD)
         stdin_output(hash);
-    else if (ssl.flags & r)
-        reversed_output(hash);
     else if (ssl.command.command & GENPRIME)
         genprime_output(hash);
-    else if (ssl.command.command & GENRSA)
-        genrsa_output(hash);
+    else if (ssl.command.command & STANDARDS)
+        rsa_output(hash);
+    else if (ssl.flags & r)
+        reversed_output(hash);
     else
         classic_output(hash);
 }

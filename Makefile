@@ -17,6 +17,8 @@ SRC			=	$(NAME).c \
 				io/output.c \
 				io/verbose.c \
 				utils/libft.c \
+				formats/DER.c \
+				formats/PEM.c \
 				calculations/maths.c \
 				calculations/bitwise.c \
 				algorithms/prime.c \
@@ -51,6 +53,7 @@ $(BIN_PATH)%.o: $(SRC_PATH)%.c $(INCS)
 dirs:
 	@mkdir -p $(BIN_PATH)/io || true
 	@mkdir -p $(BIN_PATH)/utils || true
+	@mkdir -p $(BIN_PATH)/formats || true
 	@mkdir -p $(BIN_PATH)/calculations || true
 	@mkdir -p $(BIN_PATH)/algorithms/md || true
 	@mkdir -p $(BIN_PATH)/algorithms/ciphers || true

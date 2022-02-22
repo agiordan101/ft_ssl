@@ -8,6 +8,7 @@
     To do :
 
         RSA nsm les keys juste concat
+        Remettre passin et decin pour rsa
 
         base64 + -p output cheum ???????
 

@@ -1,39 +1,56 @@
 #include "ft_ssl.h"
+    // char    data[RSA_PUBLIC_KEY_DATA_byteSz];
+    // ft_memcpy(
+    //     key,\
+    //     file_content + RSA_PUBLIC_KEY_HEADER_byteSz + 1,\
+    //     fileSz - RSA_PUBLIC_KEY_HEADER_byteSz - RSA_PUBLIC_KEY_FOOTER_byteSz
+    // );
+    // printf("DER_public_key_data: >%s<\n", data);
+    // char    data[RSA_PRIVATE_KEY_DATA_byteSz];
+    // ft_memcpy(
+    //     key,\
+    //     file_content + RSA_PRIVATE_KEY_HEADER_byteSz + 1,\
+    //     fileSz - RSA_PRIVATE_KEY_HEADER_byteSz - RSA_PRIVATE_KEY_FOOTER_byteSz
+    // );
+    // printf("DER_private_key_data: >%s<\n", data);
 
 /*
-    Road map
-        tout bien parser priv / pub
-        tout append dans une string ? Permet de gérer plusieurs clef en meme temps
+    DER data parsing ---------------------------------------
 */
 
-/*
-    Key parsing ---------------------------------------
-*/
+// static inline void  DER_public_key_data(t_rsa_public_key *key, char *file_content, Long_64bits fileSz)
+// {
+//     printf("file content length : %lu\n", fileSz);
+//     printf("file content desired: %lu\n", LONG64_byteSz * 2);
 
-static inline void  PEM_public_key(t_rsa_public_key *key, char *file_content, Long_64bits fileSz)
+//     exit(0);
+// }
+
+// static inline void  DER_private_key_data(t_rsa_private_key *key, char *file_content, Long_64bits fileSz)
+// {
+//     ;
+// }
+
+static inline void  rsa_DER_keys_parsing(t_rsa *rsa, char *file_content, Long_64bits fileSz, e_flags flags)
 {
-    char    data[RSA_PUBLIC_KEY_DATA_byteSz];
-    ft_memcpy(
-        key,\
-        file_content + RSA_PUBLIC_KEY_HEADER_byteSz + 1,\
-        fileSz - RSA_PUBLIC_KEY_HEADER_byteSz - RSA_PUBLIC_KEY_FOOTER_byteSz
-    );
-    printf("PEM_public_key: >%s<\n", data);
+    if (flags & pubin)
+    {
+        DER_read_public_key(file_content, fileSz, &rsa->pubkey);
+
+    }
+    else
+    {
+        DER_read_private_key(file_content, fileSz, &rsa->privkey);
+        printf("rsa->privkey.enc_exp: %lu\n", rsa->privkey.enc_exp);
+        printf("rsa->privkey.dec_exp: %lu\n", rsa->privkey.dec_exp);
+        printf("rsa->privkey.p: %lu\n", rsa->privkey.p);
+        printf("rsa->privkey.q: %lu\n", rsa->privkey.q);
+        printf("rsa->privkey.modulus: %lu\n", rsa->privkey.modulus);
+    }
 }
 
-static inline void  PEM_private_key(t_rsa_public_key *key, char *file_content, Long_64bits fileSz)
-{
-    char    data[RSA_PRIVATE_KEY_DATA_byteSz];
-    ft_memcpy(
-        key,\
-        file_content + RSA_PRIVATE_KEY_HEADER_byteSz + 1,\
-        fileSz - RSA_PRIVATE_KEY_HEADER_byteSz - RSA_PRIVATE_KEY_FOOTER_byteSz
-    );
-    printf("PEM_private_key: >%s<\n", data);
-}
-
 /*
-    PEM parsing ---------------------------------------
+    PEM form parsing ---------------------------------------
 */
 
 static inline int   PEM_public_key_header(char *file_content, Long_64bits fileSz)
@@ -71,6 +88,7 @@ static inline int   PEM_private_key_footer(char *file_content, Long_64bits fileS
     return (fileSz < 0 || ft_strncmp(file_content + fileSz + 1, RSA_PRIVATE_KEY_FOOTER, RSA_PRIVATE_KEY_FOOTER_byteSz)) ?\
         1 : 0;
 }
+
 static inline void  rsa_PEM_keys_parsing(t_rsa *rsa, char *file_content, Long_64bits fileSz, e_flags flags)
 {
     if (flags & pubin)
@@ -81,7 +99,8 @@ static inline void  rsa_PEM_keys_parsing(t_rsa *rsa, char *file_content, Long_64
             printf("./ft_ssl: rsa: Unable to load PUBLIC key in PEM format: bad footer\n");
         else
         {
-            PEM_public_key(&rsa->keys.pubkey, file_content, fileSz);
+
+            // DER_public_key_data(&rsa->pubkey, file_content, fileSz);
             return ;
         }
     }
@@ -92,7 +111,11 @@ static inline void  rsa_PEM_keys_parsing(t_rsa *rsa, char *file_content, Long_64
         else if (PEM_private_key_footer(file_content, fileSz))
             printf("./ft_ssl: rsa: Unable to load PRIVATE key in PEM format: bad footer\n");
         else
+        {
+
+            // DER_private_key_data(&rsa->pubkey, file_content, fileSz);
             return ;
+        }
     }
     freexit(EXIT_SUCCESS);
 }
@@ -104,6 +127,9 @@ static inline void  rsa_PEM_keys_parsing(t_rsa *rsa, char *file_content, Long_64
 Mem_8bits           *rsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags flags)
 {
     /*
+        En format PEM, return seulement la clé ?
+            Pratique pour pas encrypter les headers
+
     to do
         check
         text
@@ -122,14 +148,10 @@ Mem_8bits           *rsa(void *command_data, Mem_8bits **plaintext, Long_64bits 
 
     if (rsa_data->inform == PEM)
         rsa_PEM_keys_parsing(rsa_data, *plaintext, ptByteSz, flags);
+    else
+        rsa_DER_keys_parsing(rsa_data, *plaintext, ptByteSz, flags);
 
-    if (~flags & noout)
-    {
-        ft_putstderr("writing RSA key\n");
-        ft_putstderr(*plaintext);
-    }
-
-    exit(0);
     (void)hashByteSz;
+    exit(0);
     return NULL;
 }

@@ -91,3 +91,13 @@ void    rsa_format_error(char *form)
     ft_putstderr("\" for -[inform | outform] flag\n");
     freexit(EXIT_SUCCESS);
 }
+
+void    rsa_keys_integer_size_error(int byteSz)
+{
+    ft_putstderr("ft_ssl: ");
+    ft_putstderr(ssl.command.command_title);
+    ft_putstderr(": Cannot read ");
+    ft_putnbr(STDERR, byteSz * 8);
+    ft_putstderr(" bits integers (64 bits maximum)\n");
+    freexit(EXIT_SUCCESS);
+}

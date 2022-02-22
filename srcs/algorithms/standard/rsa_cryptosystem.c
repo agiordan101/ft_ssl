@@ -22,7 +22,8 @@ void        rsa_keys_generation(t_rsa *rsa)
                 d > (1/3)(n ^ (1/4))
                 e
     */
-    rsa->privkey.version = 0;
+    rsa->privkey.version = 0;   // Two primes: 0 / Multi primes: 1
+
     if (!rsa->privkey.p)
         rsa->privkey.p = prime_generator(1UL<<10, 1UL<<32, 1);
     if (!rsa->privkey.q)
@@ -49,11 +50,16 @@ void        rsa_keys_generation(t_rsa *rsa)
     }
 
     rsa->privkey.dec_exp = mod_mult_inverse(rsa->privkey.enc_exp, euler_f);
-    
+
+    // Pre compute exposants for smarter encryption and decryption (Chinese remainder theorem)
+    rsa->privkey.crt_exp_dp = rsa->privkey.dec_exp % (rsa->privkey.p - 1);
+    rsa->privkey.crt_exp_dq = rsa->privkey.dec_exp % (rsa->privkey.q - 1);
+    rsa->privkey.crt_exp_qinv = mod_mult_inverse(rsa->privkey.q, rsa->privkey.p);
+
     // Create public key with private key data
     rsa->pubkey.modulus = rsa->privkey.modulus;
     rsa->pubkey.enc_exp = rsa->privkey.enc_exp;
-    
+
     // printf("rsa->privkey.p : %lu\n", rsa->privkey.p);
     // printf("rsa->privkey.q : %lu\n", rsa->privkey.q);
     // printf("rsa->n : %lu\n", rsa->privkey.modulus);
@@ -78,4 +84,4 @@ inline Long_64bits rsa_decryption(t_rsa_private_key *privkey, Long_64bits cipher
 }
 
 
-// PAdding ?????????????????????????????????
+// Padding ?????????????????????????????????

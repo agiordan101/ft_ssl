@@ -137,6 +137,9 @@ Long_64bits         extended_euclide_algo(Long_64bits a, Long_64bits b, long lon
 
 inline Long_64bits  mod_mult_inverse(Long_64bits a, Long_64bits b)
 /*
+    Modular multiplicative inverse is written as x = e^(-1) mod N.
+    x is any integer that satisfies x.e ≡ 1 (mod N).
+
     Thanks to extended Euclidean algorithm,
     we can compute natural number PGCD(a, b) and relative integers u and v like:
         au + bv = PGCD(a, b)

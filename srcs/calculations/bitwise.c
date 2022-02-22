@@ -57,3 +57,14 @@ Long_64bits     _bits_permutations(Long_64bits mem, char *ptable, int bitLen)
     }
     return tk;
 }
+
+int             bytes_counter(Long_64bits n)
+{
+    int count = 0;
+    while (n)
+    {
+        count++;
+        n >>= 8;
+    }
+    return count;
+}

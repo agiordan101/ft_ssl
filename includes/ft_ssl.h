@@ -93,7 +93,7 @@ typedef enum    command_flags {
     GENPRIME_flags= GLOBAL_FLAGS_OUT + help + q + min + max + rand_path,
     ISPRIME_flags=  GLOBAL_FLAGS + DATASTRINPUT_FLAGS + prob,
     GENRSA_flags=   GLOBAL_FLAGS_OUT + help + q + rand_path,
-    RSA_flags=      GLOBAL_FLAGS + RSA_FLAGS_ONLY,
+    RSA_flags=      GLOBAL_FLAGS_OUT + help + i_ + RSA_FLAGS_ONLY,
     // RSAUTL=         ,
 }               e_command_flags;
 
@@ -117,7 +117,7 @@ typedef enum    command {
 # define STANDARDS              (GENRSA + RSA)
 
 # define HASHING_COMMANDS       (MD + CIPHERS)
-# define THASHNEED_COMMANDS     (HASHING_COMMANDS + ISPRIME)
+# define THASHNEED_COMMANDS     (HASHING_COMMANDS + ISPRIME + RSA)
 # define EXECONES_COMMANDS      (GENPRIME + GENRSA)
 
 typedef struct  s_command {
@@ -170,6 +170,7 @@ void        unrecognized_flag(char *flag);
 void        pbkdf2_iter_error();
 void        isprime_prob_error(int p);
 void        rsa_format_error(char *form);
+void        rsa_keys_integer_size_error(int byteSz);
 
 
 /*
@@ -216,6 +217,7 @@ Word_32bits     rotR(Word_32bits x, Word_32bits r);
 Long_64bits     key_discarding(Mem_8bits *p);
 Long_64bits     _bits_permutations(Long_64bits mem, char *ptable, int bitLen);
 Long_64bits     bits_permutations(Long_64bits mem, char *ptable, int bitLen);
+int             bytes_counter(Long_64bits n);
 
 
 /*
@@ -404,33 +406,19 @@ Long_64bits prime_generator(Long_64bits min, Long_64bits max, int verbose);
 # define        RSA_PRIVATE_KEY_FOOTER          "-----END RSA PRIVATE KEY-----"
 # define        RSA_PRIVATE_KEY_HEADER_byteSz   (sizeof(RSA_PRIVATE_KEY_HEADER) - 1)
 # define        RSA_PRIVATE_KEY_FOOTER_byteSz   (sizeof(RSA_PRIVATE_KEY_FOOTER) - 1)
-# define        RSA_PRIVATE_KEY_DATA_byteSz     1000
 
 # define        RSA_PUBLIC_KEY_HEADER           "-----BEGIN PUBLIC KEY-----"
 # define        RSA_PUBLIC_KEY_FOOTER           "-----END PUBLIC KEY-----"
 # define        RSA_PUBLIC_KEY_HEADER_byteSz    (sizeof(RSA_PUBLIC_KEY_HEADER) - 1)
 # define        RSA_PUBLIC_KEY_FOOTER_byteSz    (sizeof(RSA_PUBLIC_KEY_FOOTER) - 1)
-# define        RSA_PUBLIC_KEY_DATA_byteSz      1000
+
+# define        RSA_ENC_EXP                     (1UL << 15 + 1)    // Arbitrary prime number, high chances to be coprime with Euler / Carmichael exp, choosen in every RSA cryptosystems
 
 typedef enum    rsa_form
 {
-    PEM=1<<1,   
+    PEM=1<<1,   // Privacy Enhanced Mail (PEM) is a Base64 encoded Distinguished Encoding Rules(DER)
     DER=1<<2,
 }               e_rsa_form;
-
-# define        RSA_ENC_EXP (1UL << 15 + 1)    // Arbitrary prime number, high chances to be coprime with Euler / Carmichael exp, choosen in every RSA cryptosystems
-
-
-
-// RSAPrivateKey ::= SEQUENCE {
-//     otherPrimeInfos   OtherPrimeInfos OPTIONAL
-// }
-
-
-// RSAPublicKey ::= SEQUENCE {
-//     modulus           INTEGER,  -- n
-//     publicExponent    INTEGER   -- e
-// }
 
 //  RFC 3447: ASN.1 type RSAPrivateKey structure
 typedef struct  s_rsa_private_key
@@ -438,12 +426,12 @@ typedef struct  s_rsa_private_key
     Long_64bits version;           // Two primes: 0 / Multi primes: 1
     Long_64bits modulus;           // n = p * q
     Long_64bits enc_exp;           // Public exponent e (Default as 1 << 15 + 1 for faster modular exponentiation (Only 2 bits))
-    Long_64bits dec_exp;           // Private exponent d (Modular multiplicative inverse of RSA_ENC_EXP and Euler fonction)
+    Long_64bits dec_exp;           // Private exponent d (Modular multiplicative inverse of rsa encryption exponent and Euler fonction)
     Long_64bits p;                 // prime1
     Long_64bits q;                 // prime2
-    Long_64bits exponent1;         // d mod (p-1)
-    Long_64bits exponent2;         // d mod (q-1)
-    Long_64bits coefficient;       // (inverse of q) mod p
+    Long_64bits crt_exp_dp;        // Chinese remainder theorem pre-computed exponent: d mod (p-1)
+    Long_64bits crt_exp_dq;        // Chinese remainder theorem pre-computed exponent: d mod (q-1)
+    Long_64bits crt_exp_qinv;      // Chinese remainder theorem pre-computed exponent: (inverse of q) mod p
 }               t_rsa_private_key;
 
 //  RFC 3447: ASN.1 type RSAPublicKey structure
@@ -452,14 +440,7 @@ typedef struct  s_rsa_public_key
     Long_64bits modulus;    // n = p * q
     Long_64bits enc_exp;    // Public exponent e (Default as 1 << 15 + 1 for faster modular exponentiation (Only 2 bits))
 }               t_rsa_public_key;
-
-// typedef struct  s_rsa_keys
-// {
-//     Long_64bits         p;
-//     Long_64bits         q;
-//     t_rsa_private_key   privkey;
-//     t_rsa_public_key    pubkey;
-// }               t_rsa_keys;
+# define        RSA_PUBLIC_KEY_INTEGERS_COUNT   (sizeof(t_rsa_public_key) / 8)
 
 typedef struct  s_rsa
 {
@@ -467,8 +448,8 @@ typedef struct  s_rsa
     e_rsa_form          outform;
     t_rsa_private_key   privkey;
     t_rsa_public_key    pubkey;
-    // t_rsa_keys  keys;
 }               t_rsa;
+# define        RSA_PRIVATE_KEY_INTEGERS_COUNT  (sizeof(t_rsa_private_key) / 8)
 
 Mem_8bits   *rsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
 Mem_8bits   *genrsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
@@ -476,6 +457,39 @@ Mem_8bits   *genrsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByt
 void        rsa_keys_generation(t_rsa *rsa);
 Long_64bits rsa_encryption(t_rsa_public_key *pubkey, Long_64bits m);
 Long_64bits rsa_decryption(t_rsa_private_key *privkey, Long_64bits ciphertext);
+
+
+/*
+    DER format Data --------------------------------------
+*/
+
+# define    DER_OID_SEQUENCE_bytes      "\x30\x0D\x06\x09\x2A\x86\x48\x86\xF7\x0D\x01\x01\x01\x05\x00"
+# define    DER_OID_SEQUENCE_length     (sizeof(DER_OID_SEQUENCE_bytes) - 3)
+
+typedef enum    der_tag
+{
+    der_integer=0x02,
+    der_bitstring=0x03,
+    der_null=0x05,
+    der_OID=0x06,
+    der_sequence=0x30,
+}               e_der_tag;
+# define    DER_TAGS_TO_READ    (der_bitstring + der_null + der_sequence)
+# define    DER_TAGS_TO_SKIP    (der_OID)
+
+typedef struct  s_dertag
+{
+    Mem_8bits   tag_number;
+    int         length_octets_number;
+    int         header_length;
+    int         content_length;
+    int         total_length;
+}               t_dertag;
+
+void               DER_read_public_key(Mem_8bits *mem, int byteSz, t_rsa_public_key *pubkey);
+void               DER_read_private_key(Mem_8bits *mem, int byteSz, t_rsa_private_key *pubkey);
+
+Mem_8bits          *DER_generate_public_key(t_rsa_public_key *pubkey, Long_64bits *hashByteSz);
 
 
 /*
