@@ -463,8 +463,9 @@ Long_64bits rsa_decryption(t_rsa_private_key *privkey, Long_64bits ciphertext);
     DER format Data --------------------------------------
 */
 
-# define    DER_OID_SEQUENCE_bytes      "\x30\x0D\x06\x09\x2A\x86\x48\x86\xF7\x0D\x01\x01\x01\x05\x00"
-# define    DER_OID_SEQUENCE_length     (sizeof(DER_OID_SEQUENCE_bytes) - 3)
+# define    DER_OID_SEQUENCE_bytes          "\x30\x0D\x06\x09\x2A\x86\x48\x86\xF7\x0D\x01\x01\x01\x05\x00"
+# define    DER_OID_SEQUENCE_bytes_byteSz   (sizeof(DER_OID_SEQUENCE_bytes) - 1)
+# define    DER_OID_SEQUENCE_length         (sizeof(DER_OID_SEQUENCE_bytes) - 3)
 
 typedef enum    der_tag
 {

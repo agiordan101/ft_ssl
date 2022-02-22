@@ -78,7 +78,8 @@ void    rsa_output(t_hash *hash)
     if (~ssl.flags & noout)
     {
         ft_putstderr("writing RSA key\n");
-        if (((t_rsa *)ssl.command.command_data)->outform == PEM)
+        if (ssl.command.command & GENRSA ||\
+            ((t_rsa *)ssl.command.command_data)->outform == PEM)
         {
             ft_putstr(ssl.flags & pubout ? RSA_PUBLIC_KEY_HEADER : RSA_PRIVATE_KEY_HEADER);
             ft_putstr("\n");
@@ -130,12 +131,12 @@ void    output_hash_based_on_flags(t_hash *hash)
         stdin_quiet_output(hash);
     else if (ssl.flags & q)
         hash_output(hash);
-    else if (hash->stdin && ssl.command.command & MD)
-        stdin_output(hash);
     else if (ssl.command.command & GENPRIME)
         genprime_output(hash);
     else if (ssl.command.command & STANDARDS)
         rsa_output(hash);
+    else if (hash->stdin && ssl.command.command & MD)
+        stdin_output(hash);
     else if (ssl.flags & r)
         reversed_output(hash);
     else

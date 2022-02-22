@@ -39,7 +39,6 @@ static void        DER_tag_parsing(Mem_8bits *mem, t_dertag *tag)
     if (tag->tag_number == 0)
     {
         printf("exit bc tag number = 0\n");
-        printf("content left: >%s<\n", *mem);
         exit(0);
     }
 
@@ -128,7 +127,7 @@ void               DER_read_private_key(Mem_8bits *mem, int byteSz, t_rsa_privat
     Long_64bits integers[RSA_PRIVATE_KEY_INTEGERS_COUNT];
     printf("RSA_PRIVATE_KEY_INTEGERS_COUNT: %lu\n", RSA_PRIVATE_KEY_INTEGERS_COUNT);
 
-    DER_read_key(mem, byteSz, &integers, RSA_PRIVATE_KEY_INTEGERS_COUNT);
+    DER_read_key(mem, byteSz, integers, RSA_PRIVATE_KEY_INTEGERS_COUNT);
     ft_memcpy(pubkey, integers, sizeof(t_rsa_private_key));
 }
 
@@ -141,16 +140,16 @@ Mem_8bits          *DER_generate_public_key(t_rsa_public_key *pubkey, Long_64bit
     /*
         RSA public key in DER format is structured as follow (Random OID and integers):
 
-        30 26                                  // Type: 30 (SEQUENCE)
+        30 24                                  // Type: 30 (SEQUENCE)
         |  30 0D                               // Type: 30 (SEQUENCE)
         |  |  06 09                            // Type: 06 (OBJECT_IDENTIFIER)
         |  |  -  2A 86 48                      // 9 bytes OID value. HEX encoding of
         |  |  -  86 F7 0D                      //     1.2.840.113549.1.1.1
         |  |  -  01 01 01 
         |  |  05 00                            // Type: 05 (NULL)
-        |  03 15                               // Type: 03 (BIT STRING)
+        |  03 13                               // Type: 03 (BIT STRING)
         |  |  -  00                            // Number of unused bits in last content byte
-        |  |  30 12                            // Type: 30 (SEQUENCE)
+        |  |  30 10                            // Type: 30 (SEQUENCE)
         |  |  |  02 09                         // Type: 02 (INTEGER)
         |  |  |  -  00                         // Leading ZERO of integer
         |  |  |  -  D1 14 D5 3E FB DD DA 12
@@ -165,17 +164,38 @@ Mem_8bits          *DER_generate_public_key(t_rsa_public_key *pubkey, Long_64bit
     int key_sequence_length = DER_OID_SEQUENCE_length + bit_string_length + 4;  // +4 to add their header length (2 and 2)
     *hashByteSz = key_sequence_length + 2;                                      // +2 to add first header length
 
-    // printf("*hashByteSz: %d\n", *hashByteSz);
-    // printf("key_sequence_length: %d\n", key_sequence_length);
-    // printf("DER_OID_SEQUENCE_length: %ld\n", DER_OID_SEQUENCE_length);
-    // printf("bit_string_length: %d\n", bit_string_length);
-    // printf("ints_sequence_length: %d\n", ints_sequence_length);
-    // printf("modulus_length: %d\n", modulus_length);
-    // printf("exp_length: %d\n", exp_length);
+    printf("*hashByteSz: %d\n", *hashByteSz);
+    printf("key_sequence_length: %d\n", key_sequence_length);
+    printf("DER_OID_SEQUENCE_length: %ld\n", DER_OID_SEQUENCE_length);
+    printf("bit_string_length: %d\n", bit_string_length);
+    printf("ints_sequence_length: %d\n", ints_sequence_length);
+    printf("modulus_length: %d\n", modulus_length);
+    printf("exp_length: %d\n", exp_length);
 
-    // Mem_8bits   *
+    Mem_8bits DER_pubkey[*hashByteSz];
+    ft_bzero(DER_pubkey, *hashByteSz);
 
-    exit(0);
+    DER_pubkey[0] = der_sequence;
+    DER_pubkey[1] = key_sequence_length;
+    ft_memcpy(DER_pubkey + 2, DER_OID_SEQUENCE_bytes, DER_OID_SEQUENCE_bytes_byteSz);
+    
+    DER_pubkey[2 + DER_OID_SEQUENCE_bytes_byteSz] = der_bitstring;
+    DER_pubkey[2 + DER_OID_SEQUENCE_bytes_byteSz + 1] = bit_string_length;
+    
+    DER_pubkey[2 + DER_OID_SEQUENCE_bytes_byteSz + 3] = der_sequence;
+    DER_pubkey[2 + DER_OID_SEQUENCE_bytes_byteSz + 3 + 1] = ints_sequence_length;
+    
+    DER_pubkey[2 + DER_OID_SEQUENCE_bytes_byteSz + 5] = der_integer;
+    DER_pubkey[2 + DER_OID_SEQUENCE_bytes_byteSz + 5 + 1] = modulus_length;
+    ft_memcpy(DER_pubkey + 2 + DER_OID_SEQUENCE_bytes_byteSz + 8, &pubkey->modulus, modulus_length);
+
+    DER_pubkey[2 + DER_OID_SEQUENCE_bytes_byteSz + 8 + modulus_length] = der_integer;
+    DER_pubkey[2 + DER_OID_SEQUENCE_bytes_byteSz + 8 + modulus_length + 1] = exp_length;
+    ft_memcpy(DER_pubkey + 2 + DER_OID_SEQUENCE_bytes_byteSz + 8 + modulus_length + 2, &pubkey->enc_exp, exp_length);
+
+    printf("2 + DER_OID_SEQUENCE_bytes_byteSz + 8: %d\n", 2 + DER_OID_SEQUENCE_bytes_byteSz + 8 + modulus_length + 2);
+    // printBits(DER_pubkey, *hashByteSz);
+    return ft_memdup(DER_pubkey, *hashByteSz);
 }
 
 // Mem_8bits           DER_generate_public_key(t_rsa_public_key *pubkey)

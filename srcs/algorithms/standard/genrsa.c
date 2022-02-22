@@ -86,14 +86,13 @@ Mem_8bits   *genrsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByt
     ft_putstderr("Generating RSA private key, 64 bit long modulus (2 primes)\n");
 
     rsa_keys_generation(&rsa);
-    *hashByteSz = LONG64_byteSz;
 
     ft_putstderr("e is ");
     ft_putnbr(STDERR, rsa.pubkey.enc_exp);
     ft_putstderr("\n");
 
     Mem_8bits *der_privkey = DER_generate_public_key(&rsa.pubkey, hashByteSz);
-    printf("der_privkey: %s\n", der_privkey);
+    // printf("der_privkey: %s\n", der_privkey);
 
     (void)command_data;
     (void)plaintext;
