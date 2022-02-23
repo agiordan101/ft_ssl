@@ -92,8 +92,8 @@ typedef enum    command_flags {
     DES_flags=      GLOBAL_FLAGS + DES_FLAGS_ONLY + p + e + d,
     GENPRIME_flags= GLOBAL_FLAGS_OUT + help + q + min + max + rand_path,
     ISPRIME_flags=  GLOBAL_FLAGS + DATASTRINPUT_FLAGS + prob,
-    GENRSA_flags=   GLOBAL_FLAGS_OUT + help + q + rand_path,
-    RSA_flags=      GLOBAL_FLAGS_OUT + help + i_ + RSA_FLAGS_ONLY,
+    GENRSA_flags=   GLOBAL_FLAGS_OUT + help + q + rand_path + pubout + outform,
+    RSA_flags=      GLOBAL_FLAGS - q - r + RSA_FLAGS_ONLY,
     // RSAUTL=         ,
 }               e_command_flags;
 
@@ -124,6 +124,7 @@ typedef struct  s_command {
     e_command       command;
     e_command_flags command_flags;
     char            *command_title;
+    // Mem_8bits       *(*command_addr)(Mem_8bits **plaintext, ...);
     Mem_8bits       *(*command_addr)(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
     void            *command_data;
 }               t_command;
@@ -171,6 +172,7 @@ void        pbkdf2_iter_error();
 void        isprime_prob_error(int p);
 void        rsa_format_error(char *form);
 void        rsa_keys_integer_size_error(int byteSz);
+void        rsa_parsing_keys_error(char *errormsg, int value);
 
 
 /*
@@ -406,13 +408,15 @@ Long_64bits prime_generator(Long_64bits min, Long_64bits max, int verbose);
 # define        RSA_PRIVATE_KEY_FOOTER          "-----END RSA PRIVATE KEY-----"
 # define        RSA_PRIVATE_KEY_HEADER_byteSz   (sizeof(RSA_PRIVATE_KEY_HEADER) - 1)
 # define        RSA_PRIVATE_KEY_FOOTER_byteSz   (sizeof(RSA_PRIVATE_KEY_FOOTER) - 1)
+# define        RSA_PRIVATE_KEY_BANDS_byteSz    (RSA_PRIVATE_KEY_HEADER_byteSz + RSA_PRIVATE_KEY_FOOTER_byteSz)
 
 # define        RSA_PUBLIC_KEY_HEADER           "-----BEGIN PUBLIC KEY-----"
 # define        RSA_PUBLIC_KEY_FOOTER           "-----END PUBLIC KEY-----"
 # define        RSA_PUBLIC_KEY_HEADER_byteSz    (sizeof(RSA_PUBLIC_KEY_HEADER) - 1)
 # define        RSA_PUBLIC_KEY_FOOTER_byteSz    (sizeof(RSA_PUBLIC_KEY_FOOTER) - 1)
+# define        RSA_PUBLIC_KEY_BANDS_byteSz     (RSA_PUBLIC_KEY_HEADER_byteSz + RSA_PUBLIC_KEY_FOOTER_byteSz)
 
-# define        RSA_ENC_EXP                     (1UL << 15 + 1)    // Arbitrary prime number, high chances to be coprime with Euler / Carmichael exp, choosen in every RSA cryptosystems
+# define        RSA_ENC_EXP                     ((1UL << 16) + 1)    // Arbitrary prime number, high chances to be coprime with Euler / Carmichael exp, choosen in every RSA cryptosystems
 
 typedef enum    rsa_form
 {
@@ -491,6 +495,7 @@ void               DER_read_public_key(Mem_8bits *mem, int byteSz, t_rsa_public_
 void               DER_read_private_key(Mem_8bits *mem, int byteSz, t_rsa_private_key *pubkey);
 
 Mem_8bits          *DER_generate_public_key(t_rsa_public_key *pubkey, Long_64bits *hashByteSz);
+Mem_8bits          *DER_generate_private_key(t_rsa_private_key *privkey, Long_64bits *hashByteSz);
 
 
 /*

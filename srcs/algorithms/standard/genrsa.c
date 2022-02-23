@@ -79,24 +79,34 @@ static inline void  rsa_test()
 
 Mem_8bits   *genrsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way)
 {
-    t_rsa   rsa;
-    ft_bzero(&rsa, sizeof(t_rsa));
+    t_rsa       *rsa_data = (t_rsa *)command_data;
+    Mem_8bits   *key;
+    Mem_8bits   *tmp_key;
 
-    // rsa_test();
+    if (!rsa_data->outform)
+        rsa_data->outform = PEM;
+
     ft_putstderr("Generating RSA private key, 64 bit long modulus (2 primes)\n");
 
-    rsa_keys_generation(&rsa);
+    rsa_keys_generation(rsa_data);
 
     ft_putstderr("e is ");
-    ft_putnbr(STDERR, rsa.pubkey.enc_exp);
+    ft_putnbr(STDERR, rsa_data->pubkey.enc_exp);
     ft_putstderr("\n");
 
-    Mem_8bits *der_privkey = DER_generate_public_key(&rsa.pubkey, hashByteSz);
+    fprintf(stderr, "modulus: %lu\n", rsa_data->privkey.modulus);
+
+    if (way & pubout)
+        key = DER_generate_public_key(&rsa_data->pubkey, hashByteSz);
+    else
+        key = DER_generate_private_key(&rsa_data->privkey, hashByteSz);
     // printf("der_privkey: %s\n", der_privkey);
 
-    (void)command_data;
+    // fprintf(stderr, "DER key content:\n>%s<\n", key);
+    // printBits(key, *hashByteSz);
+
     (void)plaintext;
     (void)ptByteSz;
     (void)way;
-    return der_privkey;
+    return key;
 }

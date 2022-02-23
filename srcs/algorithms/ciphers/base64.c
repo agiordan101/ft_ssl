@@ -127,7 +127,7 @@ static Mem_8bits    *decode(Mem_8bits *plaintext, Long_64bits ptByteSz, Long_64b
 {
     // printf("plaintext encode (len=%d): >%s<\n", ptByteSz, plaintext);
     clean_base64(plaintext, &ptByteSz);
-    // printf("plaintext decode (len=%d): >%s<\n", ptByteSz, plaintext);
+    // printf("plaintext to decode (len=%d):\n>%s<\n", ptByteSz, plaintext);
 
     int hashlen = get_len_decoded(plaintext, ptByteSz);
     // printf("hashlen =%d\n", hashlen);
@@ -155,7 +155,7 @@ static Mem_8bits    *decode(Mem_8bits *plaintext, Long_64bits ptByteSz, Long_64b
     }
     if (hashByteSz)
         *hashByteSz = hashlen;
-    // printf("hash end   (len=%d): >%s<\n", hashlen, hash);
+    // printf("hash end   (len=%d):\n>%s<\n", hashlen, hash);
     return hash;
 }
 

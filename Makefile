@@ -1,6 +1,7 @@
 NAME		=	ft_ssl
 
 CC			=	gcc
+# CC			=	gcc -std=gnu11
 CFLAGS		+=	-O3
 
 INC_PATH	=	./includes/

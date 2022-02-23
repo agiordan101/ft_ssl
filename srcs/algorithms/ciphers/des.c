@@ -391,6 +391,7 @@ static Mem_8bits        *des_decryption(t_des *des, Mem_8bits *pt, Long_64bits p
     Long_64bits ciphertext[ptSz];
     Long_64bits *plaintext = (Long_64bits *)pt + ptSz - 1;
     Long_64bits bloc;
+    int         outbyteSz;
 
     // printMemHex(pt, ptByteSz, "Plaintext hex");
     // printf("\n- DES DECRYPTION -\nptByteSz: %ld\tptSz: %d\n", ptByteSz, ptSz);
@@ -412,15 +413,17 @@ static Mem_8bits        *des_decryption(t_des *des, Mem_8bits *pt, Long_64bits p
         }
         plaintext--;
     }
-    // printf("des_unpadding %d: %lx\n", ptSz - 1, ciphertext[ptSz - 1]);
-    des_unpadding(ciphertext + ptSz - 1, &ptSz);
-    // printf("des_unpadding %d: %lx\n", ptSz - 1, ciphertext[ptSz - 1]);
+    outbyteSz = ptSz * LONG64_byteSz;
+    // fprintf(stderr, "des_unpadding %d: %lx\n", outbyteSz, ciphertext[ptSz - 1]);
+    des_unpadding(ciphertext + ptSz - 1, &outbyteSz);
+    // fprintf(stderr, "des_unpadding %d: %lx\n", outbyteSz, ciphertext[outbyteSz / 8]);
 
     // for (int i = 0; i < ptSz; i++)
     //     printf("ciphertext %d: %lx\n", i, ciphertext[i]);
 
-    *hashByteSz = ptSz * LONG64_byteSz;
-    return ft_memdup((Mem_8bits *)ciphertext, *hashByteSz);
+    if (hashByteSz)
+        *hashByteSz = outbyteSz;
+    return ft_memdup((Mem_8bits *)ciphertext, outbyteSz);
 }
 
 static Mem_8bits        *des_encryption(t_des *des, Mem_8bits *pt, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags flags)

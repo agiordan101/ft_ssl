@@ -101,3 +101,14 @@ void    rsa_keys_integer_size_error(int byteSz)
     ft_putstderr(" bits integers (64 bits maximum)\n");
     freexit(EXIT_SUCCESS);
 }
+
+void    rsa_parsing_keys_error(char *errormsg, int value)
+{
+    ft_putstderr("ft_ssl: ");
+    ft_putstderr(ssl.command.command_title);
+    ft_putstderr(ssl.flags & pubin ? ": parsing PUBLIC key error: " : ": parsing PRIVATE key error: ");
+    ft_putstderr(errormsg);
+    ft_putnbr(STDERR, value);
+    ft_putstderr("\n");
+    freexit(EXIT_SUCCESS);
+}

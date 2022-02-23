@@ -38,12 +38,8 @@ void    hash_8bits_output(t_hash *p)
 {
     static int shitret;
 
-    // Find number of padding bytes, to not print them
-    int     n_padByte = 0;
-    while (p->hash[p->hashByteSz - 1 - n_padByte] <= 0x08)
-        n_padByte++;
     // Print one line
-    if ((shitret = write(ssl.fd_out, p->hash, p->hashByteSz - n_padByte)) < 0)
+    if ((shitret = write(ssl.fd_out, p->hash, p->hashByteSz)) < 0)
         write_failed("write() failed in hash_8bits_output() function (plain part).\n", ssl.fd_out);
 }
 
@@ -78,8 +74,7 @@ void    rsa_output(t_hash *hash)
     if (~ssl.flags & noout)
     {
         ft_putstderr("writing RSA key\n");
-        if (ssl.command.command & GENRSA ||\
-            ((t_rsa *)ssl.command.command_data)->outform == PEM)
+        if (((t_rsa *)ssl.command.command_data)->outform == PEM)
         {
             ft_putstr(ssl.flags & pubout ? RSA_PUBLIC_KEY_HEADER : RSA_PRIVATE_KEY_HEADER);
             ft_putstr("\n");

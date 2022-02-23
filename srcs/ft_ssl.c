@@ -7,6 +7,9 @@
 
     To do :
 
+        AJOUUTER LES ... et tout changer ahahh..ah...
+        Merge rsa_DER_keys_parsing and rsa_PEM_keys_parsing
+
         RSA nsm les keys juste concat
         Remettre passin et decin pour rsa
 

@@ -120,7 +120,7 @@ static void     command_handler(t_command *command, char *cmd, e_command mask)
         "Generating RSA private key ", "RSA keys visualization"
     };
     static unsigned long commands_dataSz[N_COMMANDS] = {
-        0, 0, 0, sizeof(t_des), sizeof(t_des), sizeof(t_genprime), sizeof(t_isprime), 0, sizeof(t_rsa)
+        0, 0, 0, sizeof(t_des), sizeof(t_des), sizeof(t_genprime), sizeof(t_isprime), sizeof(t_rsa), sizeof(t_rsa)
     };
     static e_command_flags  commands_flags[N_COMMANDS] = {
         MD_flags, MD_flags, BASE64_flags, DES_flags, DES_flags, GENPRIME_flags, ISPRIME_flags, GENRSA_flags, RSA_flags
@@ -465,7 +465,11 @@ void    flags_conflicts()
 
     if (ssl.command.command & GENRSA)
     {
-        if (~ssl.flags & encout)
+        if (!((t_rsa *)ssl.command.command_data)->outform)
+            ((t_rsa *)ssl.command.command_data)->outform = PEM;
+        int outform = ((t_rsa *)ssl.command.command_data)->outform;
+
+        if (~ssl.flags & encout && outform == PEM)
         {
             ssl.flags += encout;
             command_handler(&ssl.enc_o_cmd, base64_str, 0);

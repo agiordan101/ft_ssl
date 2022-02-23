@@ -72,12 +72,15 @@ void        des_unpadding(Long_64bits *lastbloc, int *ptSz)
 {
     Mem_8bits   lastbyte = (*lastbloc >> 56) & 0xff;
 
-    // printf("lastbloc : %lx\tptSz : %d\n", *lastbloc, *ptSz);
+    // fprintf(stderr, "lastbloc : %lx\tptSz : %d\n", *lastbloc, *ptSz);
     // printf("lastbyte : %x\n", lastbyte);
     if (lastbyte == 0x08)
-        (*ptSz)--;
+        *ptSz -= LONG64_byteSz;
     else if (0x01 <= lastbyte && lastbyte <= 0x07)
-        *lastbloc = *lastbloc & (((Long_64bits)1 << (64 - lastbyte * 8)) - 1);
+    {
+        *lastbloc = *lastbloc & (((Long_64bits)1 << (64 - lastbyte * 8)) - 1); //Remove padding
+        *ptSz -= lastbyte;
+    }
     else // Padding not found
     {
         if (~ssl.flags & nopad)
@@ -86,6 +89,7 @@ void        des_unpadding(Long_64bits *lastbloc, int *ptSz)
         return ;
     }
     // Padding found
+    // fprintf(stderr, "lastbloc : %lx\tptSz : %d\n", *lastbloc, *ptSz);
 
     if (ssl.flags & nopad)
     {
