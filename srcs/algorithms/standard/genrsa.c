@@ -94,17 +94,20 @@ Mem_8bits   *genrsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByt
     ft_putnbr(STDERR, rsa_data->pubkey.enc_exp);
     ft_putstderr("\n");
 
-    fprintf(stderr, "modulus: %lu\n", rsa_data->privkey.modulus);
+    // fprintf(stderr, "modulus: %lu\n", rsa_data->privkey.modulus);
 
     if (way & pubout)
         key = DER_generate_public_key(&rsa_data->pubkey, hashByteSz);
     else
         key = DER_generate_private_key(&rsa_data->privkey, hashByteSz);
-    // printf("der_privkey: %s\n", der_privkey);
-
-    // fprintf(stderr, "DER key content:\n>%s<\n", key);
-    // printBits(key, *hashByteSz);
-
+    
+    // Add base64 encryption after genrsa command for PEM form
+    if (rsa_data->outform == PEM && ~ssl.flags & encout)
+    {
+        ssl.flags += encout;
+        command_handler(&ssl.enc_o_cmd, "base64", 0);
+    }
+        
     (void)plaintext;
     (void)ptByteSz;
     (void)way;

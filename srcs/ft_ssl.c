@@ -7,10 +7,11 @@
 
     To do :
 
+        Selectionner la sortie du dernier \n en fonction des commandes
+
         AJOUUTER LES ... et tout changer ahahh..ah...
         Merge rsa_DER_keys_parsing and rsa_PEM_keys_parsing
 
-        RSA nsm les keys juste concat
         Remettre passin et decin pour rsa
 
         base64 + -p output cheum ???????
@@ -32,17 +33,17 @@
 
 t_ssl    ssl;
 
-char        *ask_password(t_command *cmd)
+char        *ask_password(char *cmd_name, e_flags flags)
 {
     char *firstmsg_1 = "enter ";
     char *password;
 
-    if (ssl.flags & e)
+    if (flags & e)
     {
         char *secondmsg_1 = "Verifying - enter ";
         char *msg_2 = " encryption password:";
-        char *firstmsg = ft_strinsert(firstmsg_1, cmd->command_title, msg_2);
-        char *secondmsg = ft_strinsert(secondmsg_1, cmd->command_title, msg_2);
+        char *firstmsg = ft_strinsert(firstmsg_1, cmd_name, msg_2);
+        char *secondmsg = ft_strinsert(secondmsg_1, cmd_name, msg_2);
 
         char *password2 = ft_strdup(getpass(firstmsg));
         password = getpass(secondmsg);
@@ -60,7 +61,7 @@ char        *ask_password(t_command *cmd)
     else
     {
         char *msg_2 = " decryption password:";
-        char *msg = ft_strinsert(firstmsg_1, ssl.command.command_title, msg_2);   
+        char *msg = ft_strinsert(firstmsg_1, cmd_name, msg_2);   
         password = getpass(msg);
         free(msg);
     }

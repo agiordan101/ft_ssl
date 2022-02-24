@@ -27,35 +27,35 @@ void    des_P_flag_output(t_des *des_data)
 void    printRevByte(char byte)
 {
     for (int j = 0; j < 8; j++)
-        printf("%u", (byte >> j) & 1);
-    printf(" ");
+        fprintf(stderr, "%u", (byte >> j) & 1);
+    fprintf(stderr, " ");
 }
 void    printByte(char byte)
 {
     for (int j = 7; j >= 0; j--)
-        printf("%u", (byte >> j) & 1);
-    printf(" ");
+        fprintf(stderr, "%u", (byte >> j) & 1);
+    fprintf(stderr, " ");
 }
 void    printWord(Word_32bits word)
 {
     for (int j = 31; j >= 0; j--)
     {
-        printf("%u", (word >> j) & 1);
+        fprintf(stderr, "%u", (word >> j) & 1);
         if (j % 8 == 0)
-            putchar(' ');
+            fprintf(stderr, " ");
     }
-    printf("\n");
+    fprintf(stderr, "\n");
 }
 void    printLong(Long_64bits l)
 {
     for (int j = 63; j >= 0; j--)
     {
-        printf("%lu", (l >> j) & 1);
+        fprintf(stderr, "%lu", (l >> j) & 1);
         if (j % 8 == 0)
-            putchar(' ');
+            fprintf(stderr, " ");
     }
 
-    printf("\n");
+    fprintf(stderr, "\n");
 }
 // Debug function, not used in this project
 void    printBits(void *p, int size)
@@ -65,15 +65,15 @@ void    printBits(void *p, int size)
     ft_memcpy(mem, (char *)p, size);
     mem[size] = '\0';
 
-    // printf("len=%d -> >%s<\n", size, mem);
+    // fprintf(stderr, "len=%d -> >%s<\n", size, mem);
     for (int i = 0; i < size; i++)
     {
         if (i && i % 8 == 0)
-            puts("");
+            fprintf(stderr, "\n");
         // printRevByte(mem[i]);
         printByte(mem[i]);
     }
-    puts("");
+    fprintf(stderr, "\n");
 }
 // Debug function, not used in this project
 void    printMemHex(void *p, int size, char *msg)
@@ -81,17 +81,17 @@ void    printMemHex(void *p, int size, char *msg)
     char *mem = (char *)p;
 
     if (msg)
-        printf("\n%s (len=%d) >%s<\n", msg, size, mem);
+        fprintf(stderr, "\n%s (len=%d) >%s<\n", msg, size, mem);
     else
-        printf("\nPrint mem HEX (len=%d) >%s<\n", size, mem);
+        fprintf(stderr, "\nPrint mem HEX (len=%d) >%s<\n", size, mem);
     for (int i = 0; i < size; i++)
     {
         if (mem[i] < 0x10)
-            printf("0%x", mem[i]);
+            fprintf(stderr, "0%x", mem[i]);
         else
-            printf("%x", mem[i]);
+            fprintf(stderr, "%x", mem[i]);
         if ((i + 1) % 4 == 0)
-            printf(" ");
+            fprintf(stderr, " ");
     }
-    puts("");
+    fprintf(stderr, "\n");
 }

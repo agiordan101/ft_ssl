@@ -13,9 +13,6 @@
 # define    STDOUT  1
 # define    STDERR  2
 
-# define    BIGENDIAN      0
-# define    LITTLEENDIAN   1
-
 typedef unsigned char   Mem_8bits;
 typedef unsigned int    Word_32bits;
 typedef unsigned long   Long_64bits;
@@ -36,9 +33,6 @@ typedef unsigned long   Long_64bits;
 
 //  FLAGS --------------------------------------------------------
 
-// # define FLAG_HELP  1
-// # define FLAG_I     2
-// # define FLAG_O     3
 # define N_FLAGS        36
 
 typedef enum    flags {
@@ -93,7 +87,7 @@ typedef enum    command_flags {
     GENPRIME_flags= GLOBAL_FLAGS_OUT + help + q + min + max + rand_path,
     ISPRIME_flags=  GLOBAL_FLAGS + DATASTRINPUT_FLAGS + prob,
     GENRSA_flags=   GLOBAL_FLAGS_OUT + help + q + rand_path + pubout + outform,
-    RSA_flags=      GLOBAL_FLAGS - q - r + RSA_FLAGS_ONLY,
+    RSA_flags=      GLOBAL_FLAGS - a - A - r + RSA_FLAGS_ONLY,
     // RSAUTL=         ,
 }               e_command_flags;
 
@@ -151,9 +145,10 @@ typedef struct  s_hash
     struct s_hash *next;
 }               t_hash;
 
-char        *ask_password();
-t_hash      *add_thash_front();
 int         parsing(int ac, char **av);
+void        command_handler(t_command *command, char *cmd, e_command mask);
+char        *ask_password(char *cmd_name, e_flags flags);
+t_hash      *add_thash_front();
 void        output(t_hash *hash);
 
 void        print_global_usage();
@@ -166,13 +161,15 @@ void        write_failed(char *errormsg, int fd);
 void        read_failed(char *errormsg, int fd);
 void        malloc_failed(char *errormsg);
 
-void        file_not_found(char *file);
 void        unrecognized_flag(char *flag);
+void        flags_conflicting_error(char *flag1, char *flag2, char *errormsg);
+void        flag_error(char *flag, char *errormsg);
 void        pbkdf2_iter_error();
 void        isprime_prob_error(int p);
+void        file_not_found(char *file);
 void        rsa_format_error(char *form);
 void        rsa_keys_integer_size_error(int byteSz);
-void        rsa_parsing_keys_error(char *errormsg, int value);
+void        rsa_parsing_keys_error(e_flags privpubin, e_flags inform, char *errormsg, int value);
 
 
 /*
@@ -347,7 +344,7 @@ typedef struct  s_des
 }               t_des;
 
 Mem_8bits   *des(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
-Long_64bits des_padding(Mem_8bits *bloc);
+Long_64bits des_padding(Mem_8bits *bloc, Long_64bits blocSz);
 void        des_unpadding(Long_64bits *lastbloc, int *ptSz);
 void        des_P_flag_output(t_des *des_data);
 
@@ -462,6 +459,8 @@ void        rsa_keys_generation(t_rsa *rsa);
 Long_64bits rsa_encryption(t_rsa_public_key *pubkey, Long_64bits m);
 Long_64bits rsa_decryption(t_rsa_private_key *privkey, Long_64bits ciphertext);
 
+Mem_8bits   *rsa_PEM_keys_parsing(t_rsa *rsa, char *file_content, int *fileSz, e_flags flags);
+void        rsa_DER_keys_parsing(t_rsa *rsa, Mem_8bits *mem, int byteSz, e_flags keyflag);
 
 /*
     DER format Data --------------------------------------
@@ -491,11 +490,8 @@ typedef struct  s_dertag
     int         total_length;
 }               t_dertag;
 
-void               DER_read_public_key(Mem_8bits *mem, int byteSz, t_rsa_public_key *pubkey);
-void               DER_read_private_key(Mem_8bits *mem, int byteSz, t_rsa_private_key *pubkey);
-
-Mem_8bits          *DER_generate_public_key(t_rsa_public_key *pubkey, Long_64bits *hashByteSz);
-Mem_8bits          *DER_generate_private_key(t_rsa_private_key *privkey, Long_64bits *hashByteSz);
+Mem_8bits           *DER_generate_public_key(t_rsa_public_key *pubkey, Long_64bits *hashByteSz);
+Mem_8bits           *DER_generate_private_key(t_rsa_private_key *privkey, Long_64bits *hashByteSz);
 
 
 /*

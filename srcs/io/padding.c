@@ -50,14 +50,14 @@ void        md_padding(Mem_8bits **data, Long_64bits *byteSz, char reverseByteSz
     *byteSz = extend_byteSz;
 }
 
-Long_64bits des_padding(Mem_8bits *bloc)
+Long_64bits des_padding(Mem_8bits *bloc, Long_64bits blocSz)
 {
     Mem_8bits   newbloc[LONG64_byteSz];
     ft_bzero(newbloc, LONG64_byteSz);
     int         missing_bytes;
     int         i = -1;
 
-    while (++i < LONG64_byteSz && bloc[i])
+    while (++i < blocSz)
         newbloc[i] = bloc[i];
     missing_bytes = 8 - i;
     // printf("missing_bytes: %d\n", missing_bytes);
@@ -84,16 +84,14 @@ void        des_unpadding(Long_64bits *lastbloc, int *ptSz)
     else // Padding not found
     {
         if (~ssl.flags & nopad)
+        {
             ft_putstderr("./ft_ssl: Bad decrypt: No padding found in decrypted data.\n");
-            // freexit(EXIT_FAILURE);
+            freexit(EXIT_FAILURE);
+        }
         return ;
     }
     // Padding found
-    // fprintf(stderr, "lastbloc : %lx\tptSz : %d\n", *lastbloc, *ptSz);
 
     if (ssl.flags & nopad)
-    {
-        ft_putstderr("./ft_ssl: -nopad is conflicting with padding found in decrypted data.\n");
-        freexit(EXIT_FAILURE);
-    }
+        flag_error("-nopad", "-nopad is conflicting with padding found in decrypted data.");
 }

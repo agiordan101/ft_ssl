@@ -103,8 +103,13 @@ Key_64bits  parse_keys_des(char *av_next)
     return key;
 }
 
-static void     command_handler(t_command *command, char *cmd, e_command mask)
+void    command_handler(t_command *command, char *cmd, e_command mask)
 {
+    /*
+        Initialize a t_command with command string past
+        There are 3 consecutive t_command in ft_ssl
+        A mask can be pass to avoid commands
+    */
     static char         *commands_name[N_COMMANDS] = {
         "md5", "sha256", "base64", "des-ecb", "des-cbc", "genprime", "isprime", "genrsa", "rsa",
     };
@@ -127,7 +132,6 @@ static void     command_handler(t_command *command, char *cmd, e_command mask)
     };
     int                 cmd_i = -1;
 
-    cmd = ft_lower(cmd);
     if (!ft_strcmp(cmd, "help"))
         print_commands();
 
@@ -168,9 +172,9 @@ int     param_handler(e_flags flag, char *av_next, int *i)
     else if (flag & o)
         ssl.output_file = av_next;
     else if (flag & decin)
-        command_handler(&ssl.dec_i_cmd, av_next, HASHING_COMMANDS);
+        command_handler(&ssl.dec_i_cmd, ft_lower(av_next), HASHING_COMMANDS);
     else if (flag & encout)
-        command_handler(&ssl.enc_o_cmd, av_next, HASHING_COMMANDS);
+        command_handler(&ssl.enc_o_cmd, ft_lower(av_next), HASHING_COMMANDS);
     else if (flag & s)
         string_handler(NULL, av_next);
     else if (flag & s_des)
@@ -427,7 +431,7 @@ static void     add_thash_from_stdin()
 
 void    flags_conflicts()
 {
-    char base64_str[] = "base64";
+    // char base64_str[] = "base64";
 
     // Handle conflict between e and d flags (Set encryption by default)
     if (ssl.flags & (e | d))
@@ -444,40 +448,36 @@ void    flags_conflicts()
         if (ssl.flags & d)
         {
             if (ssl.flags & decin)
-            {
-                ft_putstderr("Flags -a, in decryption mode, and -decin are conflicting.\n");
-                freexit(EXIT_SUCCESS);
-            }
+                flags_conflicting_error("-a, in decryption mode,", "-decin", NULL);
             ssl.flags += decin;
-            command_handler(&ssl.dec_i_cmd, base64_str, 0);
+            command_handler(&ssl.dec_i_cmd, "base64", 0);
         }
         else
         {
             if (ssl.flags & encout)
-            {
-                ft_putstderr("Flags -a, in encryption mode, and -encout are conflicting.\n");
-                freexit(EXIT_SUCCESS);
-            }
+                flags_conflicting_error("-a, in encryption mode,", "-encout", NULL);
             ssl.flags += encout;
-            command_handler(&ssl.enc_o_cmd, base64_str, 0);
+            command_handler(&ssl.enc_o_cmd, "base64", 0);
         }
     }
 
-    if (ssl.command.command & GENRSA)
+    // RSA -> Init PEM | DER forms and Private or Public key type
+    if (ssl.command.command & STANDARDS)
     {
-        if (!((t_rsa *)ssl.command.command_data)->outform)
-            ((t_rsa *)ssl.command.command_data)->outform = PEM;
-        int outform = ((t_rsa *)ssl.command.command_data)->outform;
+        e_rsa_form  *inform = &((t_rsa *)ssl.command.command_data)->inform;
+        e_rsa_form  *outform = &((t_rsa *)ssl.command.command_data)->outform;
 
-        if (~ssl.flags & encout && outform == PEM)
-        {
-            ssl.flags += encout;
-            command_handler(&ssl.enc_o_cmd, base64_str, 0);
-        }
-    }
-    else if (ssl.command.command & RSA)
+        if (!*inform)
+            *inform = ssl.command.command & GENRSA ? DER : PEM; //GENRSA generate DER format by default
+        if (!*outform)
+            *outform = PEM;
+
+        if (*inform == PEM && ssl.flags & decin)
+            flags_conflicting_error("-inform, with PEM format,", "-decin", "Please use DER format as input with -decin.");
+
         if (ssl.flags & pubin && ~ssl.flags & pubout)
-            ssl.flags += pubout;    // pubout option is automatically set if the input is a public key
+            ssl.flags += pubout;    // pubout option is automatically set if the input is a public key, otherwise, both are private
+    }
 }
 
 void    end_parse()
@@ -527,7 +527,7 @@ int     parsing(int ac, char **av)
     else
         cmd = ft_strdup(av[1]);
 
-    command_handler(&ssl.command, cmd, 0);
+    command_handler(&ssl.command, ft_lower(cmd), 0);
     // printf("ssl.command.command_title: %s\n", ssl.command.command_title);
     // printf("ssl.command.command_data: %p\n", ssl.command.command_data);
     free(cmd);

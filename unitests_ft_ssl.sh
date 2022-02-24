@@ -15,3 +15,6 @@ echo "\n\n"
 
 sh unitests_isprime.sh
 echo "\n\n"
+
+sh unitests_rsa.sh
+echo "\n\n"

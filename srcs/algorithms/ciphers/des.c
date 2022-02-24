@@ -187,7 +187,7 @@ static void             init_vars(t_des *des, Mem_8bits *plaintext, e_flags flag
     {
         // A password is asked if it's not provided
         if (!des->password)
-            des->password = (Mem_8bits *)ask_password(des);
+            des->password = (Mem_8bits *)ask_password(des->mode == DESECB ? "DES-ECB" : "DES-CBC", flags);
 
         // Password-based key derivation function (PBKDF) using SHA256-HMAC function as pseudo random function (PRF)
         des->key = pbkdf2_sha256(
@@ -387,7 +387,7 @@ static Long_64bits      feistel_algorithm(t_des *des, Long_64bits plaintext)
 
 static Mem_8bits        *des_decryption(t_des *des, Mem_8bits *pt, Long_64bits ptByteSz, Long_64bits *hashByteSz)
 {
-    int         ptSz = (ptByteSz + 7) / 8; // Count of 64-bits bloc
+    int         ptSz = (ptByteSz + LONG64_byteSz - 1) / LONG64_byteSz; // Count of 64-bits bloc
     Long_64bits ciphertext[ptSz];
     Long_64bits *plaintext = (Long_64bits *)pt + ptSz - 1;
     Long_64bits bloc;
@@ -429,7 +429,7 @@ static Mem_8bits        *des_decryption(t_des *des, Mem_8bits *pt, Long_64bits p
 static Mem_8bits        *des_encryption(t_des *des, Mem_8bits *pt, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags flags)
 {
     // ptSz is the count of 64-bits bloc (Padding: Add one bloc if the lastest is full)
-    int         ptSz = (ptByteSz + (flags & nopad ? 7 : 8)) / 8;
+    int         ptSz = (ptByteSz + (flags & nopad ? LONG64_byteSz - 1 : LONG64_byteSz)) / LONG64_byteSz;
     Long_64bits ciphertext[ptSz];
     Long_64bits *plaintext = (Long_64bits *)pt;
     Long_64bits bloc;
@@ -447,7 +447,7 @@ static Mem_8bits        *des_encryption(t_des *des, Mem_8bits *pt, Long_64bits p
 
         // Padding with number of missing bytes
         if (i == ptSz - 1)
-            bloc = des_padding((Mem_8bits *)&bloc);
+            bloc = des_padding((Mem_8bits *)&bloc, (ptByteSz % LONG64_byteSz == 0) ? LONG64_byteSz : ptByteSz % LONG64_byteSz);
 
         // printf("\nhex vector: %lx\n", i ? ciphertext[i - 1] : des->vector);
         // printf("hex   bloc: %lx\n", bloc);

@@ -1,9 +1,6 @@
 # include "ft_ssl.h"
 
-/*        
-    RSA keys parsing with DER format
-*/
-
+// Unused in ft_ssl project
 static void        print_tag(t_dertag *tag)
 {
     fprintf(stderr, "\ntag->tag_number: %x\n", tag->tag_number);
@@ -13,10 +10,14 @@ static void        print_tag(t_dertag *tag)
     fprintf(stderr, "tag->total_length: %x\n", tag->total_length);
 }
 
+/*        
+    RSA keys parsing with DER format
+*/
+
 static Long_64bits DER_tag_integer_parsing(Mem_8bits *mem, t_dertag *tag)
 {
     // print_tag(tag);
-    if (!*(mem + tag->header_length))       // Handle possible 00 byte before INTEGERS tag
+    if (!*(mem + tag->header_length))       // Handle possible leading zero (00 byte) before INTEGERS tag
     {
         mem++;
         tag->content_length--;
@@ -31,6 +32,7 @@ static Long_64bits DER_tag_integer_parsing(Mem_8bits *mem, t_dertag *tag)
     Mem_8bits   content[LONG64_byteSz];
     ft_bzero(content, LONG64_byteSz);
     ft_memcpy(content, mem + tag->header_length, tag->content_length);
+    endianReverse(content, tag->content_length);        // Like openssl
 
     return *((Long_64bits *)(content));
 }
@@ -65,7 +67,7 @@ static void        DER_tag_parsing(Mem_8bits *mem, t_dertag *tag)
     tag->total_length = tag->header_length + tag->content_length;
 }
 
-static void        DER_read_key(Mem_8bits *mem, int byteSz, Long_64bits *integers, int n_int)
+static void        DER_read_key(Mem_8bits *mem, int byteSz, Long_64bits *integers, int n_int, e_flags keyflag)
 {
     Mem_8bits   *mem_end = mem + byteSz;
     int         i = 0;
@@ -80,17 +82,17 @@ static void        DER_read_key(Mem_8bits *mem, int byteSz, Long_64bits *integer
         {
             integers[i++] = DER_tag_integer_parsing(mem, &tag);
             mem += tag.total_length;
-            printf("READ INTEGER / add %x\n", tag.total_length);
+            // printf("READ INTEGER / add %x\n", tag.total_length);
         }
         else if (tag.tag_number == der_OID)
         {
             mem += tag.total_length;        // Always the same, skip it
-            printf("SKIP OID / add %x\n", tag.total_length);
+            // printf("SKIP OID / add %x\n", tag.total_length);
         }
         else if (tag.tag_number == der_bitstring)
         {
             mem += tag.header_length + 1;   // Handle 00 byte of bit string tag
-            printf("SKIP BIT STRING / add %x\n", tag.header_length + 1);
+            // printf("SKIP BIT STRING / add %x\n", tag.header_length + 1);
         }
         else if (
             tag.tag_number == der_null ||\
@@ -98,34 +100,37 @@ static void        DER_read_key(Mem_8bits *mem, int byteSz, Long_64bits *integer
         )
         {
             mem += tag.header_length;       // Dig inside sequence or pass null
-            printf("READ %x / add %x\n", tag.tag_number, tag.header_length);
+            // printf("READ %x / add %x\n", tag.tag_number, tag.header_length);
         }
         else
         {
             print_tag(&tag);
-            rsa_parsing_keys_error("Unknow DER tag ", tag.tag_number);
+            rsa_parsing_keys_error(keyflag & pubin, DER, "Unknow DER tag ", tag.tag_number);
         }
     }
     if (i < n_int)
-        rsa_parsing_keys_error("Unable to fetch all integers, missing ", n_int - i);
+        rsa_parsing_keys_error(keyflag & pubin, DER, "Unable to fetch all integers, missing ", n_int - i);
+    if (mem < mem_end)
+        rsa_parsing_keys_error(keyflag & pubin, DER, "Additional bytes found: ", mem_end - mem);
 }
 
-void               DER_read_public_key(Mem_8bits *mem, int byteSz, t_rsa_public_key *pubkey)
+inline void        rsa_DER_keys_parsing(t_rsa *rsa, Mem_8bits *mem, int byteSz, e_flags keyflag)
 {
-    Long_64bits integers[RSA_PUBLIC_KEY_INTEGERS_COUNT];
+    if (keyflag & pubin)
+    {
+        Long_64bits integers[RSA_PUBLIC_KEY_INTEGERS_COUNT];
 
-    DER_read_key(mem, byteSz, integers, RSA_PUBLIC_KEY_INTEGERS_COUNT);
-    ft_memcpy(pubkey, integers, sizeof(t_rsa_public_key));
+        DER_read_key(mem, byteSz, integers, RSA_PUBLIC_KEY_INTEGERS_COUNT, keyflag);
+        ft_memcpy(&rsa->pubkey, integers, sizeof(t_rsa_public_key));
+    }
+    else
+    {
+        Long_64bits integers[RSA_PRIVATE_KEY_INTEGERS_COUNT];
+
+        DER_read_key(mem, byteSz, integers, RSA_PRIVATE_KEY_INTEGERS_COUNT, keyflag);
+        ft_memcpy(&rsa->privkey, integers, sizeof(t_rsa_private_key));
+    }
 }
-
-void               DER_read_private_key(Mem_8bits *mem, int byteSz, t_rsa_private_key *pubkey)
-{
-    Long_64bits integers[RSA_PRIVATE_KEY_INTEGERS_COUNT];
-
-    DER_read_key(mem, byteSz, integers, RSA_PRIVATE_KEY_INTEGERS_COUNT);
-    ft_memcpy(pubkey, integers, sizeof(t_rsa_private_key));
-}
-
 
 /*        
     RSA keys generation with DER format
@@ -141,7 +146,7 @@ Mem_8bits          *DER_generate_public_key(t_rsa_public_key *pubkey, Long_64bit
         |  |  06 09                            // Type: 06 (OBJECT_IDENTIFIER)
         |  |  -  2A 86 48                      // 9 bytes OID value. HEX encoding of
         |  |  -  86 F7 0D                      //     1.2.840.113549.1.1.1
-        |  |  -  01 01 01 
+        |  |  -  01 01 01                      // Represented by DER_OID_SEQUENCE_bytes
         |  |  05 00                            // Type: 05 (NULL)
         |  03 13                               // Type: 03 (BIT STRING)
         |  |  -  00                            // Number of unused bits in last content byte
@@ -153,9 +158,17 @@ Mem_8bits          *DER_generate_public_key(t_rsa_public_key *pubkey, Long_64bit
         |  |  |  -  01 00 01                   // Public Exponent (65537)
     */
     int exp_length = bytes_counter(pubkey->enc_exp);
-    int modulus_length = bytes_counter(pubkey->modulus) + 1;                    // +1 to add 00 byte
+    
+    int modulus_length = bytes_counter(pubkey->modulus);                    // +1 to add 00 byte / leading zero
+    endianReverse((Mem_8bits *)&pubkey->modulus, modulus_length);           // Like openssl
+    int modulus_leading_zero = (0x80 <= (pubkey->modulus & 0xF0));
+    // printBits(&pubkey->modulus, modulus_length);
+    // fprintf(stderr, "modulus_leading_zero: %d\n", modulus_leading_zero);
+    if (modulus_leading_zero)
+        modulus_length++;
+
     int ints_sequence_length = exp_length + modulus_length + 4;                 // +4 to add their header length (2 and 2)
-    int bit_string_length = ints_sequence_length + 3;                           // +3 to add its   header length and 00 byte
+    int bit_string_length = ints_sequence_length + 3;                           // +3 to add its   header length and 00 byte from bit string
     int key_sequence_length = DER_OID_SEQUENCE_length + bit_string_length + 4;  // +4 to add their header length (2 and 2)
     *hashByteSz = key_sequence_length + 2;                                      // +2 to add first header length
 
@@ -174,7 +187,7 @@ Mem_8bits          *DER_generate_public_key(t_rsa_public_key *pubkey, Long_64bit
     DER_pubkey[0] = der_sequence;
     DER_pubkey[1] = key_sequence_length;
     ft_memcpy(DER_pubkey + 2, DER_OID_SEQUENCE_bytes, DER_OID_SEQUENCE_bytes_byteSz);
-    
+
     DER_pubkey[2 + DER_OID_SEQUENCE_bytes_byteSz] = der_bitstring;
     DER_pubkey[2 + DER_OID_SEQUENCE_bytes_byteSz + 1] = bit_string_length;
     
@@ -183,7 +196,10 @@ Mem_8bits          *DER_generate_public_key(t_rsa_public_key *pubkey, Long_64bit
     
     DER_pubkey[2 + DER_OID_SEQUENCE_bytes_byteSz + 5] = der_integer;
     DER_pubkey[2 + DER_OID_SEQUENCE_bytes_byteSz + 5 + 1] = modulus_length;
-    ft_memcpy(DER_pubkey + 2 + DER_OID_SEQUENCE_bytes_byteSz + 5 + 3, &pubkey->modulus, modulus_length - 1);    // Don't consider 00 byte
+    if (modulus_leading_zero)
+        ft_memcpy(DER_pubkey + 2 + DER_OID_SEQUENCE_bytes_byteSz + 5 + 3, &pubkey->modulus, modulus_length - 1);
+    else
+        ft_memcpy(DER_pubkey + 2 + DER_OID_SEQUENCE_bytes_byteSz + 5 + 2, &pubkey->modulus, modulus_length);
 
     DER_pubkey[2 + DER_OID_SEQUENCE_bytes_byteSz + 7 + modulus_length] = der_integer;
     DER_pubkey[2 + DER_OID_SEQUENCE_bytes_byteSz + 7 + modulus_length + 1] = exp_length;
@@ -214,10 +230,23 @@ Mem_8bits          *DER_generate_private_key(t_rsa_private_key *privkey, Long_64
         privkey->enc_exp, privkey->dec_exp, privkey->p, privkey->q,
         privkey->crt_exp_dp, privkey->crt_exp_dq, privkey->crt_exp_qinv
     };
+    int         leading_zeros[RSA_PRIVATE_KEY_INTEGERS_COUNT] = {
+        0, 0, 0, 0, 0, 0, 0, 0, 0
+    };
 
     for (int i = 0; i < RSA_PRIVATE_KEY_INTEGERS_COUNT; i++)
     {
         ints_byteSz[i] = bytes_counter(integers[i]);
+
+        endianReverse((Mem_8bits *)(integers + i), ints_byteSz[i]);        // Like openssl
+        leading_zeros[i] = (0x80 <= (integers[i] & 0xF0));
+
+        // printBits(integers + i, ints_byteSz[i]);
+        // fprintf(stderr, "leading_zeros[%d] = %lx = %d\n", i, integers[i] & 0xF0, leading_zeros[i]);
+
+        if (leading_zeros[i])
+            ints_byteSz[i] += 1;
+        
         sequence_byteSz += ints_byteSz[i] + 2;          // +2 -> INTEGER header (tag type + length)
         // fprintf(stderr, "int %d: %lu\t\tbyteSz=%d\n", i, integers[i], ints_byteSz[i]);
     }
@@ -238,7 +267,15 @@ Mem_8bits          *DER_generate_private_key(t_rsa_private_key *privkey, Long_64
     {
         DER_privkey[k] = der_integer;
         DER_privkey[k + 1] = ints_byteSz[i];
-        ft_memcpy(DER_privkey + k + 2, integers + i, ints_byteSz[i]);
+
+        if (leading_zeros[i])
+        {
+            // fprintf(stderr, "leading_zeros[%d]\n", i);
+            ft_memcpy(DER_privkey + k + 3, integers + i, ints_byteSz[i] - 1);
+        }
+        else
+            ft_memcpy(DER_privkey + k + 2, integers + i, ints_byteSz[i]);
+
         k += ints_byteSz[i] + 2;
     }
 

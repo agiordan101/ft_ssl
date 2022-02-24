@@ -31,6 +31,7 @@ inline void t_hash_list_free(t_hash *hash)
 inline void t_hash_decode_inputs(t_hash *hash)
 {
     char    *tmp;
+
     e_flags flags = ssl.flags & e ? ssl.flags - e + d: ssl.flags;  //ssl.flags has d OR e
 
     // printf("ssl.dec_i_cmd.command_title: %s\n", ssl.dec_i_cmd.command_title);
@@ -48,9 +49,8 @@ inline void t_hash_decode_inputs(t_hash *hash)
                 (Mem_8bits **)&tmp,
                 hash->len,
                 (Long_64bits *)&hash->len,
-                ssl.flags
+                flags
             );
-            // if (tmp)
             free(tmp);
         }
         hash = hash->next;
@@ -80,7 +80,6 @@ inline void t_hash_encode_output(t_hash *hash)
                 (Long_64bits *)&hash->hashByteSz,
                 flags
             );
-            // if (tmp)
             free(tmp);
         }
         hash = hash->next;
