@@ -22,20 +22,20 @@ A random exemple with possible flags is given for each command
 
 Message Digest commands
 -
-* md5
+* md5  
     ./ft_ssl md5 -i Makefile -o ft_ssl_out
-* sha256
+* sha256  
     echo "42" | ./ft_ssl sha256 Makefile -p
 
 Cipher commands
 -
 * base64
-    echo "Coucou" | ./ft_ssl base64 -q | ./ft_ssl base64 -d
-* des       (Default as des-cbc)
-    ./ft_ssl des -i Makefile -v 0123456789abcdef -k 1415926535 -q
+* des       (Default as des-cbc)  
 * des-cbc
-    ./ft_ssl des-cbc Makefile -v 0123456789abcdef -o ft_ssl_out
 * des-ecb
+    echo "Coucou" | ./ft_ssl base64 -q | ./ft_ssl base64 -d
+    ./ft_ssl des -i Makefile -v 0123456789abcdef -k 1415926535 -q
+    ./ft_ssl des-cbc Makefile -v 0123456789abcdef -o ft_ssl_out
     cat Makefile | ./ft_ssl des-ecb -k acbbca
     ./ft_ssl des-ecb Makefile -s 542842e266c5541a -p mybigpassword -iter 666
 
