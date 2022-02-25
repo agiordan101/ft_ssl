@@ -6,13 +6,13 @@ DESCRIPTION
 Recode a part of **openssl** library, and additionnal features, from scratch.
 
 Only these externals functions are used (**no C libraries allowed**) :
-    open()
-    close()
-    read()
-    write()
-    malloc()
-    perror()
-    exit()
+    - open()  
+    - close()  
+    - read()  
+    - write()  
+    - malloc()  
+    - perror()  
+    - exit()  
 
 
 
@@ -59,7 +59,7 @@ Global flags :
     -r              reverse the format of the output
     -q              quiet mode
 
-Ciphers flags :
+Only ciphers flags
 -
     -e              encrypt mode (default mode) (-e has priority over -d)
     -d              decrypt mode
@@ -73,7 +73,7 @@ Ciphers flags :
         -nopad      disable standard block padding
         -iter       specify the iteration count of PBKDF2
 
-RSA cryptosystem flags
+Only RSA cryptosystem flags
 -
     -pubin          expect a public key in input file (private key by default)
     -pubout         output a public key (private key by default). This option is automatically set if the input is a public key.
@@ -83,14 +83,13 @@ RSA cryptosystem flags
     -modulus        print RSA key modulus in hex
     -check          verify key consistency
     -noout          don't print key out
+    -rand           a file containing random data used to seed the random rsa generator
 
-Generation commands flags
+Only genprime flags
 -
-    -rand           a file containing random data used to seed the random number generator
-
-    Only genprime :
-        -min        lower bound for prime generation (Default as 0)
-        -max        upper bound for prime generation (Default as 2^63 - 1)
+    -min        lower bound for prime generation (Default as 0)
+    -max        upper bound for prime generation (Default as 2^63 - 1)
+    -rand           a file containing random data used to seed the random rsa generator
 
 Only isprime flags
 -
