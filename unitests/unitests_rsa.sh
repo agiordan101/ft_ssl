@@ -78,10 +78,11 @@ diff ft_ssl_out openssl_out
 
 
 
-
 # Others tests
 ./ft_ssl genrsa -o PEM_privkey |\
 ./ft_ssl rsa -outform DER -pubout -encout des-ecb -passout pwdpwd -i PEM_privkey -q |\
 ./ft_ssl rsa -inform DER -pubin -decin des-ecb -passin pwdpwd -o ft_ssl_out
 openssl rsa -in PEM_privkey -pubout -out openssl_out
 diff ft_ssl_out openssl_out
+
+rm ft_ssl_out openssl_out

@@ -54,22 +54,22 @@ static void     print_flag_usage(e_flags flag)
         ft_putstderr("\t-max\t\tupper bound for prime generation (Default as 2^63 - 1)\n");
     else if (flag & rand_path)
         ft_putstderr("\t-rand\t\ta file containing random data used to seed the random number generator\n");
-    else if (flag & inform)
-        ft_putstderr("\t-inform\t\tinput format [PEM | DER] (Default as PEM)\n");
-    else if (flag & outform)
-        ft_putstderr("\t-outform\toutput format [PEM | DER] (Default as PEM)\n");
-    else if (flag & check)
-        ft_putstderr("\t-check\t\tverify key consistency\n");
-    else if (flag & noout)
-        ft_putstderr("\t-noout\t\tdon't print key out\n");
-    else if (flag & text)
-        ft_putstderr("\t-text\t\tprint key propoerties in hex\n");
-    else if (flag & modulus)
-        ft_putstderr("\t-modulus\tprint RSA key modulus in hex\n");
     else if (flag & pubin)
         ft_putstderr("\t-pubin\t\texpect a public key in input file (private key by default)\n");
     else if (flag & pubout)
         ft_putstderr("\t-pubout\t\toutput a public key (private key by default). This option is automatically set if the input is a public key.\n");
+    else if (flag & inform)
+        ft_putstderr("\t-inform\t\tinput format [PEM | DER] (Default as PEM)\n");
+    else if (flag & outform)
+        ft_putstderr("\t-outform\toutput format [PEM | DER] (Default as PEM)\n");
+    else if (flag & text)
+        ft_putstderr("\t-text\t\tprint key properties in hex\n");
+    else if (flag & modulus)
+        ft_putstderr("\t-modulus\tprint RSA key modulus in hex\n");
+    else if (flag & check)
+        ft_putstderr("\t-check\t\tverify key consistency\n");
+    else if (flag & noout)
+        ft_putstderr("\t-noout\t\tdon't print key out\n");
     else
     {
         printf("WTFF ?\n");
