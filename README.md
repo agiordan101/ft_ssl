@@ -1,11 +1,11 @@
 DESCRIPTION
 ===
 
-`usage: ./ft_ssl command [files] [flags]`
-
 Recode a part of **openssl** library, and additionnal features, from scratch.
 
-Only these externals functions are used (**no C libraries allowed**) :  
+`usage: ./ft_ssl command [files] [flags]`
+
+Only these externals functions are used (**no C libraries allowed**) :
     open()  
     close()  
     read()  
