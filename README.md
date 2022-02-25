@@ -38,7 +38,7 @@ Cipher commands
     echo "Coucou" | ./ft_ssl base64 -q | ./ft_ssl base64 -d  
     ./ft_ssl des -i Makefile -v 0123456789abcdef -k 1415926535 -q  
 base64
-    ./ft_ssl des-cbc Makefile -v 0123456789abcdef -o ft_ssl_out  
+    `./ft_ssl des-cbc Makefile -v 0123456789abcdef -o ft_ssl_out`
     cat Makefile | ./ft_ssl des-ecb -k acbbca  
     ./ft_ssl des-ecb Makefile -s 542842e266c5541a -p mybigpassword -iter 666  
 
