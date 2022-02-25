@@ -61,7 +61,7 @@ Each commands has some of these flags
 
 Global flags :
 -
-    -help           display this summary and exit
+    help           display this summary and exit
     -i              input file for plaintext
     -o              output file for hash
     -decin          decode the input with the given hashing command (command flags can ONLY be passed after)
