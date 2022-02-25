@@ -23,36 +23,33 @@ A random exemple with possible flags is given for each command
 Message Digest commands
 -
 * md5  
-    ./ft_ssl md5 -i Makefile -o ft_ssl_out
+    `./ft_ssl md5 -i Makefile -o ft_ssl_out`
 * sha256  
-    echo "42" | ./ft_ssl sha256 Makefile -p
-
-* des       (Default as des-cbc)
-* des-cbc
-* des-ecb  
-
+    `echo "42" | ./ft_ssl sha256 Makefile -p`
 
 Cipher commands
 -
-
-    echo "Coucou" | ./ft_ssl base64 -q | ./ft_ssl base64 -d  
-    ./ft_ssl des -i Makefile -v 0123456789abcdef -k 1415926535 -q  
-base64
+* base64
+    `echo "Coucou" | ./ft_ssl base64 -q | ./ft_ssl base64 -d`
+* des       (Default as des-cbc)
+    `./ft_ssl des -i Makefile -v 0123456789abcdef -k 1415926535 -q`
+* des-cbc
     `./ft_ssl des-cbc Makefile -v 0123456789abcdef -o ft_ssl_out`
-    cat Makefile | ./ft_ssl des-ecb -k acbbca  
-    ./ft_ssl des-ecb Makefile -s 542842e266c5541a -p mybigpassword -iter 666  
+* des-ecb
+    `cat Makefile | ./ft_ssl des-ecb -k acbbca`
+    `./ft_ssl des-ecb Makefile -s 542842e266c5541a -p mybigpassword -iter 666`
 
 Standard commands
 -
 * genprime
-    ./ft_ssl genprime -rand seed_file -min 1000 -max 10000
+    `./ft_ssl genprime -rand seed_file -min 1000 -max 10000`
 * isprime
-    ./ft_ssl genprime | ./ft_ssl isprime -s 45 -p
+    `./ft_ssl genprime | ./ft_ssl isprime -s 45 -p`
 * genrsa
-    ./ft_ssl genrsa -encout des -v 0123456789abcdef -k 1415926535
-    ./ft_ssl genrsa -pubout -outform DER
+    `./ft_ssl genrsa -encout des -v 0123456789abcdef -k 1415926535`
+    `./ft_ssl genrsa -pubout -outform DER`
 * rsa
-    ./ft_ssl genrsa | ./ft_ssl rsa -text -check
+    `./ft_ssl genrsa | ./ft_ssl rsa -text -check`
 * rsautl
 
 
@@ -101,7 +98,7 @@ Only RSA cryptosystem flags
     -text           print key properties in hex
     -modulus        print RSA key modulus in hex
     -check          verify key consistency
-    -noout          don't print key out
+    -noout          don`t print key out
     -rand           a file containing random data used to seed the random rsa generator
 
 Only genprime flags
