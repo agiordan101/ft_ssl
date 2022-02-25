@@ -85,4 +85,4 @@ diff ft_ssl_out openssl_out
 openssl rsa -in PEM_privkey -pubout -out openssl_out
 diff ft_ssl_out openssl_out
 
-rm ft_ssl_out openssl_out
+rm ft_ssl_out openssl_out ft_ssl
