@@ -5,7 +5,8 @@ Recode a part of **openssl** library, and additionnal features, from scratch.
 
 `usage: ./ft_ssl command [files] [flags]`
 
-Only these externals functions are used (**no C libraries allowed**) :  
+Only these externals functions are used (**no C libraries allowed**) :
+
     * open()  
     * close()  
     * read()  
