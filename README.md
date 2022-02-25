@@ -27,6 +27,11 @@ Message Digest commands
 * sha256  
     echo "42" | ./ft_ssl sha256 Makefile -p
 
+* base64
+* des       (Default as des-cbc)
+* des-cbc
+* des-ecb  
+
 Cipher commands
 -
 
