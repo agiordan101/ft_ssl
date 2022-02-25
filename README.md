@@ -1,11 +1,11 @@
 DESCRIPTION
 ==
 
-**usage: ./ft_ssl command [file] [flags]**
+**usage: ./ft_ssl command [files] [flags]**
 
 Recode a part of **openssl** library, and additionnal features, from scratch.
 
-Only these externals functions are used (**no C libraries allowed**) :
+Only these externals functions are used (**no C libraries allowed**) :  
     - open()  
     - close()  
     - read()  
@@ -18,23 +18,39 @@ Only these externals functions are used (**no C libraries allowed**) :
 
 COMMANDS
 ==
+A random exemple with possible flags is given for each command
 
-- *Message Digest commands :*
-    * md5
-    * sha256
+Message Digest commands
+-
+* md5
+    ./ft_ssl md5 -i Makefile -o ft_ssl_out
+* sha256
+    echo "42" | ./ft_ssl sha256 Makefile -p
 
-- *Cipher commands :*
-    * base64
-    * des       (Default as des-cbc)
-    * des-ecb
-    * des-cbc
+Cipher commands
+-
+* base64
+    echo "Coucou" | ./ft_ssl base64 -q | ./ft_ssl base64 -d
+* des       (Default as des-cbc)
+    ./ft_ssl des -i Makefile -v 0123456789abcdef -k 1415926535 -q
+* des-cbc
+    ./ft_ssl des-cbc Makefile -v 0123456789abcdef -o ft_ssl_out
+* des-ecb
+    cat Makefile | ./ft_ssl des-ecb -k acbbca
+    ./ft_ssl des-ecb Makefile -s 542842e266c5541a -p mybigpassword -iter 666
 
-- *Standard commands :*
-    * genprime
-    * isprime
-    * genrsa
-    * rsa
-    * rsautl
+Standard commands
+-
+* genprime
+    ./ft_ssl genprime -rand seed_file -min 1000 -max 10000
+* isprime
+    ./ft_ssl genprime | ./ft_ssl isprime -s 45 -p
+* genrsa
+    ./ft_ssl genrsa -encout des -v 0123456789abcdef -k 1415926535
+    ./ft_ssl genrsa -pubout -outform DER
+* rsa
+    ./ft_ssl genrsa | ./ft_ssl rsa -text -check
+* rsautl
 
 
 
@@ -87,8 +103,8 @@ Only RSA cryptosystem flags
 
 Only genprime flags
 -
-    -min        lower bound for prime generation (Default as 0)
-    -max        upper bound for prime generation (Default as 2^63 - 1)
+    -min            lower bound for prime generation (Default as 0)
+    -max            upper bound for prime generation (Default as 2^63 - 1)
     -rand           a file containing random data used to seed the random rsa generator
 
 Only isprime flags

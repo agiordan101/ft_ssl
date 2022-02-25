@@ -121,8 +121,8 @@ void    command_handler(t_command *command, char *cmd, e_command mask)
     };
     static char         *commands_title[N_COMMANDS] = {
         "MD5", "SHA256", "BASE64", "DESECB", "DESCBC",
-        "Generating prime number ", "Is that a prime number ? ",
-        "Generating RSA private key ", "RSA keys visualization"
+        "Generating prime number ", "Primality test",
+        "Generating RSA private key ", "RSA keys visualization "
     };
     static unsigned long commands_dataSz[N_COMMANDS] = {
         0, 0, 0, sizeof(t_des), sizeof(t_des), sizeof(t_genprime), sizeof(t_isprime), sizeof(t_rsa), sizeof(t_rsa)

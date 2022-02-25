@@ -16,6 +16,10 @@ static void     print_flag_usage(e_flags flag)
         ft_putstderr("\t-decin\t\tdecode the input with the given hashing command (command flags can ONLY be passed after)\n");
     else if (flag & encout)
         ft_putstderr("\t-encout\t\tencode the output with the given hashing command (command flags can ONLY be passed after)\n");
+    else if (flag & passin)
+        ft_putstderr("\t-passin\t\tsend password for input decryption (flag -decin <cmd> needs to exist before)\n");
+    else if (flag & passout)
+        ft_putstderr("\t-passout\tsend password for output encryption (flag -encout <cmd> needs to exist before)\n");
     else if (flag & q)
         ft_putstderr("\t-q\t\tquiet mode\n");
     else if (flag & r)
@@ -28,10 +32,6 @@ static void     print_flag_usage(e_flags flag)
         ft_putstderr("\t-e\t\tencrypt mode (default mode) (-e has priority over -d)\n");
     else if (flag & d)
         ft_putstderr("\t-d\t\tdecrypt mode\n");
-    else if (flag & passin)
-        ft_putstderr("\t-passin\t\tsend password for input decryption (flag -decin <cmd> needs to exist before)\n");
-    else if (flag & passout)
-        ft_putstderr("\t-passout\tsend password for output encryption (flag -encout <cmd> needs to exist before)\n");
     else if (flag & p_des)
         ft_putstderr("\t-p\t\tsend the password in hex\t(Override the behavior of global flag -p if any des command is past)\n");
     else if (flag & s_des)
@@ -52,8 +52,6 @@ static void     print_flag_usage(e_flags flag)
         ft_putstderr("\t-min\t\tlower bound for prime generation (Default as 0)\n");
     else if (flag & max)
         ft_putstderr("\t-max\t\tupper bound for prime generation (Default as 2^63 - 1)\n");
-    else if (flag & rand_path)
-        ft_putstderr("\t-rand\t\ta file containing random data used to seed the random number generator\n");
     else if (flag & pubin)
         ft_putstderr("\t-pubin\t\texpect a public key in input file (private key by default)\n");
     else if (flag & pubout)
@@ -70,6 +68,8 @@ static void     print_flag_usage(e_flags flag)
         ft_putstderr("\t-check\t\tverify key consistency\n");
     else if (flag & noout)
         ft_putstderr("\t-noout\t\tdon't print key out\n");
+    else if (flag & rand_path)
+        ft_putstderr("\t-rand\t\ta file containing random data used to seed the random number generator\n");
     else
     {
         printf("WTFF ?\n");
