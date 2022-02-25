@@ -7,13 +7,13 @@ Recode a part of **openssl** library, and additionnal features, from scratch.
 
 Only these externals functions are used (**no C libraries allowed**) :
 
-    * open()  
-    * close()  
-    * read()  
-    * write()  
-    * malloc()  
-    * perror()  
-    * exit()  
+    open()  
+    close()  
+    read()  
+    write()  
+    malloc()  
+    perror()  
+    exit()  
 
 
 
@@ -23,8 +23,9 @@ A random exemple with possible flags is given for each command
 
 Message Digest commands
 -
-* md5  
-    `./ft_ssl md5 -i Makefile -o ft_ssl_out`
+* md5
+
+    ./ft_ssl md5 -i Makefile -o ft_ssl_out
 * sha256  
     `echo "42" | ./ft_ssl sha256 Makefile -p`
 
