@@ -1,5 +1,5 @@
 DESCRIPTION
-==
+===
 
 **usage: ./ft_ssl command [files] [flags]**
 
@@ -17,7 +17,7 @@ Only these externals functions are used (**no C libraries allowed**) :
 
 
 COMMANDS
-==
+===
 A random exemple with possible flags is given for each command
 
 Message Digest commands
@@ -29,33 +29,33 @@ Message Digest commands
 
 Cipher commands
 -
-* base64
+* base64  
     `echo "Coucou" | ./ft_ssl base64 -q | ./ft_ssl base64 -d`
-* des       (Default as des-cbc)
+* des       (Default as des-cbc)  
     `./ft_ssl des -i Makefile -v 0123456789abcdef -k 1415926535 -q`
-* des-cbc
+* des-cbc  
     `./ft_ssl des-cbc Makefile -v 0123456789abcdef -o ft_ssl_out`
-* des-ecb
+* des-ecb  
     `cat Makefile | ./ft_ssl des-ecb -k acbbca`
     `./ft_ssl des-ecb Makefile -s 542842e266c5541a -p mybigpassword -iter 666`
 
 Standard commands
 -
-* genprime
+* genprime  
     `./ft_ssl genprime -rand seed_file -min 1000 -max 10000`
-* isprime
+* isprime  
     `./ft_ssl genprime | ./ft_ssl isprime -s 45 -p`
-* genrsa
+* genrsa  
     `./ft_ssl genrsa -encout des -v 0123456789abcdef -k 1415926535`
     `./ft_ssl genrsa -pubout -outform DER`
-* rsa
+* rsa  
     `./ft_ssl genrsa | ./ft_ssl rsa -text -check`
-* rsautl
+* rsautl  
 
 
 
 FLAGS
-==
+===
 
 Each commands has some of these flags
 
