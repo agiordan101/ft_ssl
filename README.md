@@ -1,11 +1,13 @@
 DESCRIPTION
 ===
 
-Recode a part of **openssl** library, and additionnal features, from scratch.
+Recode a part of **openssl** library, and additionnal features, **from scratch**.
 
 `usage: ./ft_ssl command [files] [flags]`
 
-Only these externals functions are used (**no C libraries allowed**) :
+**No C libraries used.**
+
+The only externals functions:
 
     open()  
     close()  
@@ -19,7 +21,9 @@ Only these externals functions are used (**no C libraries allowed**) :
 
 COMMANDS
 ===
-A random exemple with possible flags is given for each command
+
+"help" can be pass as command to print commands summary.
+A *random* exemple with possible flags is given for each commands.
 
 Message Digest commands
 -
@@ -48,15 +52,19 @@ Standard commands
 -
 * genprime  
     `./ft_ssl genprime -rand seed_file -min 1000 -max 10000`
+
 * isprime  
     `./ft_ssl genprime | ./ft_ssl isprime -s 45 -p`
+
 * genrsa  
     `./ft_ssl genrsa -encout des -v 0123456789abcdef -k 1415926535`  
     `./ft_ssl genrsa -pubout -outform DER`
+
 * rsa  
     `./ft_ssl genrsa | ./ft_ssl rsa -text -check`
-* rsautl  
 
+* rsautl  
+    `In progress ...`
 
 
 FLAGS
@@ -66,7 +74,7 @@ Each commands has some of these flags
 
 Global flags :
 -
-    -help           display this summary and exit
+    -help           display related command summary and exit
     -i              input file for plaintext
     -o              output file for hash
     -decin          decode the input with the given hashing command (command flags can ONLY be passed after)
@@ -85,7 +93,7 @@ Only ciphers flags
     -e              encrypt mode (default mode) (-e has priority over -d)
     -d              decrypt mode
 
-    Only DES :
+    Only DES:
         -k          send the key in hex
         -s          send the salt in hex (Overwrite global -s behavior)
         -p          send password in ascii (Overwrite global -s behavior)
@@ -105,6 +113,9 @@ Only RSA cryptosystem flags
     -check          verify key consistency
     -noout          don`t print key out
     -rand           a file containing random data used to seed the random rsa generator
+    
+    Only rsautl flag:
+        -hexdump    Hex dump output
 
 Only genprime flags
 -
@@ -112,6 +123,7 @@ Only genprime flags
     -max            upper bound for prime generation (Default as 2^63 - 1)
     -rand           a file containing random data used to seed the random rsa generator
 
-Only isprime flags
+Only isprime flag
 -
     -prob           probability requested for Miller-Rabin primality test in percentile (0 < p <= 100)
+
