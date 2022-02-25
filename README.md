@@ -84,15 +84,14 @@ RSA cryptosystem flags
     -check              verify key consistency
     -noout              don't print key out
 
-Only isprime
--
-    -prob           probability requested for Miller-Rabin primality test in percentile (0 < p <= 100)
-
 Generation commands flags
 -
     -rand           a file containing random data used to seed the random number generator
-    
-Only genprime
+
+    Only genprime :
+        -min            lower bound for prime generation (Default as 0)
+        -max            upper bound for prime generation (Default as 2^63 - 1)
+
+Only isprime flags
 -
-    -min            lower bound for prime generation (Default as 0)
-    -max            upper bound for prime generation (Default as 2^63 - 1)
+    -prob           probability requested for Miller-Rabin primality test in percentile (0 < p <= 100)
