@@ -24,8 +24,7 @@ A random exemple with possible flags is given for each command
 Message Digest commands
 -
 * md5  
-
-    ./ft_ssl md5 -i Makefile -o ft_ssl_out
+    `./ft_ssl md5 -i Makefile -o ft_ssl_out`
 * sha256  
     `echo "42" | ./ft_ssl sha256 Makefile -p`
 
