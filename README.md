@@ -33,6 +33,8 @@ Cipher commands
 * des       (Default as des-cbc)
 * des-cbc
 * des-ecb  
+
+
     echo "Coucou" | ./ft_ssl base64 -q | ./ft_ssl base64 -d
     ./ft_ssl des -i Makefile -v 0123456789abcdef -k 1415926535 -q
     ./ft_ssl des-cbc Makefile -v 0123456789abcdef -o ft_ssl_out
