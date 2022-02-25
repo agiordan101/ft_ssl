@@ -1,18 +1,18 @@
 DESCRIPTION
 ===
 
-**usage: ./ft_ssl command [files] [flags]**
+`usage: ./ft_ssl command [files] [flags]`
 
 Recode a part of **openssl** library, and additionnal features, from scratch.
 
 Only these externals functions are used (**no C libraries allowed**) :  
-    - open()  
-    - close()  
-    - read()  
-    - write()  
-    - malloc()  
-    - perror()  
-    - exit()  
+    open()  
+    close()  
+    read()  
+    write()  
+    malloc()  
+    perror()  
+    exit()  
 
 
 
