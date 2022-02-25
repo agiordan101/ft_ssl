@@ -31,6 +31,7 @@ Cipher commands
 -
 * base64  
     echo "Coucou" | ./ft_ssl base64 -q | ./ft_ssl base64 -d
+
 * des       (Default as des-cbc)  
     ./ft_ssl des -i Makefile -v 0123456789abcdef -k 1415926535 -q
 * des-cbc  
@@ -61,7 +62,7 @@ Each commands has some of these flags
 
 Global flags :
 -
-    help           display this summary and exit
+    -help           display this summary and exit
     -i              input file for plaintext
     -o              output file for hash
     -decin          decode the input with the given hashing command (command flags can ONLY be passed after)
