@@ -30,6 +30,7 @@ SRC			=	$(NAME).c \
 				algorithms/ciphers/base64.c \
 				algorithms/standard/rsa.c \
 				algorithms/standard/genrsa.c \
+				algorithms/standard/rsautl.c \
 				algorithms/standard/rsa_cryptosystem.c
 
 BIN_PATH	=	./bins/

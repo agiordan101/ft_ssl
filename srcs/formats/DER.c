@@ -228,7 +228,7 @@ Mem_8bits          *DER_generate_private_key(t_rsa_private_key *privkey, Long_64
     Long_64bits integers[RSA_PRIVATE_KEY_INTEGERS_COUNT] = {
         privkey->version, privkey->modulus,
         privkey->enc_exp, privkey->dec_exp, privkey->p, privkey->q,
-        privkey->crt_exp_dp, privkey->crt_exp_dq, privkey->crt_exp_qinv
+        privkey->crt_dmp1, privkey->crt_dmq1, privkey->crt_iqmp
     };
     int         leading_zeros[RSA_PRIVATE_KEY_INTEGERS_COUNT] = {
         0, 0, 0, 0, 0, 0, 0, 0, 0

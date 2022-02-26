@@ -65,15 +65,16 @@ typedef enum    flags {
     pubin=1UL<<31, pubout=1UL<<32,
     check=1<<27, text=1<<28, noout=1<<29, modulus=1<<30,
     inform=1UL<<33, outform=1UL<<34,
-    hexdump=1UL<<35, // rsault
+    inkey=1UL<<35, // rsault
 }               e_flags;
 # define AVFLAGS        (help + p + q + r + d + e + A + P_des + nopad + check + text + noout + modulus + pubin + pubout)
-# define AVPARAM        (s + i_ + o + decin + encout + k_des + p_des + s_des + v_des + pbkdf2_iter + prob + min + max + rand_path + inform + outform + passin + passout)
+# define AVPARAM        (s + i_ + o + decin + encout + k_des + p_des + s_des + v_des + pbkdf2_iter + prob + min + max + rand_path + inform + outform + passin + passout + inkey)
 
 # define GLOBAL_FLAGS_IN        (i_ + decin + passin)
 # define GLOBAL_FLAGS_OUT       (o + encout + passout + a + A)
 # define GLOBAL_FLAGS           (help + GLOBAL_FLAGS_IN + GLOBAL_FLAGS_OUT + q + r)
 # define DATASTRINPUT_FLAGS     (s + p)
+# define ENCDEC                 (e + d)
 # define DES_FLAGS_ONLY         (k_des + p_des + s_des + v_des + P_des + nopad + pbkdf2_iter)
 # define RSA_FLAGS_ONLY         (inform + outform + check + text + noout + modulus + pubin + pubout)
 
@@ -81,19 +82,19 @@ typedef enum    flags {
 
 typedef enum    command_flags {
     MD_flags=       GLOBAL_FLAGS + DATASTRINPUT_FLAGS,
-    BASE64_flags=   GLOBAL_FLAGS + DATASTRINPUT_FLAGS + e + d,
-    DES_flags=      GLOBAL_FLAGS + DES_FLAGS_ONLY + p + e + d,
+    BASE64_flags=   GLOBAL_FLAGS + DATASTRINPUT_FLAGS + ENCDEC,
+    DES_flags=      GLOBAL_FLAGS + DES_FLAGS_ONLY + p + ENCDEC,
     GENPRIME_flags= GLOBAL_FLAGS_OUT + help + q + min + max + rand_path,
     ISPRIME_flags=  GLOBAL_FLAGS + DATASTRINPUT_FLAGS + prob,
     GENRSA_flags=   GLOBAL_FLAGS_OUT + help + rand_path + pubout + outform,
     RSA_flags=      GLOBAL_FLAGS_IN + help + o + encout + passout + RSA_FLAGS_ONLY,
-    // RSAUTL=         ,
+    RSAUTL_flags=   GLOBAL_FLAGS + DATASTRINPUT_FLAGS + ENCDEC + inkey + inform + pubin,
 }               e_command_flags;
 
 
 //  COMMANDS --------------------------------------------------------
 
-# define N_COMMANDS 9
+# define N_COMMANDS 10
 
 typedef enum    command {
     MD5=1<<1, SHA256=1<<2,
@@ -101,16 +102,16 @@ typedef enum    command {
     GENPRIME=1<<5, ISPRIME=1<<6,
     GENRSA=1<<7,
     RSA=1<<8,
-    // RSAUTL=1<<9
+    RSAUTL=1<<9
 }               e_command;
 # define MD                     (MD5 + SHA256)
 # define DES                    (DESECB + DESCBC)
 # define CIPHERS                (BASE64 + DES)
 # define PRIMES                 (GENPRIME + ISPRIME)
-# define STANDARDS              (GENRSA + RSA)
+# define STANDARDS              (GENRSA + RSA + RSAUTL)
 
-# define HASHING_COMMANDS       (MD + CIPHERS)
-# define THASHNEED_COMMANDS     (HASHING_COMMANDS + ISPRIME + RSA)
+# define HASHING_COMMANDS       (MD + CIPHERS + RSAUTL)
+# define THASHNEED_COMMANDS     (HASHING_COMMANDS + ISPRIME + RSA + RSAUTL)
 # define EXECONES_COMMANDS      (GENPRIME + GENRSA)
 
 typedef struct  s_command {
@@ -433,9 +434,9 @@ typedef struct  s_rsa_private_key
     Long_64bits dec_exp;           // Private exponent d (Modular multiplicative inverse of rsa encryption exponent and Euler fonction)
     Long_64bits p;                 // prime1
     Long_64bits q;                 // prime2
-    Long_64bits crt_exp_dp;        // Chinese remainder theorem pre-computed exponent: d mod (p-1)
-    Long_64bits crt_exp_dq;        // Chinese remainder theorem pre-computed exponent: d mod (q-1)
-    Long_64bits crt_exp_qinv;      // Chinese remainder theorem pre-computed exponent: (inverse of q) mod p
+    Long_64bits crt_dmp1;        // Chinese remainder theorem pre-computed exponent: d mod (p-1)
+    Long_64bits crt_dmq1;        // Chinese remainder theorem pre-computed exponent: d mod (q-1)
+    Long_64bits crt_iqmp;        // Chinese remainder theorem pre-computed exponent: (inverse of q) mod p
 }               t_rsa_private_key;
 
 //  RFC 3447: ASN.1 type RSAPublicKey structure
@@ -448,6 +449,9 @@ typedef struct  s_rsa_public_key
 
 typedef struct  s_rsa
 {
+    Mem_8bits           *keyfile_data;
+    int                 keyfile_byteSz;
+    Mem_8bits           *der_content;
     e_rsa_form          inform;
     e_rsa_form          outform;
     t_rsa_private_key   privkey;
@@ -457,11 +461,14 @@ typedef struct  s_rsa
 
 Mem_8bits   *rsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
 Mem_8bits   *genrsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
+Mem_8bits   *rsautl(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags flags);
 
 void        rsa_keys_generation(t_rsa *rsa);
+void        rsa_parse_key(t_rsa *rsa, e_flags flags);
 Long_64bits rsa_encryption(t_rsa_public_key *pubkey, Long_64bits m);
 Long_64bits rsa_decryption(t_rsa_private_key *privkey, Long_64bits ciphertext);
-int         rsa_consistency(t_rsa_private_key *privkey);
+int         rsa_consistency_pubkey(t_rsa_public_key *pubkey);
+int         rsa_consistency_privkey(t_rsa_private_key *privkey);
 
 Mem_8bits   *rsa_PEM_keys_parsing(t_rsa *rsa, char *file_content, int *fileSz, e_flags flags);
 void        rsa_DER_keys_parsing(t_rsa *rsa, Mem_8bits *mem, int byteSz, e_flags keyflag);

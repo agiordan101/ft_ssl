@@ -51,25 +51,32 @@ int     get_file_len(char *file)
     return len;
 }
 
-void    file_handler(t_hash *node, char *file)
+int     file_handler(char *file, char **content, int *len)
 {
     int fd;
+
+    if ((fd = open(file, O_RDONLY)) == -1)
+        return FILENOTFOUND;
+    else
+    {
+        *len = get_file_len(file);
+        *content = ft_memnew(*len);
+
+        if (read(fd, *content, *len) == -1)
+            read_failed("parsing failed: file_handler(): \n", fd);
+        close(fd);
+    }
+    return 0;
+}
+
+void    file_handler_node(t_hash *node, char *file)
+{
 
     if (!node)
         node = add_thash_back();
 
     node->name = ft_strdup(file);
-    if ((fd = open(file, O_RDONLY)) == -1)
-        node->error = FILENOTFOUND;
-    else
-    {
-        node->len = get_file_len(file);
-        node->msg = ft_memnew(node->len);
-
-        if (read(fd, node->msg, node->len) == -1)
-            read_failed("parsing failed: file_handler(): \n", fd);
-        close(fd);
-    }
+    node->error = file_handler(file, &node->msg, &node->len);
 }
 
 void    string_handler(t_hash *node, char *av_next)
@@ -111,24 +118,24 @@ void    command_handler(t_command *command, char *cmd, e_command mask)
         A mask can be pass to avoid commands
     */
     static char         *commands_name[N_COMMANDS] = {
-        "md5", "sha256", "base64", "des-ecb", "des-cbc", "genprime", "isprime", "genrsa", "rsa",
+        "md5", "sha256", "base64", "des-ecb", "des-cbc", "genprime", "isprime", "genrsa", "rsa", "rsautl",
     };
     static e_command    commands[N_COMMANDS] = {
-        MD5, SHA256, BASE64, DESECB, DESCBC, GENPRIME, ISPRIME, GENRSA, RSA
+        MD5, SHA256, BASE64, DESECB, DESCBC, GENPRIME, ISPRIME, GENRSA, RSA, RSAUTL
     };
     static void         *commands_addr[N_COMMANDS] = {
-        md5, sha256, base64, des, des, genprime, isprime, genrsa, rsa
+        md5, sha256, base64, des, des, genprime, isprime, genrsa, rsa, rsautl
     };
     static char         *commands_title[N_COMMANDS] = {
         "MD5", "SHA256", "BASE64", "DESECB", "DESCBC",
         "Generating prime number ", "Primality test",
-        "Generating RSA private key ", "RSA keys visualization "
+        "Generating RSA private key ", "RSA keys visualization ", "RSA utilisation"
     };
     static unsigned long commands_dataSz[N_COMMANDS] = {
-        0, 0, 0, sizeof(t_des), sizeof(t_des), sizeof(t_genprime), sizeof(t_isprime), sizeof(t_rsa), sizeof(t_rsa)
+        0, 0, 0, sizeof(t_des), sizeof(t_des), sizeof(t_genprime), sizeof(t_isprime), sizeof(t_rsa), sizeof(t_rsa), sizeof(t_rsa)
     };
     static e_command_flags  commands_flags[N_COMMANDS] = {
-        MD_flags, MD_flags, BASE64_flags, DES_flags, DES_flags, GENPRIME_flags, ISPRIME_flags, GENRSA_flags, RSA_flags
+        MD_flags, MD_flags, BASE64_flags, DES_flags, DES_flags, GENPRIME_flags, ISPRIME_flags, GENRSA_flags, RSA_flags, RSAUTL_flags
     };
     int                 cmd_i = -1;
 
@@ -168,7 +175,7 @@ void    command_handler(t_command *command, char *cmd, e_command mask)
 int     param_handler(e_flags flag, char *av_next, int *i)
 {
     if (flag & i_)
-        file_handler(NULL, av_next);
+        file_handler_node(NULL, av_next);
     else if (flag & o)
         ssl.output_file = av_next;
     else if (flag & decin)
@@ -226,6 +233,12 @@ int     param_handler(e_flags flag, char *av_next, int *i)
         else
             ((t_rsa *)ssl.command.command_data)->outform = form;
     }
+    else if (flag & inkey)
+        file_handler(
+            av_next,\
+            (char **)&((t_rsa *)ssl.command.command_data)->keyfile_data,\
+            &((t_rsa *)ssl.command.command_data)->keyfile_byteSz
+        );
     (*i)++;
     return 0;
 }
@@ -317,8 +330,8 @@ e_flags     strToFlag(char *str)
         return text;
     if (!ft_strcmp(str, "-modulus"))
         return modulus;
-    if (!ft_strcmp(str, "-hexdump"))
-        return hexdump;
+    if (!ft_strcmp(str, "-inkey"))
+        return inkey;
     return 0;
 }
 
@@ -346,7 +359,7 @@ void        flags_handler(int ac, char **av, int i)
                 unrecognized_flag(av[i]);
         }
         else
-            file_handler(NULL, av[i]);
+            file_handler_node(NULL, av[i]);
     }
 }
 

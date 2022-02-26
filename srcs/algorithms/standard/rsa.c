@@ -23,7 +23,7 @@ static inline void  print_privkey_components(t_rsa_private_key *privkey)
     Long_64bits integers[RSA_PRIVATE_KEY_INTEGERS_COUNT - 1] = {
         privkey->modulus, privkey->enc_exp, privkey->dec_exp,
         privkey->p, privkey->q,
-        privkey->crt_exp_dp, privkey->crt_exp_dq, privkey->crt_exp_qinv
+        privkey->crt_dmp1, privkey->crt_dmq1, privkey->crt_iqmp
     };
     char        *int_title[RSA_PRIVATE_KEY_INTEGERS_COUNT - 1] = {
         "modulus: ", "publicExponent: ", "privateExponent: ",
@@ -44,24 +44,11 @@ static inline void  print_privkey_components(t_rsa_private_key *privkey)
 
 Mem_8bits           *rsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags flags)
 {
-    /*
-    to do
-        check
-    */
-
     t_rsa       *rsa_data = (t_rsa *)command_data;
-    Mem_8bits   *der_content;
+    rsa_data->keyfile_data = *plaintext;
+    rsa_data->keyfile_byteSz = ptByteSz;
 
-    //printBits(*plaintext, ptByteSz);
-
-    // Parse key in DER format
-    if (rsa_data->inform == PEM)
-        der_content = rsa_PEM_keys_parsing(rsa_data, *plaintext, (int *)&ptByteSz, flags);
-    else
-    {
-        rsa_DER_keys_parsing(rsa_data, *plaintext, ptByteSz, flags);
-        der_content = ft_memdup(*plaintext, ptByteSz);
-    }
+    rsa_parse_key(rsa_data, flags);
 
     if (flags & pubin)
     {
@@ -77,8 +64,8 @@ Mem_8bits           *rsa(void *command_data, Mem_8bits **plaintext, Long_64bits 
             // Generate public key if private was provided and public is asked
             rsa_data->pubkey.enc_exp = rsa_data->privkey.enc_exp;
             rsa_data->pubkey.modulus = rsa_data->privkey.modulus;
-            free(der_content);
-            der_content = DER_generate_public_key(&rsa_data->pubkey, &ptByteSz);
+            free(rsa_data->der_content);
+            rsa_data->der_content = DER_generate_public_key(&rsa_data->pubkey, &ptByteSz);
         }
     }
     if (flags & modulus)
@@ -87,7 +74,7 @@ Mem_8bits           *rsa(void *command_data, Mem_8bits **plaintext, Long_64bits 
         _ft_printHex(flags & pubin ? rsa_data->pubkey.modulus : rsa_data->privkey.modulus, LONG64_byteSz, HEXABASE_upp, 0);
         ft_putstr("\n");
     }
-    if (flags & check && rsa_consistency(&rsa_data->privkey))
+    if (flags & check && rsa_consistency_privkey(&rsa_data->privkey))
         ft_putstr("RSA key ok\n");
 
     // Add base64 encryption after rsa command to create PEM form
@@ -97,7 +84,7 @@ Mem_8bits           *rsa(void *command_data, Mem_8bits **plaintext, Long_64bits 
         command_handler(&ssl.enc_o_cmd, "base64", 0);
     }
 
-    //printBits(der_content, *hashByteSz);
+    //printBits(rsa_data->der_content, *hashByteSz);
 
     // fprintf(stderr, "rsa_data->pubkey.modulus: %lu\n", rsa_data->pubkey.modulus);
     // fprintf(stderr, "rsa_data->pubkey.enc_exp: %lu\n", rsa_data->pubkey.enc_exp);
@@ -107,10 +94,10 @@ Mem_8bits           *rsa(void *command_data, Mem_8bits **plaintext, Long_64bits 
     // fprintf(stderr, "rsa_data->privkey.p: %lu\n", rsa_data->privkey.p);
     // fprintf(stderr, "rsa_data->privkey.q: %lu\n", rsa_data->privkey.q);
     // fprintf(stderr, "rsa_data->privkey.modulus: %lu\n", rsa_data->privkey.modulus);
-    // fprintf(stderr, "rsa_data->privkey.crt_exp_dp: %lu\n", rsa_data->privkey.crt_exp_dp);
-    // fprintf(stderr, "rsa_data->privkey.crt_exp_dq: %lu\n", rsa_data->privkey.crt_exp_dq);
-    // fprintf(stderr, "rsa_data->privkey.crt_exp_qinv: %lu\n", rsa_data->privkey.crt_exp_qinv);
+    // fprintf(stderr, "rsa_data->privkey.crt_dmp1: %lu\n", rsa_data->privkey.crt_dmp1);
+    // fprintf(stderr, "rsa_data->privkey.crt_dmq1: %lu\n", rsa_data->privkey.crt_dmq1);
+    // fprintf(stderr, "rsa_data->privkey.crt_iqmp: %lu\n", rsa_data->privkey.crt_iqmp);
     if (hashByteSz)
         *hashByteSz = ptByteSz;
-    return der_content;
+    return rsa_data->der_content;
 }
