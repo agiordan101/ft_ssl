@@ -28,7 +28,8 @@ void    hash_32bits_output(t_hash *p)
     int         bloc32bitsSz = p->hashByteSz / WORD32_byteSz;
 
     for (Word_32bits *tmp = hash; tmp < hash + bloc32bitsSz; tmp += 1)
-        ft_printHex(*tmp, WORD32_byteSz);
+        _ft_printHex(*tmp, WORD32_byteSz, HEXABASE_low, 1);
+    
     // for (Word_32bits *tmp = hash; tmp < hash + bloc32bitsSz; tmp += 1)
     //     printf("%x", *tmp);
     // printMemHex(p->hash, p->hashByteSz, "out");
@@ -45,11 +46,7 @@ void    hash_8bits_output(t_hash *p)
 
 void    hash_output(t_hash *hash)
 {
-    //base64 command_familly  OR  des flag d  OR  a | ao flags (base64 output format)
-    // if (ssl.command.command & ~MD || ssl.flags & ao)
-
     // 64-bytes blocs output is only for base64 format without -A flag
-    // if 
     if (~ssl.flags & A &&\
         ((ssl.enc_o_cmd.command & BASE64) || (ssl.enc_o_cmd.command == 0 && ssl.command.command & BASE64)))
         hash_64bytesbloc_output(hash);

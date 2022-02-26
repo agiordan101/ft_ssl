@@ -24,11 +24,10 @@ typedef unsigned long   Long_64bits;
 # define ABS(x)         (x >= 0 ? x : -x)
 # define INTMAXLESS1    (Word_32bits)pow(2, 32) - 1
 # define BIG_LONG64     ((Long_64bits)1 << 63) - 1
+# define HEXABASE_low       "0123456789abcdef"
+# define HEXABASE_upp       "0123456789ABCDEF"
 
 # define BUFF_SIZE      420
-
-# define ENDMSG         0b10000000
-# define HEXABASE       "0123456789abcdef"
 
 
 //  FLAGS --------------------------------------------------------
@@ -86,8 +85,8 @@ typedef enum    command_flags {
     DES_flags=      GLOBAL_FLAGS + DES_FLAGS_ONLY + p + e + d,
     GENPRIME_flags= GLOBAL_FLAGS_OUT + help + q + min + max + rand_path,
     ISPRIME_flags=  GLOBAL_FLAGS + DATASTRINPUT_FLAGS + prob,
-    GENRSA_flags=   GLOBAL_FLAGS_OUT + help + q + rand_path + pubout + outform,
-    RSA_flags=      GLOBAL_FLAGS - a - A - r + RSA_FLAGS_ONLY,
+    GENRSA_flags=   GLOBAL_FLAGS_OUT + help + rand_path + pubout + outform,
+    RSA_flags=      GLOBAL_FLAGS_IN + help + o + encout + passout + RSA_FLAGS_ONLY,
     // RSAUTL=         ,
 }               e_command_flags;
 
@@ -197,9 +196,11 @@ int         ft_unbrlen(Long_64bits nbr);
 void	    ft_putstr(char *s);
 void    	ft_putstrfd(int fd, char *s);
 void    	ft_putstderr(char *s);
-void    	ft_putnbr(int fd, int n);
+void    	ft_putnbr(Long_64bits n);
+void    	ft_putnbrfd(int fd, Long_64bits n);
 
-void        ft_printHex(Long_64bits n, int byteSz);
+void        ft_printHex(Long_64bits n);
+void        _ft_printHex(Long_64bits n, int totalMemSz, char hexbase[], int leading_zero);
 Long_64bits ft_strtoHex(char *str);
 char        *ft_hextoStr(Long_64bits nbr);
 
@@ -216,7 +217,8 @@ Word_32bits     rotR(Word_32bits x, Word_32bits r);
 Long_64bits     key_discarding(Mem_8bits *p);
 Long_64bits     _bits_permutations(Long_64bits mem, char *ptable, int bitLen);
 Long_64bits     bits_permutations(Long_64bits mem, char *ptable, int bitLen);
-int             bytes_counter(Long_64bits n);
+int             count_bytes(Long_64bits n);
+int             count_bits(Long_64bits n);
 
 
 /*
@@ -255,6 +257,7 @@ void        printLong(Long_64bits l);
 */
 
 # define CHUNK_byteSz   (16 * sizeof(Word_32bits))    // 64 bytes or 512 bits
+# define ENDMSG         0b10000000
 
 void        md_padding(Mem_8bits **data, Long_64bits *byteSz, char reverseByteSz);
 
@@ -458,6 +461,7 @@ Mem_8bits   *genrsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByt
 void        rsa_keys_generation(t_rsa *rsa);
 Long_64bits rsa_encryption(t_rsa_public_key *pubkey, Long_64bits m);
 Long_64bits rsa_decryption(t_rsa_private_key *privkey, Long_64bits ciphertext);
+int         rsa_consistency(t_rsa_private_key *privkey);
 
 Mem_8bits   *rsa_PEM_keys_parsing(t_rsa *rsa, char *file_content, int *fileSz, e_flags flags);
 void        rsa_DER_keys_parsing(t_rsa *rsa, Mem_8bits *mem, int byteSz, e_flags keyflag);

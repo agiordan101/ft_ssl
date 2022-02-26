@@ -91,7 +91,7 @@ Mem_8bits   *genrsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByt
     rsa_keys_generation(rsa_data);
 
     ft_putstderr("e is ");
-    ft_putnbr(STDERR, rsa_data->pubkey.enc_exp);
+    ft_putnbrfd(STDERR, rsa_data->pubkey.enc_exp);
     ft_putstderr("\n");
 
     // fprintf(stderr, "modulus: %lu\n", rsa_data->privkey.modulus);
@@ -108,7 +108,7 @@ Mem_8bits   *genrsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByt
         command_handler(&ssl.enc_o_cmd, "base64", 0);
     }
         
-    (void)plaintext;
+    (void **)plaintext;
     (void)ptByteSz;
     (void)way;
     return key;

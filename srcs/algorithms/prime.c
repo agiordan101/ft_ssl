@@ -93,6 +93,8 @@ int         miller_rabin_primality_test(Long_64bits n, float p, int verbose)
 
     fermat_test_solver(n, &d, &s); // n has to be odd
 
+    if (p < 0)
+        p = PROBMIN_ISPRIME;
     // Handle case where all possible a values were tested (save_sz = n - 3 -> No more random witness)
     while (error_prob > p && save_sz < n - 3)
     {

@@ -7,13 +7,16 @@ inline void init_t_hash(t_hash *hash)
 
 inline void t_hash_free(t_hash *hash)
 {
-    if (hash->name)
-        free(hash->name);
-    if (hash->msg)
-        free(hash->msg);
-    if (hash->hash)
-        free(hash->hash);
-    free(hash);
+    if (hash)
+    {
+        if (hash->name)
+            free(hash->name);
+        if (hash->msg)
+            free(hash->msg);
+        if (hash->hash)
+            free(hash->hash);
+        free(hash);
+    }
 }
 
 inline void t_hash_list_free(t_hash *hash)

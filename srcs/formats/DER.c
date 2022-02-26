@@ -157,9 +157,9 @@ Mem_8bits          *DER_generate_public_key(t_rsa_public_key *pubkey, Long_64bit
         |  |  |  02 03                         // Type: 02 (INTEGER)
         |  |  |  -  01 00 01                   // Public Exponent (65537)
     */
-    int exp_length = bytes_counter(pubkey->enc_exp);
+    int exp_length = count_bytes(pubkey->enc_exp);
     
-    int modulus_length = bytes_counter(pubkey->modulus);                    // +1 to add 00 byte / leading zero
+    int modulus_length = count_bytes(pubkey->modulus);                    // +1 to add 00 byte / leading zero
     endianReverse((Mem_8bits *)&pubkey->modulus, modulus_length);           // Like openssl
     int modulus_leading_zero = (0x80 <= (pubkey->modulus & 0xF0));
     // printBits(&pubkey->modulus, modulus_length);
@@ -236,7 +236,7 @@ Mem_8bits          *DER_generate_private_key(t_rsa_private_key *privkey, Long_64
 
     for (int i = 0; i < RSA_PRIVATE_KEY_INTEGERS_COUNT; i++)
     {
-        ints_byteSz[i] = bytes_counter(integers[i]);
+        ints_byteSz[i] = count_bytes(integers[i]);
 
         endianReverse((Mem_8bits *)(integers + i), ints_byteSz[i]);        // Like openssl
         leading_zeros[i] = (0x80 <= (integers[i] & 0xF0));

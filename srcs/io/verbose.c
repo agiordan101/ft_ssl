@@ -6,13 +6,16 @@ void    des_P_flag_output(t_des *des_data)
 {
     ssl.fd_out = STDERR; // For ft_printHex function
     ft_putstrfd(ssl.fd_out, "salt=");
-    ft_printHex(des_data->salt, KEY_byteSz);
+    ft_printHex(des_data->salt);
+    // ft_printHex(des_data->salt, KEY_byteSz);
     ft_putstrfd(ssl.fd_out, "\nkey=");
-    ft_printHex(des_data->key, KEY_byteSz);
+    ft_printHex(des_data->key);
+    // ft_printHex(des_data->key, KEY_byteSz);
     if (ssl.command.command == DESCBC)
     {
         ft_putstrfd(ssl.fd_out, "\niv=");
-        ft_printHex(des_data->vector, KEY_byteSz);
+        ft_printHex(des_data->vector);
+        // ft_printHex(des_data->vector, KEY_byteSz);
     }
     ft_putstrfd(ssl.fd_out, "\n");
     freexit(EXIT_SUCCESS);

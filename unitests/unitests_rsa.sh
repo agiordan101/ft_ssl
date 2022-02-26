@@ -36,6 +36,7 @@ echo "\n --- Unitests isprime: This script will display others things than 'writ
 echo "\nGenerate PEM_privkey and DER_privkey ->"
 ./ft_ssl genrsa -o PEM_privkey
 openssl rsa -in PEM_privkey -outform DER -out DER_privkey
+openssl rsa -in DER_privkey -inform DER -outform DER -pubout -out DER_pubkey
 
 
 # First test (Compare ft_ssl cycle AND openssl DER_priv / DER_pub)
@@ -83,11 +84,21 @@ openssl rsa -in PEM_privkey -outform DER -pubout -out openssl_out
 diff ft_ssl_out openssl_out
 
 
-echo "\nTest 4: Compare ft_ssl and openssl (DES encryption) ->"
-# Others tests
+echo "\nTest 4: Compare ft_ssl and openssl (DES encryption / decryption RSA keys) ->"
+# Fourth test (DES encryption / decryption RSA keys)
 ./ft_ssl rsa -i PEM_privkey -outform DER -pubout -encout des-ecb -passout pwdpwd |\
 ./ft_ssl rsa -inform DER -pubin -decin des-ecb -passin pwdpwd -o ft_ssl_out
 openssl rsa -in PEM_privkey -pubout -out openssl_out
 diff ft_ssl_out openssl_out
 
-rm ft_ssl PEM_privkey DER_privkey ft_ssl_out openssl_out
+echo "\nTest 4: Compare ft_ssl and openssl with PEM private key and flags -text -modulus -check ->"
+./ft_ssl rsa -i PEM_privkey -text -modulus -check -o ft_ssl_out
+openssl rsa -in PEM_privkey -text -modulus -check -out openssl_out
+diff ft_ssl_out openssl_out
+
+echo "\nTest 5: Compare ft_ssl and openssl with DER public key and flags -text -modulus ->"
+./ft_ssl rsa -i DER_pubkey -inform DER -pubin -text -modulus -o ft_ssl_out
+openssl rsa -in DER_pubkey -inform DER -pubin -text -modulus -out openssl_out
+diff ft_ssl_out openssl_out
+
+rm -f ft_ssl PEM_privkey DER_privkey DER_pubkey ft_ssl_out openssl_out
