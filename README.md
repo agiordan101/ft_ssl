@@ -22,8 +22,8 @@ The only externals functions:
 COMMANDS
 ===
 
-"help" can be pass as command to print commands summary.
-A *random* exemple with possible flags is given for each commands.
+"help" can be pass as command to print commands summary.  
+**Random** exemples with possible flags is given for each commands.  
 
 Message Digest commands
 -

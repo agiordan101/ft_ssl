@@ -66,16 +66,16 @@ Mem_8bits           *rsa(void *command_data, Mem_8bits **plaintext, Long_64bits 
 
     //printBits(der_content, *hashByteSz);
 
-    fprintf(stderr, "rsa_data->pubkey.modulus: %lu\n", rsa_data->pubkey.modulus);
-    fprintf(stderr, "rsa_data->pubkey.enc_exp: %lu\n", rsa_data->pubkey.enc_exp);
+    // fprintf(stderr, "rsa_data->pubkey.modulus: %lu\n", rsa_data->pubkey.modulus);
+    // fprintf(stderr, "rsa_data->pubkey.enc_exp: %lu\n", rsa_data->pubkey.enc_exp);
     
-    fprintf(stderr, "rsa_data->privkey.enc_exp: %lu\n", rsa_data->privkey.enc_exp);
-    fprintf(stderr, "rsa_data->privkey.dec_exp: %lu\n", rsa_data->privkey.dec_exp);
-    fprintf(stderr, "rsa_data->privkey.p: %lu\n", rsa_data->privkey.p);
-    fprintf(stderr, "rsa_data->privkey.q: %lu\n", rsa_data->privkey.q);
-    fprintf(stderr, "rsa_data->privkey.modulus: %lu\n", rsa_data->privkey.modulus);
-    fprintf(stderr, "rsa_data->privkey.crt_exp_dp: %lu\n", rsa_data->privkey.crt_exp_dp);
-    fprintf(stderr, "rsa_data->privkey.crt_exp_dq: %lu\n", rsa_data->privkey.crt_exp_dq);
-    fprintf(stderr, "rsa_data->privkey.crt_exp_qinv: %lu\n", rsa_data->privkey.crt_exp_qinv);
+    // fprintf(stderr, "rsa_data->privkey.enc_exp: %lu\n", rsa_data->privkey.enc_exp);
+    // fprintf(stderr, "rsa_data->privkey.dec_exp: %lu\n", rsa_data->privkey.dec_exp);
+    // fprintf(stderr, "rsa_data->privkey.p: %lu\n", rsa_data->privkey.p);
+    // fprintf(stderr, "rsa_data->privkey.q: %lu\n", rsa_data->privkey.q);
+    // fprintf(stderr, "rsa_data->privkey.modulus: %lu\n", rsa_data->privkey.modulus);
+    // fprintf(stderr, "rsa_data->privkey.crt_exp_dp: %lu\n", rsa_data->privkey.crt_exp_dp);
+    // fprintf(stderr, "rsa_data->privkey.crt_exp_dq: %lu\n", rsa_data->privkey.crt_exp_dq);
+    // fprintf(stderr, "rsa_data->privkey.crt_exp_qinv: %lu\n", rsa_data->privkey.crt_exp_qinv);
     return der_content;
 }

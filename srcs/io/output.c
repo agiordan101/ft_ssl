@@ -81,6 +81,7 @@ void    rsa_output(t_hash *hash)
             hash_output(hash);
             ft_putstr("\n");
             ft_putstr(ssl.flags & pubout ? RSA_PUBLIC_KEY_FOOTER : RSA_PRIVATE_KEY_FOOTER);
+            ft_putstr("\n");
         }
         else
             hash_output(hash);
