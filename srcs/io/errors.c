@@ -41,14 +41,27 @@ void    malloc_failed(char *errormsg)
     freexit(EXIT_FAILURE);
 }
 
-// ft_ssl errors
+// ft_ssl generics errors
+
+void    ft_ssl_error(char *errormsg)
+{
+    ft_putstderr("./ft_ssl: ");
+    ft_putstderr(ssl.command.command_title);
+    ft_putstderr(": ");
+    ft_putstderr(errormsg);
+    freexit(EXIT_SUCCESS);
+}
+
+// ft_ssl specific errors
 
 void    unrecognized_flag(char *flag)
 {
+    ft_putstderr("./ft_ssl: ");
     ft_putstderr(ssl.command.command_title);
     ft_putstderr(": Unrecognized flag ");
     ft_putstderr(flag);
     ft_putstderr("\n");
+    ft_putstderr("./ft_ssl: ");
     ft_putstderr(ssl.command.command_title);
     ft_putstderr(": Use -help for summary.\n");
     freexit(EXIT_SUCCESS);
@@ -56,7 +69,7 @@ void    unrecognized_flag(char *flag)
 
 void    flags_conflicting_error(char *flag1, char *flag2, char *errormsg)
 {
-    ft_putstderr("ft_ssl: ");
+    ft_putstderr("./ft_ssl: ");
     ft_putstderr(ssl.command.command_title);
     ft_putstderr(": Flags ");
     ft_putstderr(flag1);
@@ -76,7 +89,7 @@ void    flags_conflicting_error(char *flag1, char *flag2, char *errormsg)
 
 void    flag_error(char *flag, char *errormsg)
 {
-    ft_putstderr("ft_ssl: ");
+    ft_putstderr("./ft_ssl: ");
     ft_putstderr(ssl.command.command_title);
     ft_putstderr(": Flag ");
     ft_putstderr(flag);
@@ -94,7 +107,7 @@ void    flag_error(char *flag, char *errormsg)
 
 void    pbkdf2_iter_error(int p)
 {
-    ft_putstderr("ft_ssl: ");
+    ft_putstderr("./ft_ssl: ");
     ft_putstderr(ssl.command.command_title);
     ft_putstderr(": Non-positive number \"");
     ft_putnbrfd(STDERR, p);
@@ -104,7 +117,7 @@ void    pbkdf2_iter_error(int p)
 
 void    isprime_prob_error(int p)
 {
-    ft_putstderr("ft_ssl: ");
+    ft_putstderr("./ft_ssl: ");
     ft_putstderr(ssl.command.command_title);
     ft_putstderr(": flag -prob argument \"");
     ft_putnbrfd(STDERR, p);
@@ -114,7 +127,7 @@ void    isprime_prob_error(int p)
 
 void    file_not_found(char *file)
 {
-    ft_putstderr("ft_ssl: ");
+    ft_putstderr("./ft_ssl: ");
     ft_putstderr(ssl.command.command_title);
     ft_putstderr(": ");
     ft_putstderr(file);
@@ -124,7 +137,7 @@ void    file_not_found(char *file)
 
 void    rsa_format_error(char *form)
 {
-    ft_putstderr("ft_ssl: ");
+    ft_putstderr("./ft_ssl: ");
     ft_putstderr(ssl.command.command_title);
     ft_putstderr(": Invalid format \"");
     ft_putstderr(form);
@@ -134,7 +147,7 @@ void    rsa_format_error(char *form)
 
 void    rsa_keys_integer_size_error(int byteSz)
 {
-    ft_putstderr("ft_ssl: ");
+    ft_putstderr("./ft_ssl: ");
     ft_putstderr(ssl.command.command_title);
     ft_putstderr(": Cannot read ");
     ft_putnbrfd(STDERR, byteSz * 8);
@@ -144,7 +157,7 @@ void    rsa_keys_integer_size_error(int byteSz)
 
 void    rsa_parsing_keys_error(e_flags privpubin, e_flags inform, char *errormsg, int value)
 {
-    ft_putstderr("ft_ssl: ");
+    ft_putstderr("./ft_ssl: ");
     ft_putstderr(ssl.command.command_title);
     ft_putstderr(privpubin & pubin ? ": Unable to load PUBLIC key " : ": Unable to load PRIVATE key ");
     ft_putstderr(inform & PEM ? "in PEM format: " : "in DER format: ");

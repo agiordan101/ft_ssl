@@ -43,9 +43,8 @@ inline void t_hash_decode_inputs(t_hash *hash)
     {
         if (!hash->error)
         {
-            // printf("Hash(len=%d)= >%s<\n", hash->len, hash->msg);
+            // fprintf(stderr, "Hash(len=%d)= >%s<\n", hash->len, hash->msg);
             tmp = hash->msg;
-            // hash->msg = (char *)base64(NULL, (Mem_8bits **)&hash->msg, hash->len, (Long_64bits *)&hash->len, d);
 
             hash->msg = ssl.dec_i_cmd.command_addr(
                 ssl.dec_i_cmd.command_data,
@@ -55,6 +54,7 @@ inline void t_hash_decode_inputs(t_hash *hash)
                 flags
             );
             free(tmp);
+            // fprintf(stderr, "Hash(len=%d)= >%s<\n", hash->len, hash->msg);
         }
         hash = hash->next;
     }

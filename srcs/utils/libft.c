@@ -189,7 +189,7 @@ inline void	ft_putstderr(char *s)
 {
     int ret = write(STDERR, s, ft_strlen(s));
     if (ret < 0)
-        freexit(EXIT_FAILURE);
+        ft_ssl_error("ft_putstderr() function failed.\n");
 }
 
 inline void	ft_putstrfd(int fd, char *s)

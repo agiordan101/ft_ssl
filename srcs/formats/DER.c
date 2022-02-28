@@ -77,6 +77,8 @@ static void        DER_read_key(Mem_8bits *mem, int byteSz, Long_64bits *integer
     while (mem < mem_end && i < n_int)
     {
         DER_tag_parsing(mem, &tag);
+        // fprintf(stderr, "Find %d/%d integers\n", i, n_int);
+        // printMemHex(mem, mem_end - mem, "file content");
         
         if (tag.tag_number == der_integer)
         {
@@ -114,29 +116,30 @@ static void        DER_read_key(Mem_8bits *mem, int byteSz, Long_64bits *integer
         rsa_parsing_keys_error(keyflag & pubin, DER, "Additional bytes found: ", mem_end - mem);
 }
 
-inline void        rsa_DER_keys_parsing(t_rsa *rsa, Mem_8bits *mem, int byteSz, e_flags keyflag)
+inline Mem_8bits   *rsa_DER_keys_parsing(t_rsa *rsa, Mem_8bits *file_content, int fileSz, e_flags keyflag)
 {
     if (keyflag & pubin)
     {
-        Long_64bits integers[RSA_PUBLIC_KEY_INTEGERS_COUNT];
+        Long_64bits integers[RSA_PUBLIC_KEY_INTEGERS_COUNT];     // Try to put one
 
-        DER_read_key(mem, byteSz, integers, RSA_PUBLIC_KEY_INTEGERS_COUNT, keyflag);
+        DER_read_key(file_content, fileSz, integers, RSA_PUBLIC_KEY_INTEGERS_COUNT, keyflag);
         ft_memcpy(&rsa->pubkey, integers, sizeof(t_rsa_public_key));
     }
     else
     {
         Long_64bits integers[RSA_PRIVATE_KEY_INTEGERS_COUNT];
 
-        DER_read_key(mem, byteSz, integers, RSA_PRIVATE_KEY_INTEGERS_COUNT, keyflag);
+        DER_read_key(file_content, fileSz, integers, RSA_PRIVATE_KEY_INTEGERS_COUNT, keyflag);
         ft_memcpy(&rsa->privkey, integers, sizeof(t_rsa_private_key));
     }
+    return file_content;
 }
 
 /*        
     RSA keys generation with DER format
 */
 
-Mem_8bits          *DER_generate_public_key(t_rsa_public_key *pubkey, Long_64bits *hashByteSz)
+Mem_8bits          *DER_generate_public_key(t_rsa_public_key *pubkey, int *hashByteSz)
 {
     /*
         RSA public key in DER format is structured as follow (Truth OID for RSA keys but random modulus):
@@ -209,7 +212,7 @@ Mem_8bits          *DER_generate_public_key(t_rsa_public_key *pubkey, Long_64bit
     return ft_memdup(DER_pubkey, *hashByteSz);
 }
 
-Mem_8bits          *DER_generate_private_key(t_rsa_private_key *privkey, Long_64bits *hashByteSz)
+Mem_8bits          *DER_generate_private_key(t_rsa_private_key *privkey, int *hashByteSz)
 {
     /*
         RSA public key in DER format is structured as follow (Random integers):

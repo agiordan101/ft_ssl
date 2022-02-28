@@ -50,44 +50,57 @@ void        md_padding(Mem_8bits **data, Long_64bits *byteSz, char reverseByteSz
     *byteSz = extend_byteSz;
 }
 
-Long_64bits des_padding(Mem_8bits *bloc, Long_64bits blocSz)
+// Long_64bits des_padding(Mem_8bits *bloc, Long_64bits blocByteSz)
+// {
+//     Mem_8bits   newbloc[LONG64_byteSz];
+//     ft_bzero(newbloc, LONG64_byteSz);
+//     int         missing_bytes;
+//     int         i = -1;
+
+//     fprintf(stderr, "bloc (byteSz=%d): %lx\n", blocByteSz, bloc);
+//     // Copy 
+//     while (++i < blocByteSz)
+//         newbloc[i] = bloc[i];
+//     missing_bytes = 8 - i;
+//     fprintf(stderr, "missing_bytes: %d\n", missing_bytes);
+//     fprintf(stderr, "newbloc: %lx\n", *((Long_64bits *)newbloc));
+//     while (i < LONG64_byteSz)
+//         newbloc[i++] = missing_bytes;
+//     // printf("newbloc: %lx\n", *((Long_64bits *)newbloc));
+//     return *((Long_64bits *)newbloc);
+// }
+
+Long_64bits des_padding(Mem_8bits *bloc, Long_64bits blocByteSz)
 {
     Mem_8bits   newbloc[LONG64_byteSz];
-    ft_bzero(newbloc, LONG64_byteSz);
-    int         missing_bytes;
-    int         i = -1;
+    int         missing_bytes = 8 - blocByteSz;
 
-    while (++i < blocSz)
-        newbloc[i] = bloc[i];
-    missing_bytes = 8 - i;
-    // printf("missing_bytes: %d\n", missing_bytes);
-    // printf("newbloc: %lx\n", *((Long_64bits *)newbloc));
-    while (i < LONG64_byteSz)
-        newbloc[i++] = missing_bytes;
-    // printf("newbloc: %lx\n", *((Long_64bits *)newbloc));
+    // fprintf(stderr, "bloc (byteSz=%d): %lx\n", blocByteSz, bloc);
+    ft_memcpy(newbloc, bloc, blocByteSz);
+    for (int i = blocByteSz; i < LONG64_byteSz; i++)
+        newbloc[i] = missing_bytes;
+    // fprintf(stderr, "missing_bytes: %d\n", missing_bytes);
+    // fprintf(stderr, "newbloc: %lx\n", *((Long_64bits *)newbloc));
     return *((Long_64bits *)newbloc);
 }
 
-void        des_unpadding(Long_64bits *lastbloc, int *ptSz)
+void        des_unpadding(Long_64bits *lastbloc, int *ptByteSz)
 {
     Mem_8bits   lastbyte = (*lastbloc >> 56) & 0xff;
 
-    // fprintf(stderr, "lastbloc : %lx\tptSz : %d\n", *lastbloc, *ptSz);
+    // fprintf(stderr, "lastbloc : %lx\tptByteSz : %d\n", *lastbloc, *ptByteSz);
     // printf("lastbyte : %x\n", lastbyte);
     if (lastbyte == 0x08)
-        *ptSz -= LONG64_byteSz;
+        *ptByteSz -= LONG64_byteSz;
     else if (0x01 <= lastbyte && lastbyte <= 0x07)
     {
         *lastbloc = *lastbloc & (((Long_64bits)1 << (64 - lastbyte * 8)) - 1); //Remove padding
-        *ptSz -= lastbyte;
+        *ptByteSz -= lastbyte;
     }
     else // Padding not found
     {
         if (~ssl.flags & nopad)
-        {
-            ft_putstderr("./ft_ssl: Bad decrypt: No padding found in decrypted data.\n");
-            freexit(EXIT_FAILURE);
-        }
+            ft_ssl_error("Bad decrypt: No padding found in decrypted data.\n");
         return ;
     }
     // Padding found

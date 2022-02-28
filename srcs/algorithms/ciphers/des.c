@@ -23,10 +23,7 @@ static int              magic_number_in(t_des *des, Mem_8bits *plaintext, e_flag
         {
             // free(buff);
             if (!des->key)
-            {
-                ft_putstderr("bad magic number\n");
-                freexit(EXIT_SUCCESS);
-            }
+                ft_ssl_error("bad magic number\n");
             return 0;
         }
         else
@@ -173,10 +170,7 @@ static void             init_vars(t_des *des, Mem_8bits *plaintext, e_flags flag
             ft_putstderr("warning: iv not used by this cipher\n");
     }
     else if (des->mode == DESCBC)
-    {
-        ft_putstderr("\nInitialization vector is undefined\n");
-        freexit(EXIT_SUCCESS);
-    }
+        ft_ssl_error("Initialization vector is undefined\n");
 
     // A salt is randomly generated if it's not provided
     if (!des->salt)
@@ -387,15 +381,15 @@ static Long_64bits      feistel_algorithm(t_des *des, Long_64bits plaintext)
 
 static Mem_8bits        *des_decryption(t_des *des, Mem_8bits *pt, Long_64bits ptByteSz, Long_64bits *hashByteSz)
 {
-    int         ptSz = (ptByteSz + LONG64_byteSz - 1) / LONG64_byteSz; // Count of 64-bits bloc
-    Long_64bits ciphertext[ptSz];
-    Long_64bits *plaintext = (Long_64bits *)pt + ptSz - 1;
+    int         ptBlocSz = (ptByteSz + LONG64_byteSz - 1) / LONG64_byteSz; // Count of 64-bits bloc
+    Long_64bits ciphertext[ptBlocSz];
+    Long_64bits *plaintext = (Long_64bits *)pt + ptBlocSz - 1;
     Long_64bits bloc;
     int         outbyteSz;
 
     // printMemHex(pt, ptByteSz, "Plaintext hex");
-    // printf("\n- DES DECRYPTION -\nptByteSz: %ld\tptSz: %d\n", ptByteSz, ptSz);
-    for (int i = ptSz - 1; i >= 0; i--)
+    // fprintf(stderr, "\n- DES DECRYPTION -\nptByteSz: %ld\tptBlocSz: %d\n", ptByteSz, ptBlocSz);
+    for (int i = ptBlocSz - 1; i >= 0; i--)
     {
         bloc = *plaintext;
         // printf("\nstr plaintext: >%s<\n", (Mem_8bits *)plaintext);
@@ -403,7 +397,7 @@ static Mem_8bits        *des_decryption(t_des *des, Mem_8bits *pt, Long_64bits p
         // printf("hex   bloc: %lx\n", bloc);
 
         ciphertext[i] = feistel_algorithm(des, bloc);
-        // printf("ciphertext: %lx\n", ciphertext[i]);
+        // printf("ciphertext[%d]: %lx\n", i, ciphertext[i]);
 
         if (des->mode == DESCBC)
         {
@@ -413,12 +407,12 @@ static Mem_8bits        *des_decryption(t_des *des, Mem_8bits *pt, Long_64bits p
         }
         plaintext--;
     }
-    outbyteSz = ptSz * LONG64_byteSz;
-    // fprintf(stderr, "des_unpadding %d: %lx\n", outbyteSz, ciphertext[ptSz - 1]);
-    des_unpadding(ciphertext + ptSz - 1, &outbyteSz);
+    outbyteSz = ptBlocSz * LONG64_byteSz;
+    // fprintf(stderr, "des_unpadding %d: %lx\n", outbyteSz, ciphertext[ptBlocSz - 1]);
+    des_unpadding(ciphertext + ptBlocSz - 1, &outbyteSz);
     // fprintf(stderr, "des_unpadding %d: %lx\n", outbyteSz, ciphertext[outbyteSz / 8]);
 
-    // for (int i = 0; i < ptSz; i++)
+    // for (int i = 0; i < ptBlocSz; i++)
     //     printf("ciphertext %d: %lx\n", i, ciphertext[i]);
 
     if (hashByteSz)
@@ -428,26 +422,28 @@ static Mem_8bits        *des_decryption(t_des *des, Mem_8bits *pt, Long_64bits p
 
 static Mem_8bits        *des_encryption(t_des *des, Mem_8bits *pt, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags flags)
 {
-    // ptSz is the count of 64-bits bloc (Padding: Add one bloc if the lastest is full)
-    int         ptSz = (ptByteSz + (flags & nopad ? LONG64_byteSz - 1 : LONG64_byteSz)) / LONG64_byteSz;
-    Long_64bits ciphertext[ptSz];
+    // ptBlocSz is the count of 64-bits bloc (Padding: Add one bloc if the lastest is full)
+    int         ptBlocSz = (ptByteSz + (flags & nopad ? LONG64_byteSz - 1 : LONG64_byteSz)) / LONG64_byteSz;
+    Long_64bits ciphertext[ptBlocSz];
     Long_64bits *plaintext = (Long_64bits *)pt;
     Long_64bits bloc;
 
     if (flags & nopad && ptByteSz % 8)
-    {
-        ft_putstderr("Data not multiple of block length (8 bytes).\n");
-        freexit(EXIT_FAILURE);
-    }
-    // printf("\n- DES ECRYPTION -\nptByteSz: %ld\tptSz: %d\n", ptByteSz, ptSz);
-    for (int i = 0; i < ptSz; i++)
+        ft_ssl_error("Data not multiple of block length (8 bytes).\n");
+
+    // fprintf(stderr, "\n- DES ENCRYPTION -\nptByteSz: %ld\tptBlocSz: %d\n", ptByteSz, ptBlocSz);
+    for (int i = 0; i < ptBlocSz; i++)
     {
         bloc = *plaintext;
         // printf("str plaintext: >%s<\n", (Mem_8bits *)plaintext);
 
         // Padding with number of missing bytes
-        if (i == ptSz - 1)
-            bloc = des_padding((Mem_8bits *)&bloc, (ptByteSz % LONG64_byteSz == 0) ? LONG64_byteSz : ptByteSz % LONG64_byteSz);
+        if (i == ptBlocSz - 1)
+            bloc = des_padding((Mem_8bits *)&bloc, ptByteSz % LONG64_byteSz);
+            // bloc = des_padding((Mem_8bits *)&bloc,\
+            //     (ptByteSz % LONG64_byteSz == 0) ?\
+            //     LONG64_byteSz :\
+            //     ptByteSz % LONG64_byteSz);
 
         // printf("\nhex vector: %lx\n", i ? ciphertext[i - 1] : des->vector);
         // printf("hex   bloc: %lx\n", bloc);
@@ -475,16 +471,16 @@ static Mem_8bits        *des_encryption(t_des *des, Mem_8bits *pt, Long_64bits p
         plaintext++;
     }
 
-    // for (int i = 0; i < ptSz; i++)
+    // for (int i = 0; i < ptBlocSz; i++)
     //     dprintf(stderr, "ciphertext %d: %lx\n", i, ciphertext[i]);
 
     // Restore right endianness order
-    // for (int i = 0; i < ptSz; i++)
+    // for (int i = 0; i < ptBlocSz; i++)
     //     endianReverse((Mem_8bits *)(ciphertext + i), LONG64_byteSz);
 
     if (hashByteSz)
-        *hashByteSz = ptSz * LONG64_byteSz;
-    return ft_memdup((Mem_8bits *)ciphertext, ptSz * LONG64_byteSz);
+        *hashByteSz = ptBlocSz * LONG64_byteSz;
+    return ft_memdup((Mem_8bits *)ciphertext, ptBlocSz * LONG64_byteSz);
 }
 
 Mem_8bits               *des(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way)

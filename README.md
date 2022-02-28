@@ -5,9 +5,11 @@ Recode a part of **openssl** library, and additionnal features, **from scratch**
 
 `usage: ./ft_ssl command [files] [flags]`
 
-**No C libraries used.**
+To launch all unitests script:  
+`make test`
 
-The only externals functions:
+**No C libraries used.**  
+The only externals functions:  
 
     open()  
     close()  
@@ -23,7 +25,7 @@ COMMANDS
 ===
 
 "help" can be pass as command to print commands summary.  
-**Random** exemples with possible flags is given for each commands.  
+**Random** exemples with possible flags is given for each commands. More exemples in unitests folder.  
 
 Message Digest commands
 -
@@ -64,7 +66,7 @@ Standard commands
     `./ft_ssl genrsa | ./ft_ssl rsa -text -check`
 
 * rsautl  
-    `In progress ...`
+    `echo -n "1234" | ./ft_ssl rsautl -inkey PEM_pubkey -pubin -q | ./ft_ssl rsautl -inkey PEM_privkey -d`
 
 
 FLAGS

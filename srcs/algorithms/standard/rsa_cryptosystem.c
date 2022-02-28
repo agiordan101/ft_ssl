@@ -66,22 +66,30 @@ void                rsa_keys_generation(t_rsa *rsa)
 
 void                rsa_parse_key(t_rsa *rsa, e_flags flags)
 {
-    // Parse key in DER format
-    if (rsa->inform == PEM)
-        rsa->der_content = rsa_PEM_keys_parsing(rsa, rsa->keyfile_data, &rsa->keyfile_byteSz, flags);
-    else
+    if (rsa->keyfile_data)
     {
-        rsa_DER_keys_parsing(rsa, rsa->keyfile_data, rsa->keyfile_byteSz, flags);
-        rsa->der_content = ft_memdup(rsa->keyfile_data, rsa->keyfile_byteSz);
+        // fprintf(stderr, "rsa->keyfile_data (len=%d): %s\n", rsa->keyfile_byteSz, rsa->keyfile_data);
+        // Parse key in DER format
+        if (rsa->inform == PEM)
+            rsa->der_content = rsa_PEM_keys_parsing(rsa, rsa->keyfile_data, &rsa->keyfile_byteSz, flags);
+        else
+            rsa->der_content = ft_memdup(rsa_DER_keys_parsing(rsa, rsa->keyfile_data, rsa->keyfile_byteSz, flags), rsa->keyfile_byteSz);
+        // fprintf(stderr, "rsa->der_content(len=%d): %s\n", rsa->keyfile_byteSz, rsa->der_content);
     }
+    else
+        ft_ssl_error("RSA cryptosystem: No keyfile, parsing failed.\n");
 }
 
 inline Long_64bits  rsa_encryption(t_rsa_public_key *pubkey, Long_64bits m)
 {
+    // fprintf(stderr, "plaintext: %lx\n", m);
     if (m >= pubkey->modulus)
     {
-        printf("Encryption can't be made, plaintext > modulus\n");
-        return 0;
+        ft_printHex(m);
+        ft_putstderr("\n");
+        ft_printHex(pubkey->modulus);
+        ft_putstderr("\n");
+        ft_ssl_error("RSA cryptosystem: Encryption can't be made, plaintext > modulus:\n");
     }
     return modular_exp(m, pubkey->enc_exp, pubkey->modulus);
 }
@@ -90,9 +98,11 @@ inline Long_64bits  rsa_decryption(t_rsa_private_key *privkey, Long_64bits c)
 {
     if (c >= privkey->modulus)
     {
-        printf("Decryption can't be made: c is upper than modulus\n");
-        
-        return 0;
+        ft_printHex(c);
+        ft_putstderr("\n");
+        ft_printHex(privkey->modulus);
+        ft_putstderr("\n");
+        ft_ssl_error("RSA cryptosystem: Decryption can't be made: ciphertext > modulus:\n");
     }
     return modular_exp(c, privkey->dec_exp, privkey->modulus);
 }
@@ -101,8 +111,8 @@ int                 rsa_consistency_pubkey(t_rsa_public_key *pubkey)
 {
     if (!pubkey->enc_exp || !pubkey->modulus)
     {
+        ft_putstr("RSA cryptosystem: a Public-Key component is equal to 0 !\n");
         return 0;
-        ft_putstr("RSA key error: a Public-Key component is equal to 0 !\n");
     }
     return 1;
 }

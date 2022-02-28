@@ -52,9 +52,8 @@ char        *ask_password(char *cmd_name, e_flags flags)
         free(secondmsg);
         if (ft_strcmp(password, password2))
         {
-            ft_putstderr("\nVerify failure.\nbad password read.\n");
             free(password2);
-            freexit(EXIT_SUCCESS);
+            ft_ssl_error("Password catching error.\nVerify failure.\nbad password read.\n");
         }
         free(password2);
     }

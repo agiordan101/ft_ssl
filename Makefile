@@ -70,6 +70,6 @@ fclean: clean
 	@echo "[REMOVING \"$(NAME)\"]"
 
 test: all
-	sh unitests_ft_ssl.sh Makefile
+	@sh unitests_ft_ssl.sh Makefile || echo "Unitests script 'unitests_ft_ssl.sh' not found"
 
 re: fclean all

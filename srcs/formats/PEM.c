@@ -31,11 +31,11 @@ static inline int   PEM_private_key_footer(char *file_content, int fileSz)
         1 : 0;
 }
 
-Mem_8bits           *rsa_PEM_keys_parsing(t_rsa *rsa, char *file_content, int *fileSz, e_flags flags)
+Mem_8bits           *rsa_PEM_keys_parsing(t_rsa *rsa, Mem_8bits *file_content, int *fileSz, e_flags keyflags)
 {
     int     der_contentSz = *fileSz;
 
-    if (flags & pubin)
+    if (keyflags & pubin)
     {
         if (PEM_public_key_header(file_content))
             rsa_parsing_keys_error(pubin, PEM, "bad header", -1);
@@ -61,6 +61,6 @@ Mem_8bits           *rsa_PEM_keys_parsing(t_rsa *rsa, char *file_content, int *f
     }
 
     Mem_8bits *der_content = base64(NULL, (Mem_8bits **)&file_content, der_contentSz, (Long_64bits *)fileSz, d);
-    rsa_DER_keys_parsing(rsa, der_content, *fileSz, flags);
+    rsa_DER_keys_parsing(rsa, der_content, *fileSz, keyflags);
     return der_content;
 }

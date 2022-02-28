@@ -52,8 +52,16 @@ Mem_8bits           *rsa(void *command_data, Mem_8bits **plaintext, Long_64bits 
 
     if (flags & pubin)
     {
+        if (flags & check)
+            ft_ssl_error("Only private keys can be checked.\n");
         if (flags & text)
             print_pubkey_components(&rsa_data->pubkey);
+        if (flags & modulus)
+        {
+            ft_putstr("Modulus=");
+            _ft_printHex(rsa_data->pubkey.modulus, LONG64_byteSz, HEXABASE_upp, 0);
+            ft_putstr("\n");
+        }
     }
     else
     {
@@ -65,17 +73,17 @@ Mem_8bits           *rsa(void *command_data, Mem_8bits **plaintext, Long_64bits 
             rsa_data->pubkey.enc_exp = rsa_data->privkey.enc_exp;
             rsa_data->pubkey.modulus = rsa_data->privkey.modulus;
             free(rsa_data->der_content);
-            rsa_data->der_content = DER_generate_public_key(&rsa_data->pubkey, &ptByteSz);
+            rsa_data->der_content = DER_generate_public_key(&rsa_data->pubkey, &rsa_data->keyfile_byteSz);
         }
+        if (flags & modulus)
+        {
+            ft_putstr("Modulus=");
+            _ft_printHex(rsa_data->privkey.modulus, LONG64_byteSz, HEXABASE_upp, 0);
+            ft_putstr("\n");
+        }
+        if (flags & check && rsa_consistency_privkey(&rsa_data->privkey))
+            ft_putstr("RSA key ok\n");
     }
-    if (flags & modulus)
-    {
-        ft_putstr("Modulus=");
-        _ft_printHex(flags & pubin ? rsa_data->pubkey.modulus : rsa_data->privkey.modulus, LONG64_byteSz, HEXABASE_upp, 0);
-        ft_putstr("\n");
-    }
-    if (flags & check && rsa_consistency_privkey(&rsa_data->privkey))
-        ft_putstr("RSA key ok\n");
 
     // Add base64 encryption after rsa command to create PEM form
     if (rsa_data->outform == PEM && ~ssl.flags & encout)
@@ -98,6 +106,8 @@ Mem_8bits           *rsa(void *command_data, Mem_8bits **plaintext, Long_64bits 
     // fprintf(stderr, "rsa_data->privkey.crt_dmq1: %lu\n", rsa_data->privkey.crt_dmq1);
     // fprintf(stderr, "rsa_data->privkey.crt_iqmp: %lu\n", rsa_data->privkey.crt_iqmp);
     if (hashByteSz)
-        *hashByteSz = ptByteSz;
+        *hashByteSz = rsa_data->keyfile_byteSz;
+    // fprintf(stderr, "*hashByteSz: %ld\n", *hashByteSz);
+    // fprintf(stderr, "ptByteSz: %ld\n", ptByteSz);
     return rsa_data->der_content;
 }

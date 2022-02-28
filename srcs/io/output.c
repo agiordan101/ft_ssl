@@ -63,12 +63,13 @@ void    genprime_output(t_hash *hash)
 {
     ft_putstr(ssl.command.command_title);
     hash_output(hash);
-    // ft_putstr(hash->hash);
 }
 
 void    rsa_output(t_hash *hash)
 {
-    if (~ssl.flags & noout)
+    if (ssl.command.command & RSAUTL)
+        hash_output(hash);
+    else if (~ssl.flags & noout)
     {
         ft_putstderr("writing RSA key\n");
         if (((t_rsa *)ssl.command.command_data)->outform == PEM)

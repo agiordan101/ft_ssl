@@ -9,23 +9,22 @@ Mem_8bits           *rsautl(void *command_data, Mem_8bits **plaintext, Long_64bi
     Long_64bits ciphertext;
     int         _hashByteSz;
 
+    if (~flags & inkey)
+        ft_ssl_error("No keyfile specified.\n");
+
     rsa_parse_key(rsa, flags);
     if (flags & e)
     {
         if (!rsa_consistency_pubkey(&rsa->pubkey))
-        {
-            ft_putstr("./ft_ssl: RSA encryption: RSA Public-Key provided is not valid.");
-            freexit(EXIT_SUCCESS);
-        }
+            ft_ssl_error("encryption: RSA Public-Key provided is not valid.\n");
+
         ciphertext = rsa_encryption(&rsa->pubkey, *((Long_64bits *)*plaintext));
     }
     else
     {
         if (!rsa_consistency_privkey(&rsa->privkey))
-        {
-            ft_putstr("./ft_ssl: RSA decryption: RSA Private-Key provided is not valid.");
-            freexit(EXIT_SUCCESS);
-        }
+            ft_ssl_error("decryption: RSA Private-Key provided is not valid.\n");
+
         ciphertext = rsa_decryption(&rsa->privkey, *((Long_64bits *)*plaintext));
     }
 

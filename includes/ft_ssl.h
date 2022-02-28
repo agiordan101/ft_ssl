@@ -111,7 +111,7 @@ typedef enum    command {
 # define STANDARDS              (GENRSA + RSA + RSAUTL)
 
 # define HASHING_COMMANDS       (MD + CIPHERS + RSAUTL)
-# define THASHNEED_COMMANDS     (HASHING_COMMANDS + ISPRIME + RSA + RSAUTL)
+# define THASHNEED_COMMANDS     (HASHING_COMMANDS + ISPRIME + RSA)
 # define EXECONES_COMMANDS      (GENPRIME + GENRSA)
 
 typedef struct  s_command {
@@ -155,6 +155,8 @@ void        print_global_usage();
 void        print_commands();
 void        print_command_usage(e_command cmd);
 void        freexit(int failure);
+
+void        ft_ssl_error(char *errormsg);
 
 void        open_failed(char *errormsg, char *file);
 void        write_failed(char *errormsg, int fd);
@@ -349,7 +351,7 @@ typedef struct  s_des
 
 Mem_8bits   *des(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
 Long_64bits des_padding(Mem_8bits *bloc, Long_64bits blocSz);
-void        des_unpadding(Long_64bits *lastbloc, int *ptSz);
+void        des_unpadding(Long_64bits *lastbloc, int *ptBlocSz);
 void        des_P_flag_output(t_des *des_data);
 
 
@@ -470,8 +472,8 @@ Long_64bits rsa_decryption(t_rsa_private_key *privkey, Long_64bits ciphertext);
 int         rsa_consistency_pubkey(t_rsa_public_key *pubkey);
 int         rsa_consistency_privkey(t_rsa_private_key *privkey);
 
-Mem_8bits   *rsa_PEM_keys_parsing(t_rsa *rsa, char *file_content, int *fileSz, e_flags flags);
-void        rsa_DER_keys_parsing(t_rsa *rsa, Mem_8bits *mem, int byteSz, e_flags keyflag);
+Mem_8bits   *rsa_PEM_keys_parsing(t_rsa *rsa, Mem_8bits *file_content, int *fileSz, e_flags keyflags);
+Mem_8bits   *rsa_DER_keys_parsing(t_rsa *rsa, Mem_8bits *file_content, int fileSz, e_flags keyflag);
 
 /*
     DER format Data --------------------------------------
@@ -501,8 +503,8 @@ typedef struct  s_dertag
     int         total_length;
 }               t_dertag;
 
-Mem_8bits           *DER_generate_public_key(t_rsa_public_key *pubkey, Long_64bits *hashByteSz);
-Mem_8bits           *DER_generate_private_key(t_rsa_private_key *privkey, Long_64bits *hashByteSz);
+Mem_8bits           *DER_generate_public_key(t_rsa_public_key *pubkey, int *hashByteSz);
+Mem_8bits           *DER_generate_private_key(t_rsa_private_key *privkey, int *hashByteSz);
 
 
 /*
