@@ -5,8 +5,8 @@ Recode a part of **openssl** library, and additionnal features, **from scratch**
 
 `usage: ./ft_ssl command [files] [flags]`
 
-To launch all unitests script:  
-`make test`
+A lot of example can be found in *unitests* folder, to launch all these unitests script:  
+    `make test`
 
 **No C libraries used.**  
 The only externals functions:  
