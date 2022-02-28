@@ -5,7 +5,8 @@ Recode a part of **openssl** library, and additionnal features, **from scratch**
 
 `usage: ./ft_ssl command [files] [flags]`
 
-A lot of example can be found in *unitests* folder, to launch all these unitests script:  
+A lot of example can be found in *unitests* folder.  
+To launch all these unitests script, type:  
     `make test`
 
 **No C libraries used.**  
@@ -117,7 +118,7 @@ Only RSA cryptosystem flags
     -rand           a file containing random data used to seed the random rsa generator
     
     Only rsautl flag:
-        -hexdump    Hex dump output
+        -inkey      send a file as input key
 
 Only genprime flags
 -

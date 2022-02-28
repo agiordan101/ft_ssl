@@ -67,9 +67,10 @@ void    genprime_output(t_hash *hash)
 
 void    rsa_output(t_hash *hash)
 {
-    if (ssl.command.command & RSAUTL)
-        hash_output(hash);
-    else if (~ssl.flags & noout)
+    // if (ssl.command.command & RSAUTL)
+    //     hash_output(hash);
+    // else if (~ssl.flags & noout)
+    if (~ssl.flags & noout)
     {
         ft_putstderr("writing RSA key\n");
         if (((t_rsa *)ssl.command.command_data)->outform == PEM)
@@ -123,11 +124,11 @@ void    output_hash_based_on_flags(t_hash *hash)
 {
     if (ssl.flags & q && ssl.flags & p && hash->stdin)
         stdin_quiet_output(hash);
-    else if (ssl.flags & q)
+    else if (ssl.flags & q) // Before commands output
         hash_output(hash);
     else if (ssl.command.command & GENPRIME)
         genprime_output(hash);
-    else if (ssl.command.command & STANDARDS)
+    else if (ssl.command.command & (GENRSA + RSA))
         rsa_output(hash);
     else if (hash->stdin && ssl.command.command & MD)
         stdin_output(hash);

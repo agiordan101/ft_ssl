@@ -19,8 +19,9 @@ void    des_P_flag_output(t_des *des_data)
 }
 
 
-
-
+/*
+    Debug functions are following, not used in this project    -----------------------------------------
+*/
 
 
 // Debug function, not used in this project

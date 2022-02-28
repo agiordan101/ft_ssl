@@ -1,7 +1,6 @@
 NAME		=	ft_ssl
 
 CC			=	gcc
-# CC			=	gcc -std=gnu11
 CFLAGS		+=	-O3
 
 INC_PATH	=	./includes/
@@ -12,16 +11,14 @@ SRC_PATH	=	./srcs/
 SRC			=	$(NAME).c \
 				t_hash.c \
 				io/parsing.c \
-				io/padding.c \
 				io/usages.c \
 				io/errors.c \
 				io/output.c \
 				io/verbose.c \
 				utils/libft.c \
-				formats/DER.c \
-				formats/PEM.c \
 				calculations/maths.c \
 				calculations/bitwise.c \
+				algorithms/padding.c \
 				algorithms/prime.c \
 				algorithms/pbkdf2.c \
 				algorithms/md/sha256.c \
@@ -31,7 +28,9 @@ SRC			=	$(NAME).c \
 				algorithms/standard/rsa.c \
 				algorithms/standard/genrsa.c \
 				algorithms/standard/rsautl.c \
-				algorithms/standard/rsa_cryptosystem.c
+				algorithms/standard/rsa_cryptosystem.c \
+				algorithms/standard/formats/DER.c \
+				algorithms/standard/formats/PEM.c
 
 BIN_PATH	=	./bins/
 BIN			=	$(SRC:.c=.o)
@@ -55,11 +54,11 @@ $(BIN_PATH)%.o: $(SRC_PATH)%.c $(INCS)
 dirs:
 	@mkdir -p $(BIN_PATH)/io || true
 	@mkdir -p $(BIN_PATH)/utils || true
-	@mkdir -p $(BIN_PATH)/formats || true
 	@mkdir -p $(BIN_PATH)/calculations || true
 	@mkdir -p $(BIN_PATH)/algorithms/md || true
 	@mkdir -p $(BIN_PATH)/algorithms/ciphers || true
 	@mkdir -p $(BIN_PATH)/algorithms/standard || true
+	@mkdir -p $(BIN_PATH)/algorithms/standard/formats || true
 
 clean:
 	@rm -rf $(BIN_PATH)

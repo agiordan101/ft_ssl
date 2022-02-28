@@ -50,26 +50,6 @@ void        md_padding(Mem_8bits **data, Long_64bits *byteSz, char reverseByteSz
     *byteSz = extend_byteSz;
 }
 
-// Long_64bits des_padding(Mem_8bits *bloc, Long_64bits blocByteSz)
-// {
-//     Mem_8bits   newbloc[LONG64_byteSz];
-//     ft_bzero(newbloc, LONG64_byteSz);
-//     int         missing_bytes;
-//     int         i = -1;
-
-//     fprintf(stderr, "bloc (byteSz=%d): %lx\n", blocByteSz, bloc);
-//     // Copy 
-//     while (++i < blocByteSz)
-//         newbloc[i] = bloc[i];
-//     missing_bytes = 8 - i;
-//     fprintf(stderr, "missing_bytes: %d\n", missing_bytes);
-//     fprintf(stderr, "newbloc: %lx\n", *((Long_64bits *)newbloc));
-//     while (i < LONG64_byteSz)
-//         newbloc[i++] = missing_bytes;
-//     // printf("newbloc: %lx\n", *((Long_64bits *)newbloc));
-//     return *((Long_64bits *)newbloc);
-// }
-
 Long_64bits des_padding(Mem_8bits *bloc, Long_64bits blocByteSz)
 {
     Mem_8bits   newbloc[LONG64_byteSz];

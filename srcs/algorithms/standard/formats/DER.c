@@ -1,22 +1,11 @@
 # include "ft_ssl.h"
 
-// Unused in ft_ssl project
-static void        print_tag(t_dertag *tag)
-{
-    fprintf(stderr, "\ntag->tag_number: %x\n", tag->tag_number);
-    fprintf(stderr, "tag->length_octets_number: %x\n", tag->length_octets_number);
-    fprintf(stderr, "tag->header_length: %x\n", tag->header_length);
-    fprintf(stderr, "tag->content_length: %x\n", tag->content_length);
-    fprintf(stderr, "tag->total_length: %x\n", tag->total_length);
-}
-
 /*        
     RSA keys parsing with DER format
 */
 
 static Long_64bits DER_tag_integer_parsing(Mem_8bits *mem, t_dertag *tag)
 {
-    // print_tag(tag);
     if (!*(mem + tag->header_length))       // Handle possible leading zero (00 byte) before INTEGERS tag
     {
         mem++;
@@ -105,10 +94,7 @@ static void        DER_read_key(Mem_8bits *mem, int byteSz, Long_64bits *integer
             // printf("READ %x / add %x\n", tag.tag_number, tag.header_length);
         }
         else
-        {
-            print_tag(&tag);
             rsa_parsing_keys_error(keyflag & pubin, DER, "Unknow DER tag ", tag.tag_number);
-        }
     }
     if (i < n_int)
         rsa_parsing_keys_error(keyflag & pubin, DER, "Unable to fetch all integers, missing ", n_int - i);
@@ -175,20 +161,14 @@ Mem_8bits          *DER_generate_public_key(t_rsa_public_key *pubkey, int *hashB
     int key_sequence_length = DER_OID_SEQUENCE_length + bit_string_length + 4;  // +4 to add their header length (2 and 2)
     *hashByteSz = key_sequence_length + 2;                                      // +2 to add first header length
 
-    // fprintf(stderr, "*hashByteSz: %d\n", *hashByteSz);
-    // fprintf(stderr, "key_sequence_length: %d\n", key_sequence_length);
-    // fprintf(stderr, "DER_OID_SEQUENCE_length: %ld\n", DER_OID_SEQUENCE_length);
-    // fprintf(stderr, "bit_string_length: %d\n", bit_string_length);
-    // fprintf(stderr, "ints_sequence_length: %d\n", ints_sequence_length);
-    // fprintf(stderr, "modulus_length: %d\n", modulus_length);
-    // fprintf(stderr, "exp_length: %d\n", exp_length);
-    // exit(0);
-
     Mem_8bits DER_pubkey[*hashByteSz];
     ft_bzero(DER_pubkey, *hashByteSz);
 
+    // First tag: sequence of integers
     DER_pubkey[0] = der_sequence;
     DER_pubkey[1] = key_sequence_length;
+
+    // OID value, unique for RSA algorithm
     ft_memcpy(DER_pubkey + 2, DER_OID_SEQUENCE_bytes, DER_OID_SEQUENCE_bytes_byteSz);
 
     DER_pubkey[2 + DER_OID_SEQUENCE_bytes_byteSz] = der_bitstring;
@@ -196,7 +176,8 @@ Mem_8bits          *DER_generate_public_key(t_rsa_public_key *pubkey, int *hashB
     
     DER_pubkey[2 + DER_OID_SEQUENCE_bytes_byteSz + 3] = der_sequence;
     DER_pubkey[2 + DER_OID_SEQUENCE_bytes_byteSz + 3 + 1] = ints_sequence_length;
-    
+
+    // Write modulus
     DER_pubkey[2 + DER_OID_SEQUENCE_bytes_byteSz + 5] = der_integer;
     DER_pubkey[2 + DER_OID_SEQUENCE_bytes_byteSz + 5 + 1] = modulus_length;
     if (modulus_leading_zero)
@@ -204,6 +185,7 @@ Mem_8bits          *DER_generate_public_key(t_rsa_public_key *pubkey, int *hashB
     else
         ft_memcpy(DER_pubkey + 2 + DER_OID_SEQUENCE_bytes_byteSz + 5 + 2, &pubkey->modulus, modulus_length);
 
+    // Write public exponent
     DER_pubkey[2 + DER_OID_SEQUENCE_bytes_byteSz + 7 + modulus_length] = der_integer;
     DER_pubkey[2 + DER_OID_SEQUENCE_bytes_byteSz + 7 + modulus_length + 1] = exp_length;
     ft_memcpy(DER_pubkey + 2 + DER_OID_SEQUENCE_bytes_byteSz + 7 + modulus_length + 2, &pubkey->enc_exp, exp_length);
@@ -237,6 +219,7 @@ Mem_8bits          *DER_generate_private_key(t_rsa_private_key *privkey, int *ha
         0, 0, 0, 0, 0, 0, 0, 0, 0
     };
 
+    // Count byteSz of integers and check there leading zeros
     for (int i = 0; i < RSA_PRIVATE_KEY_INTEGERS_COUNT; i++)
     {
         ints_byteSz[i] = count_bytes(integers[i]);
@@ -262,9 +245,11 @@ Mem_8bits          *DER_generate_private_key(t_rsa_private_key *privkey, int *ha
     Mem_8bits DER_privkey[*hashByteSz];
     ft_bzero(DER_privkey, *hashByteSz);
 
+    // First tag: sequence of integers
     DER_privkey[0] = der_sequence;
     DER_privkey[1] = sequence_byteSz;
 
+    // Concatenate each integers with there headers
     int k = 2;
     for (int i = 0; i < RSA_PRIVATE_KEY_INTEGERS_COUNT; i++)
     {
