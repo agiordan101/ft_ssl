@@ -14,7 +14,6 @@ SRC			=	$(NAME).c \
 				io/usages.c \
 				io/errors.c \
 				io/output.c \
-				io/verbose.c \
 				utils/libft.c \
 				calculations/maths.c \
 				calculations/bitwise.c \
@@ -32,6 +31,8 @@ SRC			=	$(NAME).c \
 				algorithms/standard/formats/DER.c \
 				algorithms/standard/formats/PEM.c
 
+# SRC += io/verbose.c
+
 BIN_PATH	=	./bins/
 BIN			=	$(SRC:.c=.o)
 BINS		=	$(addprefix $(BIN_PATH), $(BIN))
@@ -45,11 +46,12 @@ all: dirs $(NAME)
 $(NAME): $(BINS)
 
 	@$(CC) $(CFLAGS) -o $@ $^ -I $(INC_PATH) -lm
-	@echo "[EXECUTABLE \"$(NAME)\" READY]\n"
+	@echo "\n[\"$(NAME)\" binaries successfully create]"
+	@echo "[Executable \"$(NAME)\" successfully compile]\n"
 
 $(BIN_PATH)%.o: $(SRC_PATH)%.c $(INCS)
 
-	@$(CC) $(CFLAGS) -I $(INC_PATH) -o $@ -c $< && echo " \c"
+	@$(CC) $(CFLAGS) -I $(INC_PATH) -o $@ -c $< && echo "#\c"
 
 dirs:
 	@mkdir -p $(BIN_PATH)/io || true
@@ -62,11 +64,11 @@ dirs:
 
 clean:
 	@rm -rf $(BIN_PATH)
-	@echo "[CLEANING $(NAME) BINARIES]"
+	@echo "[Removing $(NAME) binaries]"
 
 fclean: clean
 	@rm -f $(NAME)
-	@echo "[REMOVING \"$(NAME)\"]"
+	@echo "[Removing \"$(NAME)\" executable]"
 
 test: all
 	@sh unitests_ft_ssl.sh Makefile || echo "Unitests script 'unitests_ft_ssl.sh' not found"

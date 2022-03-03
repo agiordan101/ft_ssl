@@ -352,7 +352,6 @@ typedef struct  s_des
 Mem_8bits   *des(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
 Long_64bits des_padding(Mem_8bits *bloc, Long_64bits blocSz);
 void        des_unpadding(Long_64bits *lastbloc, int *ptBlocSz);
-void        des_P_flag_output(t_des *des_data);
 
 
 /*

@@ -2,22 +2,6 @@
 
 // ---------------------- VERBOSE output ---------------------------
 
-void    des_P_flag_output(t_des *des_data)
-{
-    ssl.fd_out = STDERR; // For ft_printHex function
-    ft_putstrfd(ssl.fd_out, "salt=");
-    ft_printHex(des_data->salt);
-    ft_putstrfd(ssl.fd_out, "\nkey=");
-    ft_printHex(des_data->key);
-    if (ssl.command.command == DESCBC)
-    {
-        ft_putstrfd(ssl.fd_out, "\niv=");
-        ft_printHex(des_data->vector);
-    }
-    ft_putstrfd(ssl.fd_out, "\n");
-    freexit(EXIT_SUCCESS);
-}
-
 
 /*
     Debug functions are following, not used in this project    -----------------------------------------
