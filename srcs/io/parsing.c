@@ -243,97 +243,110 @@ int     param_handler(e_flags flag, char *av_next, int *i)
     return 0;
 }
 
-// e_flags strToFlag(char *str)
-// {
-//     static void *flags_convertion[2] = {
-//         {"-i", i_},
-//         {"-o", o},
-//         {"-P", P_des},
-//         {"-a", a}
-//     };
-
-//     for (int i = 0; i < N_FLAGS; i++)
-//     {
-//         if (!ft_strcmp(flags_convertion[i][0], str))
-//             return flags_convertion[i][1];
-//     }
-// }
-
-e_flags     strToFlag(char *str)
+e_flags strToFlag(char *str)
 {
-    if (!ft_strcmp(str, "-help"))
-        return help;
-    if (!ft_strcmp(str, "-i"))
-        return i_;
-    if (!ft_strcmp(str, "-o"))
-        return o;
-    if (!ft_strcmp(str, "-a"))
-        return a;
-    if (!ft_strcmp(str, "-A"))
-        return A;
-    if (!ft_strcmp(str, "-decin"))
-        return decin;
-    if (!ft_strcmp(str, "-encout"))
-        return encout;
-    if (!ft_strcmp(str, "-q"))
-        return q;
-    if (!ft_strcmp(str, "-r"))
-        return r;
-    if (!ft_strcmp(str, "-d"))
-        return d;
-    if (!ft_strcmp(str, "-e"))
-        return e;
-    if (!ft_strcmp(str, "-passin"))
-        return passin;
-    if (!ft_strcmp(str, "-passout"))
-        return passout;
+    static char     *flags_str[N_FLAGS] = {
+        "-help", "-i", "-o", "-a", "-A", "-decin", "-encout",
+        "-q", "-r", "-d", "-e", "-passin", "-passout",
+        "-P", "-k", "-v", "-nopad", "-iter",
+        "-prob", "-min", "-max", "-rand",
+        "-inform", "-outform", "-check", "-pubin", "-pubout", "-noout", "-text", "-modulus", "-inkey"
+    };
+    static e_flags  flags[N_FLAGS] = {
+        help, i_, o, a, A, decin, encout,
+        q, r, d, e, passin, passout,
+        P_des, k_des, v_des, nopad, pbkdf2_iter,
+        prob, min, max, rand_path,
+        inform, outform, check, pubin, pubout, noout, text, modulus, inkey
+    };
 
-    if (!ft_strcmp(str, "-s"))
-        return DES & (ssl.dec_i_cmd.command | ssl.command.command | ssl.enc_o_cmd.command) ? s_des : s;
-    if (!ft_strcmp(str, "-p"))
-        return DES & (ssl.dec_i_cmd.command | ssl.command.command | ssl.enc_o_cmd.command) ? p_des : p;
-    
-    if (!ft_strcmp(str, "-P"))
-        return P_des;
-    if (!ft_strcmp(str, "-k"))
-        return k_des;
-    if (!ft_strcmp(str, "-v"))
-        return v_des;
-    if (!ft_strcmp(str, "-nopad"))
-        return nopad;
-    if (!ft_strcmp(str, "-iter"))
-        return pbkdf2_iter;
-    
-    if (!ft_strcmp(str, "-prob"))
-        return prob;
-    if (!ft_strcmp(str, "-min"))
-        return min;
-    if (!ft_strcmp(str, "-max"))
-        return max;
-    
-    if (!ft_strcmp(str, "-rand"))
-        return rand_path;
-    
-    if (!ft_strcmp(str, "-inform"))
-        return inform;
-    if (!ft_strcmp(str, "-outform"))
-        return outform;
-    if (!ft_strcmp(str, "-check"))
-        return check;
-    if (!ft_strcmp(str, "-pubin"))
-        return pubin;
-    if (!ft_strcmp(str, "-pubout"))
-        return pubout;
-    if (!ft_strcmp(str, "-noout"))
-        return noout;
-    if (!ft_strcmp(str, "-text"))
-        return text;
-    if (!ft_strcmp(str, "-modulus"))
-        return modulus;
-    if (!ft_strcmp(str, "-inkey"))
-        return inkey;
+    for (int i = 0; i < N_FLAGS; i++)
+    {    
+        if (!ft_strcmp(str, "-s"))
+            return DES & (ssl.dec_i_cmd.command | ssl.command.command | ssl.enc_o_cmd.command) ? s_des : s;
+        if (!ft_strcmp(str, "-p"))
+            return DES & (ssl.dec_i_cmd.command | ssl.command.command | ssl.enc_o_cmd.command) ? p_des : p;   
+        if (!ft_strcmp(str, flags_str[i]))
+            return flags[i];
+    }
     return 0;
 }
+
+// e_flags     strToFlag(char *str)
+// {
+//     if (!ft_strcmp(str, "-help"))
+//         return help;
+//     if (!ft_strcmp(str, "-i"))
+//         return i_;
+//     if (!ft_strcmp(str, "-o"))
+//         return o;
+//     if (!ft_strcmp(str, "-a"))
+//         return a;
+//     if (!ft_strcmp(str, "-A"))
+//         return A;
+//     if (!ft_strcmp(str, "-decin"))
+//         return decin;
+//     if (!ft_strcmp(str, "-encout"))
+//         return encout;
+//     if (!ft_strcmp(str, "-q"))
+//         return q;
+//     if (!ft_strcmp(str, "-r"))
+//         return r;
+//     if (!ft_strcmp(str, "-d"))
+//         return d;
+//     if (!ft_strcmp(str, "-e"))
+//         return e;
+//     if (!ft_strcmp(str, "-passin"))
+//         return passin;
+//     if (!ft_strcmp(str, "-passout"))
+//         return passout;
+
+//     if (!ft_strcmp(str, "-s"))
+//         return DES & (ssl.dec_i_cmd.command | ssl.command.command | ssl.enc_o_cmd.command) ? s_des : s;
+//     if (!ft_strcmp(str, "-p"))
+//         return DES & (ssl.dec_i_cmd.command | ssl.command.command | ssl.enc_o_cmd.command) ? p_des : p;
+    
+//     if (!ft_strcmp(str, "-P"))
+//         return P_des;
+//     if (!ft_strcmp(str, "-k"))
+//         return k_des;
+//     if (!ft_strcmp(str, "-v"))
+//         return v_des;
+//     if (!ft_strcmp(str, "-nopad"))
+//         return nopad;
+//     if (!ft_strcmp(str, "-iter"))
+//         return pbkdf2_iter;
+    
+//     if (!ft_strcmp(str, "-prob"))
+//         return prob;
+//     if (!ft_strcmp(str, "-min"))
+//         return min;
+//     if (!ft_strcmp(str, "-max"))
+//         return max;
+    
+//     if (!ft_strcmp(str, "-rand"))
+//         return rand_path;
+    
+//     if (!ft_strcmp(str, "-inform"))
+//         return inform;
+//     if (!ft_strcmp(str, "-outform"))
+//         return outform;
+//     if (!ft_strcmp(str, "-check"))
+//         return check;
+//     if (!ft_strcmp(str, "-pubin"))
+//         return pubin;
+//     if (!ft_strcmp(str, "-pubout"))
+//         return pubout;
+//     if (!ft_strcmp(str, "-noout"))
+//         return noout;
+//     if (!ft_strcmp(str, "-text"))
+//         return text;
+//     if (!ft_strcmp(str, "-modulus"))
+//         return modulus;
+//     if (!ft_strcmp(str, "-inkey"))
+//         return inkey;
+//     return 0;
+// }
 
 void        flags_handler(int ac, char **av, int i)
 {

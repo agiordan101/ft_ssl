@@ -32,22 +32,22 @@ typedef unsigned long   Long_64bits;
 
 //  FLAGS --------------------------------------------------------
 
-# define N_FLAGS        36
+# define N_FLAGS        35
 
 typedef enum    flags {
     // Global flags
     help=1<<1,
     i_=1<<2, o=1<<3,
     q=1<<4, r=1<<5,
-    decin=1<<6, encout=1<<7,
-    a=1<<8, A=1<<9,
+    a=1<<6, A=1<<7,
+    decin=1<<8, encout=1<<9,
+    passin=1<<25, passout=1<<26,
 
     // All hashing commands
     s=1<<10, p=1<<11,
     
     // Encyption & Decryption commands
     e=1<<12, d=1<<13, 
-    passin=1<<25, passout=1<<26,
 
     // Only des
     p_des=1<<14, s_des=1<<15, k_des=1<<16, v_des=1<<17,
