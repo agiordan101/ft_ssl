@@ -18,12 +18,13 @@ SRC			=	$(NAME).c \
 				calculations/maths.c \
 				calculations/bitwise.c \
 				algorithms/padding.c \
-				algorithms/prime.c \
-				algorithms/pbkdf2.c \
+				algorithms/isprime.c \
+				algorithms/genprime.c \
 				algorithms/md/sha256.c \
 				algorithms/md/md5.c \
 				algorithms/ciphers/des.c \
 				algorithms/ciphers/base64.c \
+				algorithms/ciphers/pbkdf2.c \
 				algorithms/standard/rsa.c \
 				algorithms/standard/genrsa.c \
 				algorithms/standard/rsautl.c \
@@ -46,7 +47,7 @@ all: dirs $(NAME)
 $(NAME): $(BINS)
 
 	@$(CC) $(CFLAGS) -o $@ $^ -I $(INC_PATH) -lm
-	@echo "\n[\"$(NAME)\" binaries successfully create]"
+	@echo "\n[All \"$(NAME)\" binaries successfully create]"
 	@echo "[Executable \"$(NAME)\" successfully compile]\n"
 
 $(BIN_PATH)%.o: $(SRC_PATH)%.c $(INCS)
@@ -72,5 +73,6 @@ fclean: clean
 
 test: all
 	@sh unitests_ft_ssl.sh Makefile || echo "Unitests script 'unitests_ft_ssl.sh' not found"
+	# @sh unitests_ft_ssl.sh ft_ssl || echo "Unitests script 'unitests_ft_ssl.sh' not found"
 
 re: fclean all

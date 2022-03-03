@@ -7,6 +7,9 @@
 
     To do :
 
+        Essayer plusieurs input avec toutes les commandes
+        Créer un test/comparaison openssl -P pour des
+        Protection arguments commands fonctions -> errors.c -> command flag + errormsg
         Selectionner la sortie du dernier \n en fonction des commandes
 
         AJOUUTER LES ... et tout changer ahahh..ah...
@@ -69,7 +72,7 @@ char        *ask_password(char *cmd_name, e_flags flags)
 
 static void    t_command_free(t_command *cmd)
 {
-    if (cmd->command_addr == des && ((t_des *)cmd->command_data)->password)
+    if (cmd->command & DES && ((t_des *)cmd->command_data)->password)
         free(((t_des *)cmd->command_data)->password);
     if (cmd->command_data)
         free(cmd->command_data);
@@ -128,8 +131,6 @@ int     main(int ac, char **av)
     // Encode output
     if (ssl.flags & encout)
         t_hash_encode_output(ssl.hash);
-    // Base64 encode output (Do not encode if command_familly is already base64 in encryption mode)
-    // if (ssl.flags & ao && !(ssl.command.command_addr == base64 && ssl.flags & e))
 
     t_hash_output(ssl.hash);
 

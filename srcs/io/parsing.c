@@ -117,25 +117,31 @@ void    command_handler(t_command *command, char *cmd, e_command mask)
         There are 3 consecutive t_command in ft_ssl
         A mask can be pass to avoid commands
     */
-    static char         *commands_name[N_COMMANDS] = {
-        "md5", "sha256", "base64", "des-ecb", "des-cbc", "genprime", "isprime", "genrsa", "rsa", "rsautl",
+    static char         *cmd_names[N_COMMANDS] = {
+        "md5", "sha256", "base64", "des-ecb", "des-cbc",
+        "genprime", "isprime", "genrsa", "rsa", "rsautl",
     };
     static e_command    commands[N_COMMANDS] = {
-        MD5, SHA256, BASE64, DESECB, DESCBC, GENPRIME, ISPRIME, GENRSA, RSA, RSAUTL
+        MD5, SHA256, BASE64, DESECB, DESCBC,
+        GENPRIME, ISPRIME, GENRSA, RSA, RSAUTL
     };
-    static void         *commands_addr[N_COMMANDS] = {
-        md5, sha256, base64, des, des, genprime, isprime, genrsa, rsa, rsautl
+    static void         *cmd_wrappers[N_COMMANDS] = {
+        cmd_wrapper_md5, cmd_wrapper_sha256, cmd_wrapper_base64, cmd_wrapper_des,
+        cmd_wrapper_des, cmd_wrapper_genprime, cmd_wrapper_isprime,
+        cmd_wrapper_genrsa, cmd_wrapper_rsa, cmd_wrapper_rsautl
     };
-    static char         *commands_title[N_COMMANDS] = {
+    static char         *cmd_titles[N_COMMANDS] = {
         "MD5", "SHA256", "BASE64", "DESECB", "DESCBC",
         "Generating prime number ", "Primality test",
         "Generating RSA keys", "RSA keys visualization", "RSA utilisation"
     };
-    static unsigned long commands_dataSz[N_COMMANDS] = {
-        0, 0, 0, sizeof(t_des), sizeof(t_des), sizeof(t_genprime), sizeof(t_isprime), sizeof(t_rsa), sizeof(t_rsa), sizeof(t_rsa)
+    static unsigned long cmd_dataSz[N_COMMANDS] = {
+        0, 0, 0, sizeof(t_des), sizeof(t_des), sizeof(t_genprime),
+        sizeof(t_isprime), sizeof(t_rsa), sizeof(t_rsa), sizeof(t_rsa)
     };
-    static e_command_flags  commands_flags[N_COMMANDS] = {
-        MD_flags, MD_flags, BASE64_flags, DES_flags, DES_flags, GENPRIME_flags, ISPRIME_flags, GENRSA_flags, RSA_flags, RSAUTL_flags
+    static e_command_flags  cmd_flags[N_COMMANDS] = {
+        MD_flags, MD_flags, BASE64_flags, DES_flags, DES_flags,
+        GENPRIME_flags, ISPRIME_flags, GENRSA_flags, RSA_flags, RSAUTL_flags
     };
     int                 cmd_i = -1;
 
@@ -148,7 +154,7 @@ void    command_handler(t_command *command, char *cmd, e_command mask)
     {
         while (++cmd_i < N_COMMANDS)
             if ((!mask || commands[cmd_i] & mask) &&\
-                !ft_strcmp(cmd, commands_name[cmd_i]))
+                !ft_strcmp(cmd, cmd_names[cmd_i]))
                 break ;
         if (cmd_i == N_COMMANDS)
         {
@@ -159,11 +165,11 @@ void    command_handler(t_command *command, char *cmd, e_command mask)
         }
     }
     command->command = commands[cmd_i];
-    command->command_addr = commands_addr[cmd_i];
-    command->command_title = commands_title[cmd_i];
-    command->command_flags = commands_flags[cmd_i];
-    if (commands_dataSz[cmd_i])
-        command->command_data = ft_memnew(commands_dataSz[cmd_i]);
+    command->command_wrapper = cmd_wrappers[cmd_i];
+    command->command_title = cmd_titles[cmd_i];
+    command->command_flags = cmd_flags[cmd_i];
+    if (cmd_dataSz[cmd_i])
+        command->command_data = ft_memnew(cmd_dataSz[cmd_i]);
 
     if (commands[cmd_i] & DESECB)
         ((t_des *)(command->command_data))->mode = DESECB;
@@ -437,7 +443,7 @@ void    end_parse()
     t_des       *cmd;
 
     for (int i = 0; i < 3; i++)
-        if (commands[i]->command_addr == des)
+        if (commands[i]->command & DES)
         {
             cmd = (t_des *)(commands[i]->command_data);
             cmd->key = ssl.des_flagsdata.key;
@@ -446,11 +452,11 @@ void    end_parse()
             cmd->pbkdf2_iter = ssl.des_flagsdata.pbkdf2_iter;
         }
 
-    if (commands[0]->command_addr == des)
+    if (commands[0]->command & DES)
         ((t_des *)(commands[0]->command_data))->password = ssl.passin ? ssl.passin : ssl.des_flagsdata.password;
-    if (commands[1]->command_addr == des)
+    if (commands[1]->command & DES)
         ((t_des *)(commands[1]->command_data))->password = ssl.des_flagsdata.password;
-    if (commands[2]->command_addr == des)
+    if (commands[2]->command & DES)
         ((t_des *)(commands[2]->command_data))->password = ssl.passout ? ssl.passout : ssl.des_flagsdata.password;
 
     // printf("ssl.des_flagsdata.key: %lu\n", ssl.des_flagsdata.key);

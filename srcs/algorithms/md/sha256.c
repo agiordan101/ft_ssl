@@ -105,7 +105,7 @@ static void hash_chunk(t_sha *sha, Word_32bits *chunk)
     sha->hash[7] += h;
 }
 
-Mem_8bits   *sha256(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way)
+Mem_8bits   *sha256(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz)
 {
     t_sha   sha;
     t_sha   *sha_data = &sha;
@@ -113,7 +113,6 @@ Mem_8bits   *sha256(void *command_data, Mem_8bits **plaintext, Long_64bits ptByt
     md_padding(plaintext, &ptByteSz, 1);
     init_sha(sha_data, *plaintext, ptByteSz);
 
-    // printBits(chunks, CHUNK_byteSz);
     Word_32bits *chunks = (Word_32bits *)sha_data->chunks;
     Word_32bits *chunk = chunks;
     while (chunk < chunks + sha_data->chunksSz / WORD32_byteSz)
@@ -122,11 +121,16 @@ Mem_8bits   *sha256(void *command_data, Mem_8bits **plaintext, Long_64bits ptByt
         chunk += CHUNK_byteSz / WORD32_byteSz;
     }
 
-    (void)way;          // Decryption does not exist
-    (void)command_data; // No data pass in needed
     if (hashByteSz)
         *hashByteSz = SHA256_byteSz;
     return ft_memdup((Mem_8bits *)sha_data->hash, SHA256_byteSz);
+}
+
+Mem_8bits   *cmd_wrapper_sha256(void *cmd_data, Mem_8bits **input, Long_64bits iByteSz, Long_64bits *oByteSz, e_flags flags)
+{
+    (void)flags;        // No flags needed
+    (void)cmd_data;     // No data  needed
+    return sha256(input, iByteSz, oByteSz);
 }
 
 /*

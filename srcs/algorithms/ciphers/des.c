@@ -499,40 +499,42 @@ static Mem_8bits        *des_encryption(t_des *des, Mem_8bits *pt, Long_64bits p
     return ft_memdup((Mem_8bits *)ciphertext, ptBlocSz * LONG64_byteSz);
 }
 
-Mem_8bits               *des(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way)
+Mem_8bits               *des(t_des *des_data, Mem_8bits *input, Long_64bits iByteSz, Long_64bits *oByteSz, e_flags flags)
 {
-    t_des       *des_data = (t_des *)command_data;
-
-    // printf("command_data: %p\n", command_data);
-    if (!command_data || !ptByteSz || !hashByteSz)
+    if (!des_data || !iByteSz || !oByteSz)
     {
-        ft_putstderr("Parameters command_data, ptByteSz and hashByteSz can't be NULL in des() function.\n");
+        ft_putstderr("Parameters des_data, iByteSz and oByteSz can't be NULL in des() function.\n");
         freexit(EXIT_FAILURE);
     }
 
     // Return 1 if magic number is needed (encryption) or seen (decryption)
-    int         magic_number_case = magic_number_in(des_data, *plaintext, way);
+    int         magic_number_case = magic_number_in(des_data, input, flags);
 
     // Parse and initialize data
-    init_vars(des_data, *plaintext, way);
-    if (way & P_des)
+    init_vars(des_data, input, flags);
+    if (flags & P_des)
         des_P_flag_output(des_data);
 
     // Algorithm part
     endianReverse((Mem_8bits *)&des_data->vector, KEY_byteSz); // Do this now to print iv/vector exactly like openssl with P_des flag
-    if (way & e)
+    if (flags & e)
         return magic_number_case ?\
             magic_number_out(
                 des_data,
-                des_encryption(des_data, *plaintext, ptByteSz, hashByteSz, way), //Merge 2 encryption calls
-                hashByteSz
+                des_encryption(des_data, input, iByteSz, oByteSz, flags), //Merge 2 encryption calls
+                oByteSz
             ) :\
-            des_encryption(des_data, *plaintext, ptByteSz, hashByteSz, way);
+            des_encryption(des_data, input, iByteSz, oByteSz, flags);
     else
     {
         set_keys_for_decryption(des_data);
         return magic_number_case ?\
-            des_decryption(des_data, *plaintext + MAGICHEADER_byteSz, ptByteSz - MAGICHEADER_byteSz, hashByteSz) :\
-            des_decryption(des_data, *plaintext, ptByteSz, hashByteSz);
+            des_decryption(des_data, input + MAGICHEADER_byteSz, iByteSz - MAGICHEADER_byteSz, oByteSz) :\
+            des_decryption(des_data, input, iByteSz, oByteSz);
     }
+}
+
+Mem_8bits   *cmd_wrapper_des(void *cmd_data, Mem_8bits **input, Long_64bits iByteSz, Long_64bits *oByteSz, e_flags flags)
+{
+    return des((t_des *)cmd_data, *input, iByteSz, oByteSz, flags);
 }

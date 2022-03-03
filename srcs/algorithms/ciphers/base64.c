@@ -71,7 +71,7 @@ static inline void  split_3to4bytes(Mem_8bits b1, Mem_8bits b2, Mem_8bits b3, Me
     res[3] = b3 & 0b00111111;
 }
 
-static Mem_8bits    *encode(Mem_8bits *plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz)
+static Mem_8bits    *encode(Mem_8bits *plaintext, Long_64bits ptByteSz, Long_64bits *ctByteSz)
 {
     int         hashlen = get_len_encoded(ptByteSz);
     Mem_8bits   bytecode[4];
@@ -118,25 +118,25 @@ static Mem_8bits    *encode(Mem_8bits *plaintext, Long_64bits ptByteSz, Long_64b
         ft_memcpy(hash_tmp, (char *)bytecode, 4);
     }
     // printf("hash end   (len=%d): >%s<\n", hashlen, hash);
-    if (hashByteSz)
-        *hashByteSz = hashlen;
+    if (ctByteSz)
+        *ctByteSz = hashlen;
     return hash;
 }
 
-static Mem_8bits    *decode(Mem_8bits *plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz)
+static Mem_8bits    *decode(Mem_8bits *ciphertext, Long_64bits ctByteSz, Long_64bits *ptByteSz)
 {
-    // printf("plaintext encode (len=%d): >%s<\n", ptByteSz, plaintext);
-    clean_base64(plaintext, &ptByteSz);
-    // printf("plaintext to decode (len=%d):\n>%s<\n", ptByteSz, plaintext);
+    // printf("ciphertext encode (len=%d): >%s<\n", ctByteSz, ciphertext);
+    clean_base64(ciphertext, &ctByteSz);
+    // printf("ciphertext to decode (len=%d):\n>%s<\n", ctByteSz, ciphertext);
 
-    int hashlen = get_len_decoded(plaintext, ptByteSz);
+    int hashlen = get_len_decoded(ciphertext, ctByteSz);
     // printf("hashlen =%d\n", hashlen);
     Mem_8bits   bytecode[4];
     Mem_8bits   *hash = ft_memnew(hashlen);
     Mem_8bits   *hash_tmp = hash;
 
-    Mem_8bits   *pt_end = plaintext + ptByteSz;
-    for (Mem_8bits *pt_tmp = plaintext; pt_tmp < pt_end; pt_tmp += 4)
+    Mem_8bits   *pt_end = ciphertext + ctByteSz;
+    for (Mem_8bits *pt_tmp = ciphertext; pt_tmp < pt_end; pt_tmp += 4)
     {
         for (int i = 0; i < 4; i++)
             bytecode[i] = (pt_tmp[i] == '=') ? 0b0 : base64_to_bin(pt_tmp[i]);
@@ -153,20 +153,22 @@ static Mem_8bits    *decode(Mem_8bits *plaintext, Long_64bits ptByteSz, Long_64b
         // printf("pt_tmp / pt_end: %p / %p\n", pt_tmp, pt_end);
         hash_tmp += 3;
     }
-    if (hashByteSz)
-        *hashByteSz = hashlen;
+    if (ptByteSz)
+        *ptByteSz = hashlen;
     // printf("hash end   (len=%d):\n>%s<\n", hashlen, hash);
     return hash;
 }
 
-Mem_8bits           *base64(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way)
+Mem_8bits           *base64(Mem_8bits *input, Long_64bits iByteSz, Long_64bits *oByteSz, e_flags way)
 {
-    (void)command_data;          // No data pass in needed
-    // printf("plaintext: %s\n", *plaintext);
-
-    // printBits(*plaintext, ptByteSz);
     if (way & e)
-        return encode(*plaintext, ptByteSz, hashByteSz);
+        return encode(input, iByteSz, oByteSz);
     else
-        return decode(*plaintext, ptByteSz, hashByteSz);
+        return decode(input, iByteSz, oByteSz);
+}
+
+Mem_8bits           *cmd_wrapper_base64(void *cmd_data, Mem_8bits **input, Long_64bits iByteSz, Long_64bits *oByteSz, e_flags flags)
+{
+    (void)cmd_data;          // No data needed
+    return base64(*input, iByteSz, oByteSz, flags);
 }

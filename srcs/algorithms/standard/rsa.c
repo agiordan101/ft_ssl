@@ -42,11 +42,10 @@ static inline void  print_privkey_components(t_rsa_private_key *privkey)
     RSA ----------------------------------------------
 */
 
-Mem_8bits           *rsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags flags)
+Mem_8bits           *rsa(t_rsa *rsa_data, Mem_8bits *key, Long_64bits keyByteSz, Long_64bits *oByteSz, e_flags flags)
 {
-    t_rsa       *rsa_data = (t_rsa *)command_data;
-    rsa_data->keyfile_data = *plaintext;
-    rsa_data->keyfile_byteSz = ptByteSz;
+    rsa_data->keyfile_data = key;
+    rsa_data->keyfile_byteSz = keyByteSz;
 
     rsa_parse_key(rsa_data, flags);
 
@@ -92,22 +91,12 @@ Mem_8bits           *rsa(void *command_data, Mem_8bits **plaintext, Long_64bits 
         command_handler(&ssl.enc_o_cmd, "base64", 0);
     }
 
-    //printBits(rsa_data->der_content, *hashByteSz);
-
-    // fprintf(stderr, "rsa_data->pubkey.modulus: %lu\n", rsa_data->pubkey.modulus);
-    // fprintf(stderr, "rsa_data->pubkey.enc_exp: %lu\n", rsa_data->pubkey.enc_exp);
-    
-    // fprintf(stderr, "rsa_data->privkey.enc_exp: %lu\n", rsa_data->privkey.enc_exp);
-    // fprintf(stderr, "rsa_data->privkey.dec_exp: %lu\n", rsa_data->privkey.dec_exp);
-    // fprintf(stderr, "rsa_data->privkey.p: %lu\n", rsa_data->privkey.p);
-    // fprintf(stderr, "rsa_data->privkey.q: %lu\n", rsa_data->privkey.q);
-    // fprintf(stderr, "rsa_data->privkey.modulus: %lu\n", rsa_data->privkey.modulus);
-    // fprintf(stderr, "rsa_data->privkey.crt_dmp1: %lu\n", rsa_data->privkey.crt_dmp1);
-    // fprintf(stderr, "rsa_data->privkey.crt_dmq1: %lu\n", rsa_data->privkey.crt_dmq1);
-    // fprintf(stderr, "rsa_data->privkey.crt_iqmp: %lu\n", rsa_data->privkey.crt_iqmp);
-    if (hashByteSz)
-        *hashByteSz = rsa_data->keyfile_byteSz;
-    // fprintf(stderr, "*hashByteSz: %ld\n", *hashByteSz);
-    // fprintf(stderr, "ptByteSz: %ld\n", ptByteSz);
+    if (oByteSz)
+        *oByteSz = rsa_data->keyfile_byteSz;
     return rsa_data->der_content;
+}
+
+Mem_8bits   *cmd_wrapper_rsa(void *cmd_data, Mem_8bits **input, Long_64bits iByteSz, Long_64bits *oByteSz, e_flags flags)
+{
+    return rsa((t_rsa *)cmd_data, *input, iByteSz, oByteSz, flags);
 }

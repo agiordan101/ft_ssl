@@ -37,8 +37,6 @@ inline void t_hash_decode_inputs(t_hash *hash)
 
     e_flags flags = ssl.flags & e ? ssl.flags - e + d: ssl.flags;  //ssl.flags has d OR e
 
-    // printf("ssl.dec_i_cmd.command_title: %s\n", ssl.dec_i_cmd.command_title);
-    // printf("ssl.dec_i_cmd.command_data: %p\n", ssl.dec_i_cmd.command_data);
     while (hash)
     {
         if (!hash->error)
@@ -46,7 +44,7 @@ inline void t_hash_decode_inputs(t_hash *hash)
             // fprintf(stderr, "Hash(len=%d)= >%s<\n", hash->len, hash->msg);
             tmp = hash->msg;
 
-            hash->msg = ssl.dec_i_cmd.command_addr(
+            hash->msg = ssl.dec_i_cmd.command_wrapper(
                 ssl.dec_i_cmd.command_data,
                 (Mem_8bits **)&tmp,
                 hash->len,
@@ -65,9 +63,6 @@ inline void t_hash_encode_output(t_hash *hash)
     Mem_8bits   *tmp;
     e_flags     flags = ssl.flags & d ? ssl.flags - d + e: ssl.flags;  //ssl.flags has d OR e
 
-    // printf("ssl.enc_o_cmd.command_title: %s\n", ssl.enc_o_cmd.command_title);
-    // printf("ssl.enc_o_cmd.command_data: %p\n", ssl.enc_o_cmd.command_data);
-    // printf("Encode output\n");
     while (hash)
     {
         if (!hash->error)
@@ -76,7 +71,7 @@ inline void t_hash_encode_output(t_hash *hash)
             tmp = hash->hash;
 
             // hash->hash = base64(NULL, &hash->hash, hash->hashByteSz, (Long_64bits *)&hash->hashByteSz, e);
-            hash->hash = ssl.enc_o_cmd.command_addr(
+            hash->hash = ssl.enc_o_cmd.command_wrapper(
                 ssl.enc_o_cmd.command_data,
                 (Mem_8bits **)&tmp,
                 hash->hashByteSz,
@@ -91,9 +86,6 @@ inline void t_hash_encode_output(t_hash *hash)
 
 inline void t_hash_hashing(t_hash *hash)
 {
-    // printf("ssl.command.command_title: %s\n", ssl.command.command_title);
-    // printf("ssl.command.command_data: %p\n", ssl.command.command_data);
-    // printf("HASH\n");
     // EXECONES_COMMANDS commands doesn't need t_hash / any data input. Only one t_hash for printing
     if (ssl.command.command & EXECONES_COMMANDS)
     {
@@ -108,9 +100,8 @@ inline void t_hash_hashing(t_hash *hash)
 
     while (hash)
     {
-        // printf("Hash(len=%d)= >%s<\n", hash->len, hash->msg);
         if (!hash->error)
-            hash->hash = ssl.command.command_addr(
+            hash->hash = ssl.command.command_wrapper(
                 ssl.command.command_data,
                 (Mem_8bits **)&hash->msg,
                 hash->len,

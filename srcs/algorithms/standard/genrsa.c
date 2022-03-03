@@ -1,8 +1,7 @@
 #include "ft_ssl.h"
 
-Mem_8bits   *genrsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way)
+Mem_8bits   *genrsa(t_rsa *rsa_data, Long_64bits *oByteSz, e_flags flags)
 {
-    t_rsa       *rsa_data = (t_rsa *)command_data;
     Mem_8bits   *key;
     Mem_8bits   *tmp_key;
 
@@ -17,12 +16,10 @@ Mem_8bits   *genrsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByt
     ft_putnbrfd(STDERR, rsa_data->pubkey.enc_exp);
     ft_putstderr("\n");
 
-    // fprintf(stderr, "modulus: %lu\n", rsa_data->privkey.modulus);
-
-    if (way & pubout)
-        key = DER_generate_public_key(&rsa_data->pubkey, (int *)hashByteSz);
+    if (flags & pubout)
+        key = DER_generate_public_key(&rsa_data->pubkey, (int *)oByteSz);
     else
-        key = DER_generate_private_key(&rsa_data->privkey, (int *)hashByteSz);
+        key = DER_generate_private_key(&rsa_data->privkey, (int *)oByteSz);
     
     // Add base64 encryption after genrsa command for PEM form
     if (rsa_data->outform == PEM && ~ssl.flags & encout)
@@ -31,8 +28,12 @@ Mem_8bits   *genrsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByt
         command_handler(&ssl.enc_o_cmd, "base64", 0);
     }
 
-    (void **)plaintext;
-    (void)ptByteSz;
-    (void)way;
     return key;
+}
+
+Mem_8bits   *cmd_wrapper_genrsa(void *cmd_data, Mem_8bits **input, Long_64bits iByteSz, Long_64bits *oByteSz, e_flags flags)
+{
+    (void)input;
+    (void)iByteSz;
+    return genrsa((t_rsa *)cmd_data, oByteSz, flags);
 }

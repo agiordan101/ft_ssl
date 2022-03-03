@@ -77,7 +77,7 @@ static void hash_chunk(t_md5 *md5, Word_32bits *chunk)
     md5->hash[3] += d;
 }
 
-Mem_8bits   *md5(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way)
+Mem_8bits   *md5(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz)
 {
     t_md5   md5;
     t_md5   *md5_data = &md5;
@@ -97,9 +97,14 @@ Mem_8bits   *md5(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz
     for (int i = 0; i < MD5_wordSz; i++)
         endianReverse((Mem_8bits *)(md5_data->hash + i), WORD32_byteSz);
 
-    (void)way;          // Decryption does not exist
-    (void)command_data; // No data pass in needed
     if (hashByteSz)
         *hashByteSz = MD5_byteSz;
     return ft_memdup((Mem_8bits *)md5_data->hash, MD5_byteSz);
+}
+
+Mem_8bits   *cmd_wrapper_md5(void *cmd_data, Mem_8bits **input, Long_64bits iByteSz, Long_64bits *oByteSz, e_flags flags)
+{
+    (void)flags;          // No flags needed
+    (void)cmd_data;       // No data  needed
+    return md5(input, iByteSz, oByteSz);
 }

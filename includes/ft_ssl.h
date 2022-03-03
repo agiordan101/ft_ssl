@@ -118,8 +118,7 @@ typedef struct  s_command {
     e_command       command;
     e_command_flags command_flags;
     char            *command_title;
-    // Mem_8bits       *(*command_addr)(Mem_8bits **plaintext, ...);
-    Mem_8bits       *(*command_addr)(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
+    Mem_8bits       *(*command_wrapper)(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
     void            *command_data;
 }               t_command;
 
@@ -281,7 +280,9 @@ typedef struct  s_md5
     Word_32bits hash[MD5_wordSz];
 }               t_md5;
 
-Mem_8bits   *md5(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
+Mem_8bits   *md5(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz);
+Mem_8bits   *cmd_wrapper_md5(void *cmd_data, Mem_8bits **input, Long_64bits iByteSz, Long_64bits *oByteSz, e_flags flags);
+
 void        md5_t_hash(t_hash *hash);
 
 
@@ -301,7 +302,9 @@ typedef struct  s_sha
     Word_32bits hash[SHA256_wordSz];
 }               t_sha;
 
-Mem_8bits   *sha256(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
+Mem_8bits   *sha256(Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz);
+Mem_8bits   *cmd_wrapper_sha256(void *cmd_data, Mem_8bits **input, Long_64bits iByteSz, Long_64bits *oByteSz, e_flags flags);
+
 void        sha256_xor_8bits(Mem_8bits *sha1, Mem_8bits *sha2, Mem_8bits **result);
 
 
@@ -323,9 +326,10 @@ typedef unsigned long   Key_64bits;
     BASE64 Data --------------------------------------
 */
 
-# define    BASE64_BASE  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+Mem_8bits   *base64(Mem_8bits *input, Long_64bits iByteSz, Long_64bits *oByteSz, e_flags way);
+Mem_8bits   *cmd_wrapper_base64(void *cmd_data, Mem_8bits **input, Long_64bits iByteSz, Long_64bits *oByteSz, e_flags flags);
 
-Mem_8bits   *base64(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
+# define    BASE64_BASE  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
 
 /*
@@ -349,7 +353,9 @@ typedef struct  s_des
     int         pbkdf2_iter;
 }               t_des;
 
-Mem_8bits   *des(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
+Mem_8bits   *des(t_des *des_data, Mem_8bits *input, Long_64bits iByteSz, Long_64bits *oByteSz, e_flags flags);
+Mem_8bits   *cmd_wrapper_des(void *cmd_data, Mem_8bits **input, Long_64bits iByteSz, Long_64bits *oByteSz, e_flags flags);
+
 Long_64bits des_padding(Mem_8bits *bloc, Long_64bits blocSz);
 void        des_unpadding(Long_64bits *lastbloc, int *ptBlocSz);
 
@@ -361,7 +367,6 @@ void        des_unpadding(Long_64bits *lastbloc, int *ptBlocSz);
 # define PBKDF2_iter        10000
 
 Key_64bits  pbkdf2_sha256(Mem_8bits *pwd, Key_64bits salt, int c);
-Mem_8bits   *pbkdf2_sha256_hmac(Mem_8bits *key, int keyByteSz, Mem_8bits *msg, int msgByteSz);
 
 
 
@@ -385,7 +390,9 @@ typedef struct  s_isprime {
     float       prob_requested;
 }               t_isprime;
 
-Mem_8bits   *isprime(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
+Mem_8bits   *isprime(t_isprime *isprime_data, Mem_8bits *input, Long_64bits *oByteSz);
+Mem_8bits   *cmd_wrapper_isprime(void *cmd_data, Mem_8bits **input, Long_64bits iByteSz, Long_64bits *oByteSz, e_flags flags);
+
 int         miller_rabin_primality_test(Long_64bits n, float p, int verbose);
 
 
@@ -398,7 +405,9 @@ typedef struct  s_genprime {
     Long_64bits max;
 }               t_genprime;
 
-Mem_8bits   *genprime(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
+Mem_8bits   *genprime(t_genprime *genprime_data, Long_64bits *oByteSz);
+Mem_8bits   *cmd_wrapper_genprime(void *cmd_data, Mem_8bits **input, Long_64bits iByteSz, Long_64bits *oByteSz, e_flags flags);
+
 Long_64bits prime_generator(Long_64bits min, Long_64bits max, int verbose);
 
 
@@ -460,9 +469,13 @@ typedef struct  s_rsa
 }               t_rsa;
 # define        RSA_PRIVATE_KEY_INTEGERS_COUNT  (sizeof(t_rsa_private_key) / 8)
 
-Mem_8bits   *rsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
-Mem_8bits   *genrsa(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
-Mem_8bits   *rsautl(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags flags);
+Mem_8bits   *genrsa(t_rsa *rsa_data, Long_64bits *oByteSz, e_flags flags);
+Mem_8bits   *rsa(t_rsa *rsa_data, Mem_8bits *key, Long_64bits keyByteSz, Long_64bits *oByteSz, e_flags flags);
+Mem_8bits   *rsautl(t_rsa *rsa_data, Long_64bits input, Long_64bits *oByteSz, e_flags flags);
+
+Mem_8bits   *cmd_wrapper_genrsa(void *cmd_data, Mem_8bits **input, Long_64bits iByteSz, Long_64bits *oByteSz, e_flags flags);
+Mem_8bits   *cmd_wrapper_rsa(void *cmd_data, Mem_8bits **input, Long_64bits iByteSz, Long_64bits *oByteSz, e_flags flags);
+Mem_8bits   *cmd_wrapper_rsautl(void *cmd_data, Mem_8bits **input, Long_64bits iByteSz, Long_64bits *oByteSz, e_flags flags);
 
 void        rsa_keys_generation(t_rsa *rsa);
 void        rsa_parse_key(t_rsa *rsa, e_flags flags);
