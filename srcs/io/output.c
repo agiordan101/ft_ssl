@@ -149,6 +149,6 @@ void    output(t_hash *hash)
         output_hash_based_on_flags(hash);
 
     // Always display '\n'. Except the last one if -q flag is up)
-    if (hash->next || (ssl.command.command & ~STANDARDS && ~ssl.flags & q))
+    if (hash->next || (ssl.command.command & ~RSA_CMDS && ~ssl.flags & q))
         ft_putstr("\n");
 }

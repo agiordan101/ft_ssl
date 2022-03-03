@@ -7,19 +7,14 @@
 
     To do :
 
+        Tester rsautl et genrsa avec encout et decin
+
         Essayer plusieurs input avec toutes les commandes
         Créer un test/comparaison openssl -P pour des
         Protection arguments commands fonctions -> errors.c -> command flag + errormsg
         Selectionner la sortie du dernier \n en fonction des commandes
 
-        AJOUUTER LES ... et tout changer ahahh..ah...
-        Merge rsa_DER_keys_parsing and rsa_PEM_keys_parsing
-
-        Remettre passin et decin pour rsa
-
         base64 + -p output cheum ???????
-
-        Renommer les "way" en un truc plus pertinant pour la command en question
 
         //Leaks ft_stradd_quote ?
         inline keywords pour les prime peut etre et le dossier calculations

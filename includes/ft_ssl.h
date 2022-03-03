@@ -50,8 +50,8 @@ typedef enum    flags {
     e=1<<12, d=1<<13, 
 
     // Only des
-    p_des=1<<14, s_des=1<<15, k_des=1<<16, v_des=1<<17,
-    P_des=1<<18, nopad=1<<19, pbkdf2_iter=1<<20,
+    pass=1<<14, salt=1<<15, k=1<<16, v=1<<17,
+    P=1<<18, nopad=1<<19, pbkdf2_iter=1<<20,
 
     // Only isprime
     prob=1<<21,
@@ -67,15 +67,15 @@ typedef enum    flags {
     inform=1UL<<33, outform=1UL<<34,
     inkey=1UL<<35, // rsault
 }               e_flags;
-# define AVFLAGS        (help + p + q + r + d + e + A + P_des + nopad + check + text + noout + modulus + pubin + pubout)
-# define AVPARAM        (s + i_ + o + decin + encout + k_des + p_des + s_des + v_des + pbkdf2_iter + prob + min + max + rand_path + inform + outform + passin + passout + inkey)
+# define AVFLAGS        (help + p + q + r + d + e + A + P + nopad + check + text + noout + modulus + pubin + pubout)
+# define AVPARAM        (s + i_ + o + decin + encout + k + pass + salt + v + pbkdf2_iter + prob + min + max + rand_path + inform + outform + passin + passout + inkey)
 
 # define GLOBAL_FLAGS_IN        (i_ + decin + passin)
 # define GLOBAL_FLAGS_OUT       (o + encout + passout + a + A)
 # define GLOBAL_FLAGS           (help + GLOBAL_FLAGS_IN + GLOBAL_FLAGS_OUT + q + r)
 # define DATASTRINPUT_FLAGS     (s + p)
 # define ENCDEC                 (e + d)
-# define DES_FLAGS_ONLY         (k_des + p_des + s_des + v_des + P_des + nopad + pbkdf2_iter)
+# define DES_FLAGS_ONLY         (k + pass + salt + v + P + nopad + pbkdf2_iter)
 # define RSA_FLAGS_ONLY         (inform + outform + check + text + noout + modulus + pubin + pubout)
 
 //  COMMAND & FLAGS relationship --------------------------------------------------------
@@ -83,7 +83,8 @@ typedef enum    flags {
 typedef enum    command_flags {
     MD_flags=       GLOBAL_FLAGS + DATASTRINPUT_FLAGS,
     BASE64_flags=   GLOBAL_FLAGS + DATASTRINPUT_FLAGS + ENCDEC,
-    DES_flags=      GLOBAL_FLAGS + DES_FLAGS_ONLY + p + ENCDEC,
+    DES_flags=      GLOBAL_FLAGS + DES_FLAGS_ONLY + ENCDEC,
+    PBKDF2_flags=   GLOBAL_FLAGS + salt + pbkdf2_iter,
     GENPRIME_flags= GLOBAL_FLAGS_OUT + help + q + min + max + rand_path,
     ISPRIME_flags=  GLOBAL_FLAGS + DATASTRINPUT_FLAGS + prob,
     GENRSA_flags=   GLOBAL_FLAGS_OUT + help + rand_path + pubout + outform,
@@ -94,31 +95,29 @@ typedef enum    command_flags {
 
 //  COMMANDS --------------------------------------------------------
 
-# define N_COMMANDS 10
+# define N_COMMANDS 11
 
 typedef enum    command {
-    MD5=1<<1, SHA256=1<<2,
-    BASE64=1, DESECB=1<<3, DESCBC=1<<4,
-    GENPRIME=1<<5, ISPRIME=1<<6,
-    GENRSA=1<<7,
-    RSA=1<<8,
-    RSAUTL=1<<9
+    MD5=1<<1, SHA256=1<<2, BASE64=1<<3,
+    DESECB=1<<4, DESCBC=1<<5, PBKDF2=1<<6,
+    GENPRIME=1<<7, ISPRIME=1<<8,
+    GENRSA=1<<9, RSA=1<<10, RSAUTL=1<<11
 }               e_command;
 # define MD                     (MD5 + SHA256)
 # define DES                    (DESECB + DESCBC)
-# define CIPHERS                (BASE64 + DES)
-# define PRIMES                 (GENPRIME + ISPRIME)
-# define STANDARDS              (GENRSA + RSA + RSAUTL)
+# define RSA_CMDS               (GENRSA + RSA + RSAUTL)
 
-# define HASHING_COMMANDS       (MD + CIPHERS + RSAUTL)
-# define THASHNEED_COMMANDS     (HASHING_COMMANDS + ISPRIME + RSA)
+# define DESDATA_NEED_COMMANDS  (DES + PBKDF2)
+
+# define HASHING_COMMANDS       (MD + BASE64 + DES + RSAUTL)
+# define THASHNEED_COMMANDS     (HASHING_COMMANDS + PBKDF2 + ISPRIME + RSA)
 # define EXECONES_COMMANDS      (GENPRIME + GENRSA)
 
 typedef struct  s_command {
     e_command       command;
     e_command_flags command_flags;
     char            *command_title;
-    Mem_8bits       *(*command_wrapper)(void *command_data, Mem_8bits **plaintext, Long_64bits ptByteSz, Long_64bits *hashByteSz, e_flags way);
+    Mem_8bits       *(*command_wrapper)(void *cmd_data, Mem_8bits **input, Long_64bits iByteSz, Long_64bits *oByteSz, e_flags flags);
     void            *command_data;
 }               t_command;
 
@@ -340,7 +339,7 @@ Mem_8bits   *cmd_wrapper_base64(void *cmd_data, Mem_8bits **input, Long_64bits i
 # define MAGICNUMBER_byteSz (sizeof(MAGICNUMBER) - 1)
 # define MAGICHEADER_byteSz (MAGICNUMBER_byteSz + KEY_byteSz)
 
-typedef struct  s_des
+typedef struct  salt
 {
     e_command   mode;               // Not necessarily related to command
     Mem_8bits   *password;          // Malloced
@@ -366,8 +365,8 @@ void        des_unpadding(Long_64bits *lastbloc, int *ptBlocSz);
 
 # define PBKDF2_iter        10000
 
-Key_64bits  pbkdf2_sha256(Mem_8bits *pwd, Key_64bits salt, int c);
-
+Key_64bits  pbkdf2_sha256(Mem_8bits *pwd, Long_64bits pwdByteSz, Key_64bits salt, int c);
+Mem_8bits   *cmd_wrapper_pbkdf2(void *cmd_data, Mem_8bits **input, Long_64bits iByteSz, Long_64bits *oByteSz, e_flags flags);
 
 
 /*

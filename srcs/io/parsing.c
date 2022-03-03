@@ -118,29 +118,29 @@ void    command_handler(t_command *command, char *cmd, e_command mask)
         A mask can be pass to avoid commands
     */
     static char         *cmd_names[N_COMMANDS] = {
-        "md5", "sha256", "base64", "des-ecb", "des-cbc",
+        "md5", "sha256", "base64", "des-ecb", "des-cbc", "pbkdf2",
         "genprime", "isprime", "genrsa", "rsa", "rsautl",
     };
     static e_command    commands[N_COMMANDS] = {
-        MD5, SHA256, BASE64, DESECB, DESCBC,
+        MD5, SHA256, BASE64, DESECB, DESCBC, PBKDF2,
         GENPRIME, ISPRIME, GENRSA, RSA, RSAUTL
     };
     static void         *cmd_wrappers[N_COMMANDS] = {
         cmd_wrapper_md5, cmd_wrapper_sha256, cmd_wrapper_base64, cmd_wrapper_des,
-        cmd_wrapper_des, cmd_wrapper_genprime, cmd_wrapper_isprime,
+        cmd_wrapper_des, cmd_wrapper_pbkdf2, cmd_wrapper_genprime, cmd_wrapper_isprime,
         cmd_wrapper_genrsa, cmd_wrapper_rsa, cmd_wrapper_rsautl
     };
     static char         *cmd_titles[N_COMMANDS] = {
-        "MD5", "SHA256", "BASE64", "DESECB", "DESCBC",
+        "MD5", "SHA256", "BASE64", "DESECB", "DESCBC", "PBKDF2_SHA256",
         "Generating prime number ", "Primality test",
         "Generating RSA keys", "RSA keys visualization", "RSA utilisation"
     };
     static unsigned long cmd_dataSz[N_COMMANDS] = {
-        0, 0, 0, sizeof(t_des), sizeof(t_des), sizeof(t_genprime),
+        0, 0, 0, sizeof(t_des), sizeof(t_des), sizeof(t_des), sizeof(t_genprime),
         sizeof(t_isprime), sizeof(t_rsa), sizeof(t_rsa), sizeof(t_rsa)
     };
     static e_command_flags  cmd_flags[N_COMMANDS] = {
-        MD_flags, MD_flags, BASE64_flags, DES_flags, DES_flags,
+        MD_flags, MD_flags, BASE64_flags, DES_flags, DES_flags, PBKDF2_flags,
         GENPRIME_flags, ISPRIME_flags, GENRSA_flags, RSA_flags, RSAUTL_flags
     };
     int                 cmd_i = -1;
@@ -190,13 +190,13 @@ int     param_handler(e_flags flag, char *av_next, int *i)
         command_handler(&ssl.enc_o_cmd, ft_lower(av_next), HASHING_COMMANDS);
     else if (flag & s)
         string_handler(NULL, av_next);
-    else if (flag & s_des)
+    else if (flag & salt)
         ssl.des_flagsdata.salt = parse_keys_des(av_next);
-    else if (flag & k_des)
+    else if (flag & k)
         ssl.des_flagsdata.key = parse_keys_des(av_next);
-    else if (flag & v_des)
+    else if (flag & v)
         ssl.des_flagsdata.vector = parse_keys_des(av_next);
-    else if (flag & p_des)
+    else if (flag & pass)
         ssl.des_flagsdata.password = ft_strdup(av_next);
     else if (flag & pbkdf2_iter)
     {
@@ -251,27 +251,31 @@ int     param_handler(e_flags flag, char *av_next, int *i)
 
 e_flags strToFlag(char *str)
 {
-    static char     *flags_str[N_FLAGS] = {
+    static char     *flags_str[N_FLAGS - 4] = {
         "-help", "-i", "-o", "-a", "-A", "-decin", "-encout",
         "-q", "-r", "-d", "-e", "-passin", "-passout",
         "-P", "-k", "-v", "-nopad", "-iter",
         "-prob", "-min", "-max", "-rand",
         "-inform", "-outform", "-check", "-pubin", "-pubout", "-noout", "-text", "-modulus", "-inkey"
     };
-    static e_flags  flags[N_FLAGS] = {
+    static e_flags  flags[N_FLAGS - 4] = {
         help, i_, o, a, A, decin, encout,
         q, r, d, e, passin, passout,
-        P_des, k_des, v_des, nopad, pbkdf2_iter,
+        P, k, v, nopad, pbkdf2_iter,
         prob, min, max, rand_path,
         inform, outform, check, pubin, pubout, noout, text, modulus, inkey
     };
 
-    for (int i = 0; i < N_FLAGS; i++)
-    {    
+    for (int i = 0; i < N_FLAGS - 4; i++)
+    {
+        // fprintf(stderr, "[%d] ?= %s\t--> %ld\n", i, flags_str[i], flags[i]);
         if (!ft_strcmp(str, "-s"))
-            return DES & (ssl.dec_i_cmd.command | ssl.command.command | ssl.enc_o_cmd.command) ? s_des : s;
+        {
+            // fprintf(stderr, "[%d] ?= %s\t--> %ld\n", i, flags_str[i], flags[i]);
+            return DESDATA_NEED_COMMANDS & (ssl.dec_i_cmd.command | ssl.command.command | ssl.enc_o_cmd.command) ? salt : s;
+        }
         if (!ft_strcmp(str, "-p"))
-            return DES & (ssl.dec_i_cmd.command | ssl.command.command | ssl.enc_o_cmd.command) ? p_des : p;   
+            return DESDATA_NEED_COMMANDS & (ssl.dec_i_cmd.command | ssl.command.command | ssl.enc_o_cmd.command) ? pass : p;   
         if (!ft_strcmp(str, flags_str[i]))
             return flags[i];
     }
@@ -284,12 +288,13 @@ void        flags_handler(int ac, char **av, int i)
  
     while (++i < ac)
     {
-        // printf("arg %d: %s\n", i, av[i]);
+        // fprintf(stderr, "arg %d: %s\n", i, av[i]);
         if (av[i][0] == '-')
         {
             flag = strToFlag(av[i]);
 
-            // printf("flag compatible ? %d\n", flag & (ssl.dec_i_cmd.command_flags | ssl.command.command_flags | ssl.enc_o_cmd.command_flags));
+            // fprintf(stderr, "flag = %ld\n", flag);
+            // fprintf(stderr, "flag compatible ? %ld\n", flag & (ssl.dec_i_cmd.command_flags | ssl.command.command_flags | ssl.enc_o_cmd.command_flags));
             if (flag & help)
                 print_command_usage(ssl.command.command);
             else if (flag & (ssl.dec_i_cmd.command_flags | ssl.command.command_flags | ssl.enc_o_cmd.command_flags))
@@ -418,7 +423,7 @@ void    flags_conflicts()
     }
 
     // RSA -> Init PEM | DER forms and Private or Public key type
-    if (ssl.command.command & STANDARDS)
+    if (ssl.command.command & RSA_CMDS)
     {
         e_rsa_form  *inform = &((t_rsa *)ssl.command.command_data)->inform;
         e_rsa_form  *outform = &((t_rsa *)ssl.command.command_data)->outform;
@@ -443,7 +448,7 @@ void    end_parse()
     t_des       *cmd;
 
     for (int i = 0; i < 3; i++)
-        if (commands[i]->command & DES)
+        if (commands[i]->command & DESDATA_NEED_COMMANDS)
         {
             cmd = (t_des *)(commands[i]->command_data);
             cmd->key = ssl.des_flagsdata.key;
@@ -452,11 +457,11 @@ void    end_parse()
             cmd->pbkdf2_iter = ssl.des_flagsdata.pbkdf2_iter;
         }
 
-    if (commands[0]->command & DES)
+    if (commands[0]->command & DESDATA_NEED_COMMANDS)
         ((t_des *)(commands[0]->command_data))->password = ssl.passin ? ssl.passin : ssl.des_flagsdata.password;
-    if (commands[1]->command & DES)
+    if (commands[1]->command & DESDATA_NEED_COMMANDS)
         ((t_des *)(commands[1]->command_data))->password = ssl.des_flagsdata.password;
-    if (commands[2]->command & DES)
+    if (commands[2]->command & DESDATA_NEED_COMMANDS)
         ((t_des *)(commands[2]->command_data))->password = ssl.passout ? ssl.passout : ssl.des_flagsdata.password;
 
     // printf("ssl.des_flagsdata.key: %lu\n", ssl.des_flagsdata.key);

@@ -202,6 +202,7 @@ static void             init_vars(t_des *des, Mem_8bits *plaintext, e_flags flag
         // Password-based key derivation function (PBKDF) using SHA256-HMAC function as pseudo random function (PRF)
         des->key = pbkdf2_sha256(
             des->password,
+            ft_strlen(des->password),
             des->salt,
             des->pbkdf2_iter ?\
                 des->pbkdf2_iter :\
@@ -512,11 +513,11 @@ Mem_8bits               *des(t_des *des_data, Mem_8bits *input, Long_64bits iByt
 
     // Parse and initialize data
     init_vars(des_data, input, flags);
-    if (flags & P_des)
+    if (flags & P)
         des_P_flag_output(des_data);
 
     // Algorithm part
-    endianReverse((Mem_8bits *)&des_data->vector, KEY_byteSz); // Do this now to print iv/vector exactly like openssl with P_des flag
+    endianReverse((Mem_8bits *)&des_data->vector, KEY_byteSz); // Do this now to print iv/vector exactly like openssl with P flag
     if (flags & e)
         return magic_number_case ?\
             magic_number_out(

@@ -100,7 +100,7 @@ static Mem_8bits    *pbkdf2_sha256_prfxors(Mem_8bits *pwd, int pwdByteSz, Key_64
     return sha_xor;
 }
 
-Key_64bits          pbkdf2_sha256(Mem_8bits *pwd, Key_64bits salt, int c)
+Key_64bits          pbkdf2_sha256(Mem_8bits *pwd, Long_64bits pwdByteSz, Key_64bits salt, int c)
 /*
 
     Desired output length: KEY_byteSz = 8 bytes / 64 bits
@@ -128,9 +128,26 @@ Key_64bits          pbkdf2_sha256(Mem_8bits *pwd, Key_64bits salt, int c)
 */
 {
     // T1 = F(Password, Salt, c, i) = U1 ^ U2 ^ ... ^ Uc
-    Mem_8bits *key = pbkdf2_sha256_prfxors(pwd, ft_strlen((char *)pwd), salt, c, 1);
+    Mem_8bits *key = pbkdf2_sha256_prfxors(pwd, pwdByteSz, salt, c, 1);
     endianReverse(key, KEY_byteSz);
 
     // DK = T1 & (1 << 65 - 1)
     return *((Key_64bits *)key);
+}
+
+Mem_8bits       *cmd_wrapper_pbkdf2(void *cmd_data, Mem_8bits **input, Long_64bits iByteSz, Long_64bits *oByteSz, e_flags flags)
+{
+    t_des *des_data = (t_des *)cmd_data;
+    Key_64bits  key = pbkdf2_sha256(
+        *input,
+        ft_strlen(*input),
+        des_data->salt,
+        des_data->pbkdf2_iter
+    );
+
+    (void)iByteSz;
+    (void)flags;
+    if (oByteSz)
+        *oByteSz = KEY_byteSz;
+    return ft_memdup(&key, KEY_byteSz);
 }

@@ -32,15 +32,15 @@ static void     print_flag_usage(e_flags flag)
         ft_putstderr("\t-e\t\tencrypt mode (default mode) (-e has priority over -d)\n");
     else if (flag & d)
         ft_putstderr("\t-d\t\tdecrypt mode\n");
-    else if (flag & p_des)
+    else if (flag & pass)
         ft_putstderr("\t-p\t\tsend the password in hex\t(Override the behavior of global flag -p if any des command is past)\n");
-    else if (flag & s_des)
+    else if (flag & salt)
         ft_putstderr("\t-s\t\tsend the salt in hex\t(Override the behavior of global flag -s if any des command is past)\n");
-    else if (flag & k_des)
+    else if (flag & k)
         ft_putstderr("\t-k\t\tsend the key in hex\n");
-    else if (flag & v_des)
+    else if (flag & v)
         ft_putstderr("\t-v\t\tsend initialization vector in hex\n");
-    else if (flag & P_des)
+    else if (flag & P)
         ft_putstderr("\t-P\t\tprint the vector/key and exit\n");
     else if (flag & nopad)
         ft_putstderr("\t-nopad\t\tdisable standard block padding\n");
@@ -110,10 +110,19 @@ static void     print_des_usage()
     print_command_flags(DES_flags);
 }
 
+static void     print_pbkdf2_usage()
+{
+    ft_putstderr("Usage: ./ft_ssl pbkdf2 [pwd files] [flags]\n");
+    ft_putstderr("Password-Based Key Derivation Function 2\n");
+    ft_putstderr("Generate 64-bit key from password.\n\n");
+    ft_putstderr("Valid flags are:\n");
+    print_command_flags(PBKDF2_flags);
+}
+
 static void     print_genprime_usage()
 {
     ft_putstderr("Usage: ./ft_ssl genprime [flags]\n");
-    ft_putstderr("Generate 64-bits random prime number.\n\n");
+    ft_putstderr("Generate 64-bit random prime number.\n\n");
     ft_putstderr("Valid flags are:\n");
     print_command_flags(GENPRIME_flags);
 }
@@ -121,7 +130,7 @@ static void     print_genprime_usage()
 static void     print_isprime_usage()
 {
     ft_putstderr("Usage: ./ft_ssl isprime [files] [flags]\n");
-    ft_putstderr("Handle 64-bits numbers (up to ~19 digits).\n\n");
+    ft_putstderr("Handle 64-bit numbers (up to ~19 digits).\n\n");
     ft_putstderr("Valid flags are:\n");
     print_command_flags(ISPRIME_flags);
 }
@@ -152,13 +161,14 @@ static void     print_rsautl_usage()
 
 void    print_command_usage(e_command cmd)
 {
-    // Transform to list of function pt
     if (cmd & MD)
         print_md_usage();
     else if (cmd & BASE64)
         print_base64_usage();
     else if (cmd & DES)
         print_des_usage();
+    else if (cmd & PBKDF2)
+        print_pbkdf2_usage();
     else if (cmd & GENPRIME)
         print_genprime_usage();
     else if (cmd & ISPRIME)
