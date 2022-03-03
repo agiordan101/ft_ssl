@@ -113,7 +113,7 @@ static void     print_des_usage()
 static void     print_pbkdf2_usage()
 {
     ft_putstderr("Usage: ./ft_ssl pbkdf2 [pwd files] [flags]\n");
-    ft_putstderr("Password-Based Key Derivation Function 2\n");
+    ft_putstderr("Password-Based Key Derivation Function 2 using HMAC-SHA256\n");
     ft_putstderr("Generate 64-bit key from password.\n\n");
     ft_putstderr("Valid flags are:\n");
     print_command_flags(PBKDF2_flags);
@@ -187,7 +187,7 @@ void    print_commands()
     ft_putstderr("usage: ./ft_ssl <command> [files] [flags]\n");
     ft_putstderr("see './ft_ssl <command> -help' for command details.\n");
     ft_putstderr("\nMessage Digest commands:\n\tmd5\n\tsha256\n");
-    ft_putstderr("\nCipher commands:\n\tbase64\n\tdes\t(Default as des-cbc)\n\tdes-ecb\n\tdes-cbc\n");
+    ft_putstderr("\nCipher commands:\n\tbase64\n\tdes\t(Default as des-cbc)\n\tdes-ecb\n\tdes-cbc\n\tpbkdf2\t(HMAC is computing with sha256)\n");
     ft_putstderr("\nPrime numbers commands:\n\tgenprime\n\tisprime\n");
     ft_putstderr("\nStandard commands:\n\tgenrsa\n\trsa\n\trsautl\n");
     freexit(EXIT_SUCCESS);

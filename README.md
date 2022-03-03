@@ -49,7 +49,11 @@ Cipher commands
 
 * des-ecb  
     `cat Makefile | ./ft_ssl des-ecb -k acbbca`  
-    `./ft_ssl des-ecb Makefile -s 542842e266c5541a -p mybigpassword -iter 666`
+    `./ft_ssl des-ecb Makefile -s 542842e266c5541a -p mybigpwd -iter 666`
+
+* pbkdf2    (HMAC is computing with sha256)  
+    `echo -n "Mybigpwd" | ./ft_ssl pbkdf2 -s 542842e266c5541a -iter 42`
+
 
 Standard commands
 -
@@ -95,15 +99,15 @@ Only ciphers flags
 -
     -e              encrypt mode (default mode) (-e has priority over -d)
     -d              decrypt mode
+    -s          send the salt in hex (Overwrite global -s behavior)
+    -iter       specify the iteration count of PBKDF2
 
     Only DES:
         -k          send the key in hex
-        -s          send the salt in hex (Overwrite global -s behavior)
         -p          send password in ascii (Overwrite global -s behavior)
         -v          send initialization vector in hex
         -P          print the vector/key and exit
         -nopad      disable standard block padding
-        -iter       specify the iteration count of PBKDF2
 
 Only RSA cryptosystem flags
 -
