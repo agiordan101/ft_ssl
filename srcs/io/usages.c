@@ -5,7 +5,7 @@ static void     print_flag_usage(e_flags flag)
     if (flag & help)
         ft_putstderr("\t-help\t\tdisplay this summary and exit\n");
     else if (flag & i_)
-        ft_putstderr("\t-i\t\tinput data as file\n");
+        ft_putstderr("\t-i\t\tinput file\n");
     else if (flag & o)
         ft_putstderr("\t-o\t\toutput file\n");
     else if (flag & a)
@@ -70,6 +70,8 @@ static void     print_flag_usage(e_flags flag)
         ft_putstderr("\t-noout\t\tdon't print key out\n");
     else if (flag & rand_path)
         ft_putstderr("\t-rand\t\ta file containing random data used to seed the random number generator\n");
+    else if (flag & inkey)
+        ft_putstderr("\t-inkey\t\tinput key\n");
     else
     {
         printf("WTFF ?\n");
@@ -110,7 +112,7 @@ static void     print_des_usage()
 
 static void     print_genprime_usage()
 {
-    ft_putstderr("Usage: ./ft_ssl genprime [files] [flags]\n");
+    ft_putstderr("Usage: ./ft_ssl genprime [flags]\n");
     ft_putstderr("Generate 64-bits random prime number.\n\n");
     ft_putstderr("Valid flags are:\n");
     print_command_flags(GENPRIME_flags);
@@ -126,7 +128,7 @@ static void     print_isprime_usage()
 
 static void     print_genrsa_usage()
 {
-    ft_putstderr("Usage: ./ft_ssl genrsa [files] [flags]\n");
+    ft_putstderr("Usage: ./ft_ssl genrsa [flags]\n");
     ft_putstderr("Generating RSA private key, 64 bit long modulus.\n\n");
     ft_putstderr("Valid flags are:\n");
     print_command_flags(GENRSA_flags);
@@ -138,6 +140,14 @@ static void     print_rsa_usage()
     ft_putstderr("RSA keys visualization.\n\n");
     ft_putstderr("Valid flags are:\n");
     print_command_flags(RSA_flags);
+}
+
+static void     print_rsautl_usage()
+{
+    ft_putstderr("Usage: ./ft_ssl rsautl [files] [flags]\n");
+    ft_putstderr("RSA cryptosystem utilisation.\n\n");
+    ft_putstderr("Valid flags are:\n");
+    print_command_flags(RSAUTL_flags);
 }
 
 void    print_command_usage(e_command cmd)
@@ -157,6 +167,8 @@ void    print_command_usage(e_command cmd)
         print_genrsa_usage();
     else if (cmd & RSA)
         print_rsa_usage();
+    else if (cmd & RSAUTL)
+        print_rsautl_usage();
     freexit(EXIT_SUCCESS);
 }
 
@@ -167,7 +179,7 @@ void    print_commands()
     ft_putstderr("\nMessage Digest commands:\n\tmd5\n\tsha256\n");
     ft_putstderr("\nCipher commands:\n\tbase64\n\tdes\t(Default as des-cbc)\n\tdes-ecb\n\tdes-cbc\n");
     ft_putstderr("\nPrime numbers commands:\n\tgenprime\n\tisprime\n");
-    ft_putstderr("\nStandard commands:\n\tgenrsa\n");
+    ft_putstderr("\nStandard commands:\n\tgenrsa\n\trsa\n\trsautl\n");
     freexit(EXIT_SUCCESS);
 }
 
