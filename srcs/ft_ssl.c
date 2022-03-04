@@ -8,24 +8,15 @@
     To do :
 
         Tester rsautl et genrsa avec encout et decin
+        
+        pbkdf2 unitest 
+        Créer un test/comparaison openssl -P pour des
 
         Essayer plusieurs input avec toutes les commandes
-        Créer un test/comparaison openssl -P pour des
-        Protection arguments commands fonctions -> errors.c -> command flag + errormsg
-        Selectionner la sortie du dernier \n en fonction des commandes
-
-        base64 + -p output cheum ???????
-
+        
         //Leaks ft_stradd_quote ?
-        inline keywords pour les prime peut etre et le dossier calculations
-        INTMAXLESS1 enlever le pow
-        Enlever les protection useless dans le parsing
         Gerer les \n dans l'output (pas dans les ft hash)
-        Boucler pour les flags parsing pt sur ft
-        -nosalt             Do not use salt in the KDF
-
-    Crashs :
-
+        Selectionner la sortie du dernier \n en fonction des commandes
 
 */
 
@@ -106,11 +97,8 @@ static void    t_ssl_init(t_ssl *ssl)
 
 int     main(int ac, char **av)
 {
-    int     ret;
-
     t_ssl_init(&ssl);
-    if ((ret = parsing(ac, av)))
-        freexit(ret);
+    parsing(ac, av);
 
     // Set output file descriptor (STDOUT as default)
     if (ssl.flags & o)

@@ -12,9 +12,10 @@ Mem_8bits   *genrsa(t_rsa *rsa_data, Long_64bits *oByteSz, e_flags flags)
 
     rsa_keys_generation(rsa_data);
 
-    ft_putstderr("e is ");
-    ft_putnbrfd(STDERR, rsa_data->pubkey.enc_exp);
-    ft_putstderr("\n");
+    int fd_save = ssl.fd_out;
+    ssl.fd_out = STDERR;
+    print_component("e is ", rsa_data->pubkey.enc_exp);
+    ssl.fd_out = fd_save;
 
     if (flags & pubout)
         key = DER_generate_public_key(&rsa_data->pubkey, (int *)oByteSz);

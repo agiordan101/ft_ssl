@@ -502,12 +502,6 @@ static Mem_8bits        *des_encryption(t_des *des, Mem_8bits *pt, Long_64bits p
 
 Mem_8bits               *des(t_des *des_data, Mem_8bits *input, Long_64bits iByteSz, Long_64bits *oByteSz, e_flags flags)
 {
-    if (!des_data || !iByteSz || !oByteSz)
-    {
-        ft_putstderr("Parameters des_data, iByteSz and oByteSz can't be NULL in des() function.\n");
-        freexit(EXIT_FAILURE);
-    }
-
     // Return 1 if magic number is needed (encryption) or seen (decryption)
     int         magic_number_case = magic_number_in(des_data, input, flags);
 

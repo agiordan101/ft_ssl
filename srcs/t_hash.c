@@ -41,7 +41,6 @@ inline void t_hash_decode_inputs(t_hash *hash)
     {
         if (!hash->error)
         {
-            // fprintf(stderr, "Hash(len=%d)= >%s<\n", hash->len, hash->msg);
             tmp = hash->msg;
 
             hash->msg = ssl.dec_i_cmd.command_wrapper(
@@ -52,8 +51,37 @@ inline void t_hash_decode_inputs(t_hash *hash)
                 flags
             );
             free(tmp);
-            // fprintf(stderr, "Hash(len=%d)= >%s<\n", hash->len, hash->msg);
         }
+        hash = hash->next;
+    }
+}
+
+inline void t_hash_hashing(t_hash *hash)
+{
+    // EXECONES_COMMANDS commands doesn't need t_hash / any data input. Only one t_hash for printing
+    // if (ssl.command.command & EXECONES_COMMANDS)
+    // {
+    //     if (hash)
+    //     {
+    //         t_hash_free(hash->next);
+    //         hash->next = NULL;
+    //     }
+    //     else
+    //         hash = add_thash_front();
+    // }
+    if (ssl.command.command & EXECONES_COMMANDS && !hash)
+        hash = add_thash_front();
+
+    while (hash)
+    {
+        if (!hash->error)
+            hash->hash = ssl.command.command_wrapper(
+                ssl.command.command_data,
+                (Mem_8bits **)&hash->msg,
+                hash->len,
+                (Long_64bits *)&hash->hashByteSz,
+                ssl.flags
+            );
         hash = hash->next;
     }
 }
@@ -67,10 +95,8 @@ inline void t_hash_encode_output(t_hash *hash)
     {
         if (!hash->error)
         {
-            // printf("Hash(len=%d)= >%s<\n", hash->hashByteSz, hash->hash);
             tmp = hash->hash;
 
-            // hash->hash = base64(NULL, &hash->hash, hash->hashByteSz, (Long_64bits *)&hash->hashByteSz, e);
             hash->hash = ssl.enc_o_cmd.command_wrapper(
                 ssl.enc_o_cmd.command_data,
                 (Mem_8bits **)&tmp,
@@ -80,34 +106,6 @@ inline void t_hash_encode_output(t_hash *hash)
             );
             free(tmp);
         }
-        hash = hash->next;
-    }
-}
-
-inline void t_hash_hashing(t_hash *hash)
-{
-    // EXECONES_COMMANDS commands doesn't need t_hash / any data input. Only one t_hash for printing
-    if (ssl.command.command & EXECONES_COMMANDS)
-    {
-        if (hash)
-        {
-            t_hash_free(hash->next);
-            hash->next = NULL;
-        }
-        else
-            hash = add_thash_front();
-    }
-
-    while (hash)
-    {
-        if (!hash->error)
-            hash->hash = ssl.command.command_wrapper(
-                ssl.command.command_data,
-                (Mem_8bits **)&hash->msg,
-                hash->len,
-                (Long_64bits *)&hash->hashByteSz,
-                ssl.flags
-            );
         hash = hash->next;
     }
 }

@@ -10,16 +10,7 @@ inline Word_32bits  rotR(Word_32bits x, Word_32bits r)
     return (x << (32 - r) | x >> r);
 }
 
-Mem_8bits           endianReverseByte(Mem_8bits byte)
-{
-    Mem_8bits tmp = 0;
-
-    for (int i = 0; i < 8; i++)
-        tmp += (128 >> i) * ((byte >> i) & 1);
-    return tmp;
-}
-
-void                endianReverse(Mem_8bits *mem, Long_64bits byteSz)
+inline void         endianReverse(Mem_8bits *mem, Long_64bits byteSz)
 {
     Mem_8bits   tmp[byteSz];
     ft_bzero(tmp, byteSz);
@@ -29,8 +20,7 @@ void                endianReverse(Mem_8bits *mem, Long_64bits byteSz)
         mem[c] = tmp[byteSz - c - 1];
 }
 
-
-Long_64bits     bits_permutations(Long_64bits mem, char *ptable, int bitLen)
+inline Long_64bits  bits_permutations(Long_64bits mem, char *ptable, int bitLen)
 {
     Long_64bits tk = 0;
     for (int i = 0; i < bitLen; i++)
@@ -46,7 +36,7 @@ Long_64bits     bits_permutations(Long_64bits mem, char *ptable, int bitLen)
     return tk;
 }
 
-Long_64bits     _bits_permutations(Long_64bits mem, char *ptable, int bitLen)
+inline Long_64bits  _bits_permutations(Long_64bits mem, char *ptable, int bitLen)
 {
     Long_64bits tk = 0;
     for (int i = 0; i < bitLen; i++)

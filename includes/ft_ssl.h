@@ -21,12 +21,11 @@ typedef unsigned long   Long_64bits;
 # define WORD32_byteSz  sizeof(Word_32bits)      // 4 bytes or 32 bits
 # define LONG64_byteSz  sizeof(Long_64bits)      // 8 bytes or 64 bits
 
-# define ABS(x)         (x >= 0 ? x : -x)
-# define INTMAXLESS1    (Word_32bits)pow(2, 32) - 1
 # define BIG_LONG64     ((Long_64bits)1 << 63) - 1
-# define HEXABASE_low       "0123456789abcdef"
-# define HEXABASE_upp       "0123456789ABCDEF"
 
+# define ABS(x)         (x >= 0 ? x : -x)
+# define HEXABASE_low   "0123456789abcdef"
+# define HEXABASE_upp   "0123456789ABCDEF"
 # define BUFF_SIZE      420
 
 
@@ -143,10 +142,11 @@ typedef struct  s_hash
     struct s_hash *next;
 }               t_hash;
 
-int         parsing(int ac, char **av);
+void        parsing(int ac, char **av);
 void        command_handler(t_command *command, char *cmd, e_command mask);
 char        *ask_password(char *cmd_name, e_flags flags);
 t_hash      *add_thash_front();
+
 void        output(t_hash *hash);
 
 void        print_global_usage();
@@ -155,12 +155,6 @@ void        print_command_usage(e_command cmd);
 void        freexit(int failure);
 
 void        ft_ssl_error(char *errormsg);
-
-void        open_failed(char *errormsg, char *file);
-void        write_failed(char *errormsg, int fd);
-void        read_failed(char *errormsg, int fd);
-void        malloc_failed(char *errormsg);
-
 void        unrecognized_flag(char *flag);
 void        flags_conflicting_error(char *flag1, char *flag2, char *errormsg);
 void        flag_error(char *flag, char *errormsg);
@@ -170,6 +164,11 @@ void        file_not_found(char *file);
 void        rsa_format_error(char *form);
 void        rsa_keys_integer_size_error(int byteSz);
 void        rsa_parsing_keys_error(e_flags privpubin, e_flags inform, char *errormsg, int value);
+
+void        open_failed(char *errormsg, char *file);
+void        write_failed(char *errormsg, int fd);
+void        read_failed(char *errormsg, int fd);
+void        malloc_failed(char *errormsg);
 
 
 /*
@@ -476,6 +475,7 @@ Mem_8bits   *cmd_wrapper_genrsa(void *cmd_data, Mem_8bits **input, Long_64bits i
 Mem_8bits   *cmd_wrapper_rsa(void *cmd_data, Mem_8bits **input, Long_64bits iByteSz, Long_64bits *oByteSz, e_flags flags);
 Mem_8bits   *cmd_wrapper_rsautl(void *cmd_data, Mem_8bits **input, Long_64bits iByteSz, Long_64bits *oByteSz, e_flags flags);
 
+void        print_component(char *msg, Long_64bits n);
 void        rsa_keys_generation(t_rsa *rsa);
 void        rsa_parse_key(t_rsa *rsa, e_flags flags);
 Long_64bits rsa_encryption(t_rsa_public_key *pubkey, Long_64bits m);

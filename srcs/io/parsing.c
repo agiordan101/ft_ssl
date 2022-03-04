@@ -1,6 +1,6 @@
 #include "ft_ssl.h"
 
-t_hash      *add_thash_front()
+t_hash          *add_thash_front()
 {
     t_hash *tmp;
 
@@ -12,7 +12,7 @@ t_hash      *add_thash_front()
     return ssl.hash;
 }
 
-t_hash      *add_thash_back()
+static t_hash   *add_thash_back()
 {
     t_hash *tmp;
     t_hash *node;
@@ -32,7 +32,7 @@ t_hash      *add_thash_back()
     return node;
 }
 
-int     get_file_len(char *file)
+static int      get_file_len(char *file)
 {
     char    buff[BUFF_SIZE];
     int     ret = BUFF_SIZE;
@@ -51,7 +51,7 @@ int     get_file_len(char *file)
     return len;
 }
 
-int     file_handler(char *file, char **content, int *len)
+static int      file_handler(char *file, char **content, int *len)
 {
     int fd;
 
@@ -69,7 +69,7 @@ int     file_handler(char *file, char **content, int *len)
     return 0;
 }
 
-void    file_handler_node(t_hash *node, char *file)
+static void     file_handler_node(t_hash *node, char *file)
 {
 
     if (!node)
@@ -79,7 +79,7 @@ void    file_handler_node(t_hash *node, char *file)
     node->error = file_handler(file, &node->msg, &node->len);
 }
 
-void    string_handler(t_hash *node, char *av_next)
+static void     string_handler(t_hash *node, char *av_next)
 {
     if (!node)
         node = add_thash_back();
@@ -88,7 +88,7 @@ void    string_handler(t_hash *node, char *av_next)
     node->name = ft_stradd_quote(node->msg, node->len);
 }
 
-Key_64bits  parse_keys_des(char *av_next)
+static Key_64bits   parse_keys_des(char *av_next)
 {
     Key_64bits  key = ft_strtoHex(av_next);
     int         str_zero_count = 0;
@@ -110,7 +110,7 @@ Key_64bits  parse_keys_des(char *av_next)
     return key;
 }
 
-void    command_handler(t_command *command, char *cmd, e_command mask)
+void            command_handler(t_command *command, char *cmd, e_command mask)
 {
     /*
         Initialize a t_command with command string past
@@ -178,7 +178,7 @@ void    command_handler(t_command *command, char *cmd, e_command mask)
     // printf("command= %s\n", command->command_title);
 }
 
-int     param_handler(e_flags flag, char *av_next, int *i)
+static void     param_handler(e_flags flag, char *av_next, int *i)
 {
     if (flag & i_)
         file_handler_node(NULL, av_next);
@@ -246,10 +246,9 @@ int     param_handler(e_flags flag, char *av_next, int *i)
             &((t_rsa *)ssl.command.command_data)->keyfile_byteSz
         );
     (*i)++;
-    return 0;
 }
 
-e_flags strToFlag(char *str)
+static e_flags  strToFlag(char *str)
 {
     static char     *flags_str[N_FLAGS - 4] = {
         "-help", "-i", "-o", "-a", "-A", "-decin", "-encout",
@@ -282,7 +281,7 @@ e_flags strToFlag(char *str)
     return 0;
 }
 
-void        flags_handler(int ac, char **av, int i)
+static void     flags_handler(int ac, char **av, int i)
 {
     e_flags flag;
  
@@ -306,7 +305,9 @@ void        flags_handler(int ac, char **av, int i)
             else
                 unrecognized_flag(av[i]);
         }
-        else
+
+        // Limit to 1 node if command is an exec ones command.
+        else if (ssl.command.command & ~EXECONES_COMMANDS || !ssl.hash)
             file_handler_node(NULL, av[i]);
     }
 }
@@ -390,7 +391,7 @@ static void     add_thash_from_stdin()
     }
 }
 
-void    flags_conflicts()
+static void     flags_conflicts()
 {
     // char base64_str[] = "base64";
 
@@ -441,7 +442,7 @@ void    flags_conflicts()
     }
 }
 
-void    end_parse()
+static void     end_parse()
 {
     // DES decryption input part, DES command and DES encryption output part use ssl.des_inputdata to fetch password key salt vector
     t_command   *commands[3] = {&ssl.dec_i_cmd, &ssl.command, &ssl.enc_o_cmd};
@@ -471,7 +472,7 @@ void    end_parse()
     // printf("ssl.des_flagsdata.pbkdf2_iter: %u\n", ssl.des_flagsdata.pbkdf2_iter);
 }
 
-int     parsing(int ac, char **av)
+void     parsing(int ac, char **av)
 {
     char    *cmd;
     int     cmd_len;
@@ -489,8 +490,6 @@ int     parsing(int ac, char **av)
         cmd = ft_strdup(av[1]);
 
     command_handler(&ssl.command, ft_lower(cmd), 0);
-    // printf("ssl.command.command_title: %s\n", ssl.command.command_title);
-    // printf("ssl.command.command_data: %p\n", ssl.command.command_data);
     free(cmd);
     flags_handler(ac, av, i);
 
@@ -502,5 +501,4 @@ int     parsing(int ac, char **av)
 
     flags_conflicts();
     end_parse();
-    return 0;
 }

@@ -18,13 +18,13 @@ SRC			=	$(NAME).c \
 				calculations/maths.c \
 				calculations/bitwise.c \
 				algorithms/padding.c \
-				algorithms/isprime.c \
-				algorithms/genprime.c \
 				algorithms/md/sha256.c \
 				algorithms/md/md5.c \
 				algorithms/ciphers/des.c \
 				algorithms/ciphers/base64.c \
 				algorithms/ciphers/pbkdf2.c \
+				algorithms/standard/genprime.c \
+				algorithms/standard/isprime.c \
 				algorithms/standard/rsa.c \
 				algorithms/standard/genrsa.c \
 				algorithms/standard/rsautl.c \
@@ -75,4 +75,7 @@ test: all
 	@sh unitests_ft_ssl.sh Makefile || echo "Unitests script 'unitests_ft_ssl.sh' not found"
 	# @sh unitests_ft_ssl.sh ft_ssl || echo "Unitests script 'unitests_ft_ssl.sh' not found"
 
-re: fclean all
+re: fclean all  
+
+
+

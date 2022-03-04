@@ -1,14 +1,5 @@
 #include "ft_ssl.h"
 
-static inline void  print_component(char *msg, Long_64bits n)
-{
-    ft_putstr(msg);
-    ft_putnbr(n);
-    ft_putstr(" (0x");
-    _ft_printHex(n, LONG64_byteSz, HEXABASE_low, 0);
-    ft_putstr(")\n");
-}
-
 static inline void  print_pubkey_components(t_rsa_public_key *pubkey)
 {
     ft_putstr("RSA Public-Key: (");

@@ -9,6 +9,15 @@
 
 */
 
+inline void         print_component(char *msg, Long_64bits n)
+{
+    ft_putstr(msg);
+    ft_putnbr(n);
+    ft_putstr(" (0x");
+    _ft_printHex(n, LONG64_byteSz, HEXABASE_low, 0);
+    ft_putstr(")\n");
+}
+
 void                rsa_keys_generation(t_rsa *rsa)
 {
     /*
