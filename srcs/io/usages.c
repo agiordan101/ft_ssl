@@ -188,8 +188,7 @@ void    print_commands()
     ft_putstderr("see './ft_ssl <command> -help' for command details.\n");
     ft_putstderr("\nMessage Digest commands:\n\tmd5\n\tsha256\n");
     ft_putstderr("\nCipher commands:\n\tbase64\n\tdes\t(Default as des-cbc)\n\tdes-ecb\n\tdes-cbc\n\tpbkdf2\t(HMAC is computing with sha256)\n");
-    ft_putstderr("\nPrime numbers commands:\n\tgenprime\n\tisprime\n");
-    ft_putstderr("\nStandard commands:\n\tgenrsa\n\trsa\n\trsautl\n");
+    ft_putstderr("\nStandard commands:\n\tgenprime\n\tisprime\n\tgenrsa\n\trsa\n\trsautl\n");
     freexit(EXIT_SUCCESS);
 }
 

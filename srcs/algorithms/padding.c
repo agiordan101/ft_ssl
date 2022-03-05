@@ -100,35 +100,38 @@ void        des_unpadding(Long_64bits *lastbloc, int *ptByteSz)
 
 // void        des_unpadding(Long_64bits *lastbloc, int *ptByteSz)
 // {
+//     Mem_8bits   validpadd = 1;
 //     Mem_8bits   lastbyte = (*lastbloc >> 56) & 0xff;
 
-//     if (lastbyte > 0x08) // No padding found
+//     fprintf(stderr, "\nlastbloc: %lx\tlastbyte: %x\tptByteSz: %d\n", *lastbloc, lastbyte, *ptByteSz);
+//     if (lastbyte <= 0x08) // Padding found
 //     {
-//         if (~ssl.flags & nopad)
-//             ft_ssl_error("Bad decrypt: No padding found in decrypted data.\n");
-//         return ;
+//         // Search all padding bytes
+//         for (int i = 0, rot = 56; i < lastbyte; i++, rot -= 8)
+//             if ((*lastbloc >> rot) & 0xff != lastbyte)  // Invalid padding
+//             {
+//                 validpadd = 0;
+//                 break ;
+//             }
+//     }
+//     else // Padding not found
+//         validpadd = 0;
+
+//     if (validpadd)
+//     {
+//         if (ssl.flags & nopad)
+//             flag_error("-nopad", "-nopad is conflicting with padding found in decrypted data.");
+//         if (lastbyte == 0x08)
+//             *ptByteSz -= LONG64_byteSz;
+//         else
+//         {
+//             *lastbloc = *lastbloc & (((Long_64bits)1 << (64 - lastbyte * 8)) - 1); //Remove padding
+//             *ptByteSz -= lastbyte;
+//         }
 //     }
 //     else
 //     {
-//         for (int i = 0; i < lastbyte; i++)
-//             if ()
+//         if (~ssl.flags & nopad)
+//             ft_ssl_error("Bad decrypt: No padding found in decrypted data.\n");
 //     }
-
-
-//     fprintf(stderr, "\nlastbloc: %lx\tlastbyte: %x\tptByteSz: %d\n", *lastbloc, lastbyte, *ptByteSz);
-//     // printf("lastbyte : %x\n", lastbyte);
-//     if (*lastbloc == 0x0808080808080808)
-//         *ptByteSz -= LONG64_byteSz;
-//     else if (0x01 <= lastbyte && lastbyte <= 0x07)
-//     {
-//         *lastbloc = *lastbloc & (((Long_64bits)1 << (64 - lastbyte * 8)) - 1); //Remove padding
-//         *ptByteSz -= lastbyte;
-//     }
-//     else // Padding not found
-//     {
-//     }
-//     // Padding found
-
-//     if (ssl.flags & nopad)
-//         flag_error("-nopad", "-nopad is conflicting with padding found in decrypted data.");
 // }
