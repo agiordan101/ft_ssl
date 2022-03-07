@@ -7,16 +7,7 @@
 
     To do :
 
-        Tester rsautl et genrsa avec encout et decin
-        
-        pbkdf2 unitest 
-        Créer un test/comparaison openssl -P pour des
-
-        Essayer plusieurs input avec toutes les commandes
-        
         //Leaks ft_stradd_quote ?
-        Gerer les \n dans l'output (pas dans les ft hash)
-        Selectionner la sortie du dernier \n en fonction des commandes
 
 */
 
@@ -58,10 +49,12 @@ char        *ask_password(char *cmd_name, e_flags flags)
 
 static void    t_command_free(t_command *cmd)
 {
-    if (cmd->command & DES && ((t_des *)cmd->command_data)->password)
-        free(((t_des *)cmd->command_data)->password);
     if (cmd->command_data)
+    {
+        if (cmd->command & DES && ((t_des *)cmd->command_data)->password)
+            free(((t_des *)cmd->command_data)->password);
         free(cmd->command_data);
+    }
 }
 
 static void    ssl_free()

@@ -117,15 +117,11 @@ inline char *ft_strinsert(char *str1, char *toinsert, char *str2)
     int     str1len = ft_strlen(str1);
     int     toinsertlen = ft_strlen(toinsert);
     int     str2len = ft_strlen(str2);
-    // char    concat[str1len + toinsertlen + str2len + 1];
-    // ft_bzero(concat, str1len + toinsertlen + str2len + 1);
     char    *concat = (char *)ft_memnew(str1len + toinsertlen + str2len);
 
-    // printf("lengths: %d / %d / %d\n", str1len, toinsertlen, str2len);
     ft_memcpy(concat, str1, str1len);
     ft_memcpy(concat + str1len, toinsert, toinsertlen);
     ft_memcpy(concat + str1len + toinsertlen, str2, str2len);
-    // return ft_strdup((char *)&concat);
     return concat;
 }
 
@@ -248,28 +244,6 @@ inline char         *ft_hextoStr(Long_64bits nbr)
         str[i] = (nbr >> (i * 8)) & 0xff;
 	return str;
 }
-
-// void    	        _ft_printHex(Long_64bits n, char hexbase[])
-// {
-//     int             leading_zero = 1;
-//     unsigned char   *mem = (unsigned char *)&n;
-//     unsigned char   c_16e0;
-//     unsigned char   c_16e1;
-
-//     for (int i = LONG64_byteSz - 1; i >= 0; i--)
-//     {
-//         if (leading_zero && mem[i])
-//             leading_zero = 0;
-//         if (!leading_zero)
-//         {
-//             c_16e0 = hexbase[mem[i] % 16];
-//             c_16e1 = hexbase[mem[i] / 16];
-//             if (write(ssl.fd_out, &c_16e1, 1) == -1 ||\
-//                 write(ssl.fd_out, &c_16e0, 1) == -1)
-//                 write_failed("write() failed in ft_printHex()", ssl.fd_out);
-//         }
-//     }
-// }
 
 void    	        _ft_printHex(Long_64bits n, int totalMemSz, char hexbase[], int leading_zero)
 {

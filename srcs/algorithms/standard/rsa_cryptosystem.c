@@ -1,14 +1,5 @@
 #include "ft_ssl.h"
 
-/*
-
-    When encrypting with low encryption exponents (e.g., e = 3)
-     and small values of the m (i.e., m < n1/e),
-     the result of me is strictly less than the modulus n.
-     In this case, ciphertexts can be decrypted easily by taking the eth root of the ciphertext over the integers.
-
-*/
-
 inline void         print_component(char *msg, Long_64bits n)
 {
     ft_putstr(msg);
@@ -37,10 +28,7 @@ void                rsa_keys_generation(t_rsa *rsa)
     rsa->privkey.modulus = rsa->privkey.p * rsa->privkey.q;
 
     if (ulmult_overflow(rsa->privkey.p, rsa->privkey.q))
-    {
-        printf("genrsa p and q primes multiplication OVERFLOW\n");
-        exit(0);
-    }
+        ft_ssl_error("genrsa p and q primes multiplication OVERFLOW.\n");
 
     Long_64bits euler_f = (rsa->privkey.p - 1) * (rsa->privkey.q - 1);
 
@@ -51,7 +39,6 @@ void                rsa_keys_generation(t_rsa *rsa)
     {
         // Only 2 bits for faster modular exponentiations
         rsa->privkey.enc_exp = rsa->privkey.enc_exp == 2 ? 1 : (rsa->privkey.enc_exp >> 1) + 1;
-        // printf("RSA_ENC_EXP > euler_f or PGCD != 1, new e: %lu\n", rsa->privkey.enc_exp);
     }
 
     rsa->privkey.dec_exp = mod_mult_inverse(rsa->privkey.enc_exp, euler_f);
@@ -64,26 +51,17 @@ void                rsa_keys_generation(t_rsa *rsa)
     // Create public key with private key data
     rsa->pubkey.modulus = rsa->privkey.modulus;
     rsa->pubkey.enc_exp = rsa->privkey.enc_exp;
-
-    // printf("rsa->privkey.p : %lu\n", rsa->privkey.p);
-    // printf("rsa->privkey.q : %lu\n", rsa->privkey.q);
-    // printf("rsa->n : %lu\n", rsa->privkey.modulus);
-    // printf("euler_f : %lu\n", euler_f);
-    // printf("rsa->privkey.enc_exp : %lu\n", rsa->privkey.enc_exp);
-    // printf("rsa->privkey.dec_exp : %lu\n\n", rsa->privkey.dec_exp);
 }
 
 void                rsa_parse_key(t_rsa *rsa, e_flags flags)
 {
     if (rsa->keyfile_data)
     {
-        // fprintf(stderr, "rsa->keyfile_data (len=%d): %s\n", rsa->keyfile_byteSz, rsa->keyfile_data);
-        // Parse key in DER format
+        rsa->der_content_byteSz = rsa->keyfile_byteSz;
         if (rsa->inform == PEM)
-            rsa->der_content = rsa_PEM_keys_parsing(rsa, rsa->keyfile_data, &rsa->keyfile_byteSz, flags);
+            rsa->der_content = rsa_PEM_keys_parsing(rsa, rsa->keyfile_data, &rsa->der_content_byteSz, flags);
         else
             rsa->der_content = ft_memdup(rsa_DER_keys_parsing(rsa, rsa->keyfile_data, rsa->keyfile_byteSz, flags), rsa->keyfile_byteSz);
-        // fprintf(stderr, "rsa->der_content(len=%d): %s\n", rsa->keyfile_byteSz, rsa->der_content);
     }
     else
         ft_ssl_error("RSA cryptosystem: No keyfile, parsing failed.\n");
@@ -91,14 +69,11 @@ void                rsa_parse_key(t_rsa *rsa, e_flags flags)
 
 inline Long_64bits  rsa_encryption(t_rsa_public_key *pubkey, Long_64bits m)
 {
-    // fprintf(stderr, "plaintext: %lx\n", m);
     if (m >= pubkey->modulus)
     {
-        ft_printHex(m);
-        ft_putstderr("\n");
-        ft_printHex(pubkey->modulus);
-        ft_putstderr("\n");
-        ft_ssl_error("RSA cryptosystem: Encryption can't be made, plaintext > modulus:\n");
+        print_component("Plaintext: ", m);
+        print_component("Modulus  : ", pubkey->modulus);
+        ft_ssl_error("RSA cryptosystem: Encryption can't be made, plaintext > modulus.\n");
     }
     return modular_exp(m, pubkey->enc_exp, pubkey->modulus);
 }
@@ -107,11 +82,9 @@ inline Long_64bits  rsa_decryption(t_rsa_private_key *privkey, Long_64bits c)
 {
     if (c >= privkey->modulus)
     {
-        ft_printHex(c);
-        ft_putstderr("\n");
-        ft_printHex(privkey->modulus);
-        ft_putstderr("\n");
-        ft_ssl_error("RSA cryptosystem: Decryption can't be made: ciphertext > modulus:\n");
+        print_component("Ciphertext: ", c);
+        print_component("Modulus   : ", privkey->modulus);
+        ft_ssl_error("RSA cryptosystem: Decryption can't be made: ciphertext > modulus.\n");
     }
     return modular_exp(c, privkey->dec_exp, privkey->modulus);
 }

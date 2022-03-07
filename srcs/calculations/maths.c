@@ -1,17 +1,5 @@
 # include "ft_ssl.h"
 
-// Long_64bits ft_pow(Long_64bits a, int pow)
-// {
-//     if (pow == 0)
-//         return 1;
-
-//     Long_64bits a_pow = a;
-
-//     for (int i = 1; i < pow; i++)
-//         a_pow *= a;
-//     return a_pow;
-// }
-
 inline long long modular_mult(long long a, Long_64bits b, Long_64bits mod)
 {
     Long_64bits res = 0;
@@ -59,7 +47,6 @@ Long_64bits        ulrandom()
 
     if (data_left < LONG64_byteSz)
     {
-        // printf("read / data_left=%d / ssl.ulrandom_fd=%d\n", data_left, ssl.ulrandom_fd);
         if ((ret = read(ssl.ulrandom_fd, buff, URANDBUFF)) == -1)
             read_failed("ulrandom() failed: Cannot read file '/dev/urandom' or -rand file pass in arg", ssl.ulrandom_fd);
         data_left = ret;
@@ -82,10 +69,7 @@ inline Long_64bits  ulrandom_range(Long_64bits min, Long_64bits max)
 inline int          ulmult_overflow(Long_64bits a, Long_64bits b)
 {
     Long_64bits c = BIG_LONG64;
-    // printf("%lu\n/\n%lu\n<\n%lu ?\n", c, b, a);
     c /= b;
-    // printf("%lu\n<\n%lu ? %d\n", c, a, c < a);
-    // b = b ? BIG_LONG64 / b : BIG_LONG64;
     return c < a;
 }
 
@@ -103,7 +87,6 @@ inline Long_64bits  gcd(Long_64bits a, Long_64bits b)
         b ^= a;
         a ^= b;
     }
-    // printf("GCD = %lu\n", a);
     return a;
 }
 
@@ -155,30 +138,9 @@ inline Long_64bits  mod_mult_inverse(Long_64bits a, Long_64bits b)
     long long v;
     Long_64bits g = extended_euclide_algo(a, b, &u, &v);
 
-    // printf("\n[Modular multiplicative inverse of a and b]\n");
-    // printf("%lu * %lld + %lu * %lld = %lld (Real gcd()=%lu)\n", a, u, b, v, a*u+b*v, gcd(a, b));
-    if (g != gcd(a, b))
-    {
-        printf("a * u + b * v != PGCD(a, b) (real pgcd=1 fail)\n");
-        exit(0);
-    }
-    // printf("a * u + b * v = PGCD(a, b)\n");
-
     // Handle negative case: 1 mod b = 1 + kb with k relative integer (When u < 0, k = -1)
     if (u < 0)
         u += b;
-
     long long mm = modular_mult(u, a, b);
-    // printf("%lu * %lld = %lld mod %lu\n", a, u, mm, b);
-
-    // if (mm != 1 && mm != -b - 1)
-    if (mm != 1)
-    {
-        printf("a * u != 1 mod b\n");
-        printf("(%lu * %lld) != 1 mod %lu\n", a, u, b);
-        printf("(%lld * %lu) %% %lu = %lld\n", u, a, b, mm);
-        exit(0);
-    }
-    // printf("a * u = 1 mod b\n");
     return u;
 }

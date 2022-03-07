@@ -29,10 +29,6 @@ void    hash_32bits_output(t_hash *p)
 
     for (Word_32bits *tmp = hash; tmp < hash + bloc32bitsSz; tmp += 1)
         _ft_printHex(*tmp, WORD32_byteSz, HEXABASE_low, 1);
-    
-    // for (Word_32bits *tmp = hash; tmp < hash + bloc32bitsSz; tmp += 1)
-    //     printf("%x", *tmp);
-    // printMemHex(p->hash, p->hashByteSz, "out");
 }
 
 void    hash_8bits_output(t_hash *p)
@@ -67,9 +63,6 @@ void    genprime_output(t_hash *hash)
 
 void    rsa_output(t_hash *hash)
 {
-    // if (ssl.command.command & RSAUTL)
-    //     hash_output(hash);
-    // else if (~ssl.flags & noout)
     if (~ssl.flags & noout)
     {
         ft_putstderr("writing RSA key\n");
@@ -144,11 +137,10 @@ void    output(t_hash *hash)
 {
     if (hash->error == FILENOTFOUND)
         file_not_found(hash->name);
-    // else if (ssl.command.command & THASHNEED_COMMANDS)
     else
         output_hash_based_on_flags(hash);
 
-    // Always display '\n'. Except the last one if -q flag is up)
+    // Always display '\n'. Except the last one or if -q flag is up
     if (hash->next || (ssl.command.command & ~RSA_CMDS && ~ssl.flags & q))
         ft_putstr("\n");
 }

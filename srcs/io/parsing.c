@@ -71,10 +71,8 @@ static int      file_handler(char *file, char **content, int *len)
 
 static void     file_handler_node(t_hash *node, char *file)
 {
-
     if (!node)
         node = add_thash_back();
-
     node->name = ft_strdup(file);
     node->error = file_handler(file, &node->msg, &node->len);
 }
@@ -106,7 +104,6 @@ static Key_64bits   parse_keys_des(char *av_next)
         ft_putstderr("hex string is too short, padding with zero bytes to length\n");
         key <<= (hex_zero_count - str_zero_count) * 4;
     }
-    // printf("parse_keys_des: %lx\n", key);
     return key;
 }
 
@@ -131,7 +128,7 @@ void            command_handler(t_command *command, char *cmd, e_command mask)
         cmd_wrapper_genrsa, cmd_wrapper_rsa, cmd_wrapper_rsautl
     };
     static char         *cmd_titles[N_COMMANDS] = {
-        "MD5", "SHA256", "BASE64", "DESECB", "DESCBC", "PBKDF2_SHA256",
+        "MD5", "SHA256", "BASE64", "DESECB", "DESCBC", "PBKDF2",
         "Generating prime number ", "Primality test",
         "Generating RSA keys", "RSA keys visualization", "RSA utilisation"
     };
@@ -175,12 +172,11 @@ void            command_handler(t_command *command, char *cmd, e_command mask)
         ((t_des *)(command->command_data))->mode = DESECB;
     if (commands[cmd_i] & DESCBC)
         ((t_des *)(command->command_data))->mode = DESCBC;
-    // printf("command= %s\n", command->command_title);
 }
 
 static void     param_handler(e_flags flag, char *av_next, int *i)
 {
-    if (flag & i_)
+    if (flag & i_ && (ssl.command.command & ~EXECONES_COMMANDS || !ssl.hash))
         file_handler_node(NULL, av_next);
     else if (flag & o)
         ssl.output_file = av_next;
@@ -267,12 +263,8 @@ static e_flags  strToFlag(char *str)
 
     for (int i = 0; i < N_FLAGS - 4; i++)
     {
-        // fprintf(stderr, "[%d] ?= %s\t--> %ld\n", i, flags_str[i], flags[i]);
         if (!ft_strcmp(str, "-s"))
-        {
-            // fprintf(stderr, "[%d] ?= %s\t--> %ld\n", i, flags_str[i], flags[i]);
             return DESDATA_NEED_COMMANDS & (ssl.dec_i_cmd.command | ssl.command.command | ssl.enc_o_cmd.command) ? salt : s;
-        }
         if (!ft_strcmp(str, "-p"))
             return DESDATA_NEED_COMMANDS & (ssl.dec_i_cmd.command | ssl.command.command | ssl.enc_o_cmd.command) ? pass : p;   
         if (!ft_strcmp(str, flags_str[i]))
@@ -287,13 +279,10 @@ static void     flags_handler(int ac, char **av, int i)
  
     while (++i < ac)
     {
-        // fprintf(stderr, "arg %d: %s\n", i, av[i]);
         if (av[i][0] == '-')
         {
             flag = strToFlag(av[i]);
 
-            // fprintf(stderr, "flag = %ld\n", flag);
-            // fprintf(stderr, "flag compatible ? %ld\n", flag & (ssl.dec_i_cmd.command_flags | ssl.command.command_flags | ssl.enc_o_cmd.command_flags));
             if (flag & help)
                 print_command_usage(ssl.command.command);
             else if (flag & (ssl.dec_i_cmd.command_flags | ssl.command.command_flags | ssl.enc_o_cmd.command_flags))
@@ -329,20 +318,17 @@ static char     *stdin_handler(char **data, int *data_len, char *msg_out, int on
     if (msg_out)
         ft_putstderr(msg_out);
 
-    // printf("stdin handler %d\n", only_one_read);
     ft_bzero(buff, BUFF_SIZE);
     while (ret && !(only_one_read && len != 0))                 // Work for echo
     {
         if ((ret = read(STDIN, buff, BUFF_SIZE)) == -1)
             read_failed("parsing failed: stdin_handler(): Unable to read stdin.\n", STDIN);
 
-        // printf("Hash(len=%d)= >%s<\n", ret, buff);
         tmp = msg;
         msg = ft_memjoin(tmp, len, buff, ret);
         if (tmp)
             free(tmp);
         len += ret;
-        // printf("%d / Hash(len=%d)= >%s<\n", only_one_read, len, msg);
     }
     if (data)
         *data = msg;
@@ -366,10 +352,7 @@ static void     add_thash_from_stdin()
         {
             tmp = ft_strdup(node->msg);
             if (tmp[node->len - 1] == '\n')
-            {
-                // printf("???????????????????????????????????????????????\n");
                 tmp[node->len - 1] = '\0'; // Remove '\n' for name displaying
-            }
 
             // q will not print name, but when q, r and p are True, stdin content without quote is required. Yes, I know, it's sucks
             if (ssl.flags & q)
@@ -393,8 +376,6 @@ static void     add_thash_from_stdin()
 
 static void     flags_conflicts()
 {
-    // char base64_str[] = "base64";
-
     // Handle conflict between e and d flags (Set encryption by default)
     if (ssl.flags & (e | d))
     {
@@ -464,12 +445,6 @@ static void     end_parse()
         ((t_des *)(commands[1]->command_data))->password = ssl.des_flagsdata.password;
     if (commands[2]->command & DESDATA_NEED_COMMANDS)
         ((t_des *)(commands[2]->command_data))->password = ssl.passout ? ssl.passout : ssl.des_flagsdata.password;
-
-    // printf("ssl.des_flagsdata.key: %lu\n", ssl.des_flagsdata.key);
-    // printf("ssl.des_flagsdata.salt: %lu\n", ssl.des_flagsdata.salt);
-    // printf("ssl.des_flagsdata.vector: %lu\n", ssl.des_flagsdata.vector);
-    // printf("ssl.des_flagsdata.password: %lu\n", ssl.des_flagsdata.password);
-    // printf("ssl.des_flagsdata.pbkdf2_iter: %u\n", ssl.des_flagsdata.pbkdf2_iter);
 }
 
 void     parsing(int ac, char **av)

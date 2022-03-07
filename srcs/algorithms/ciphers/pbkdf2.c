@@ -31,14 +31,12 @@ static Mem_8bits    *concat_and_hash(Mem_8bits *keyxor, Mem_8bits *to_concat, in
 
     ft_memcpy(concat, keyxor, CHUNK_byteSz);
     ft_memcpy(concat + CHUNK_byteSz, to_concat, to_concatByteSz);
-    // printMemHex(concat, concatByteSz, "K ^ pad || concat");
 
     Mem_8bits *hash_ret = sha256((Mem_8bits **)&concat, concatByteSz, NULL);
     for (Word_32bits *tmp = (Word_32bits *)hash_ret; (Mem_8bits *)tmp < hash_ret + SHA256_byteSz; tmp += 1)
         endianReverse((Mem_8bits *)tmp, WORD32_byteSz);
 
     free(concat);
-    // printMemHex(hash_ret, SHA256_byteSz, "h(K ^ pad || concat)");
     return hash_ret;
 }
 
@@ -59,14 +57,11 @@ static Mem_8bits    *pbkdf2_sha256_hmac(Mem_8bits *key, int keyByteSz, Mem_8bits
         ipad[i] ^= keypad[i];
         opad[i] ^= keypad[i];
     }
-    // printMemHex(ipad, CHUNK_byteSz, "K ^ ipad");
-    // printMemHex(opad, CHUNK_byteSz, "K ^ opad");
 
     Mem_8bits *sha256_res = concat_and_hash(ipad, msg, msgByteSz);
     Mem_8bits *hmac_res = concat_and_hash(opad, sha256_res, SHA256_byteSz);
     free(sha256_res);
 
-    // printMemHex(hmac_res, SHA256_byteSz, "hmac result (ohash)");
     return hmac_res;
 }
 
@@ -131,8 +126,11 @@ Key_64bits          pbkdf2_sha256(Mem_8bits *pwd, Long_64bits pwdByteSz, Key_64b
     Mem_8bits *key = pbkdf2_sha256_prfxors(pwd, pwdByteSz, salt, c, 1);
     endianReverse(key, KEY_byteSz);
 
-    // DK = T1 & (1 << 65 - 1)
-    return *((Key_64bits *)key);
+    // DK = T1 & (1 << 64 - 1)
+    Key_64bits  keyvalue = *((Key_64bits *)key);
+
+    free(key);
+    return keyvalue;
 }
 
 Mem_8bits       *cmd_wrapper_pbkdf2(void *cmd_data, Mem_8bits **input, Long_64bits iByteSz, Long_64bits *oByteSz, e_flags flags)
@@ -142,7 +140,9 @@ Mem_8bits       *cmd_wrapper_pbkdf2(void *cmd_data, Mem_8bits **input, Long_64bi
         *input,
         ft_strlen(*input),
         des_data->salt,
-        des_data->pbkdf2_iter
+        des_data->pbkdf2_iter ?\
+            des_data->pbkdf2_iter :\
+            PBKDF2_iter
     );
 
     (void)iByteSz;

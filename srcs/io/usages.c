@@ -72,21 +72,13 @@ static void     print_flag_usage(e_flags flag)
         ft_putstderr("\t-rand\t\ta file containing random data used to seed the random number generator\n");
     else if (flag & inkey)
         ft_putstderr("\t-inkey\t\tinput key\n");
-    else
-    {
-        printf("WTFF ?\n");
-        exit(0);
-    }
 }
 
 static void     print_command_flags(e_flags flags)
 {
     for (Long_64bits i = 1, flag = 1<<1; i < N_FLAGS + 1; i++, flag <<= 1)
-    {
-        // printf("flag %d: %d & %d = %d\n", i, flag, rand_path, flag & flags);
         if (flag & flags)
             print_flag_usage(flag);
-    }
 }
 
 static void     print_md_usage()
@@ -106,6 +98,7 @@ static void     print_base64_usage()
 static void     print_des_usage()
 {
     ft_putstderr("Usage: ./ft_ssl des | des-ecb | des-cbc [files] [flags]\n\n");
+    ft_putstderr("Using pbkdf2 for key generation.\n");
     ft_putstderr("Valid flags are:\n");
     print_command_flags(DES_flags);
 }
@@ -114,7 +107,7 @@ static void     print_pbkdf2_usage()
 {
     ft_putstderr("Usage: ./ft_ssl pbkdf2 [pwd files] [flags]\n");
     ft_putstderr("Password-Based Key Derivation Function 2 using HMAC-SHA256\n");
-    ft_putstderr("Generate 64-bit key from password.\n\n");
+    ft_putstderr("Generate 64-bit key from password. Nosalt used by default.\n\n");
     ft_putstderr("Valid flags are:\n");
     print_command_flags(PBKDF2_flags);
 }

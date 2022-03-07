@@ -110,7 +110,7 @@ typedef enum    command {
 
 # define HASHING_COMMANDS       (MD + BASE64 + DES + RSAUTL)
 # define THASHNEED_COMMANDS     (HASHING_COMMANDS + PBKDF2 + ISPRIME + RSA)
-# define EXECONES_COMMANDS      (GENPRIME + GENRSA)
+# define EXECONES_COMMANDS      (GENPRIME + GENRSA + RSA + RSAUTL)
 
 typedef struct  s_command {
     e_command       command;
@@ -460,6 +460,7 @@ typedef struct  s_rsa
     Mem_8bits           *keyfile_data;
     int                 keyfile_byteSz;
     Mem_8bits           *der_content;
+    int                 der_content_byteSz;
     e_rsa_form          inform;
     e_rsa_form          outform;
     t_rsa_private_key   privkey;

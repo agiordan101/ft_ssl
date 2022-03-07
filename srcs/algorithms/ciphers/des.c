@@ -28,24 +28,18 @@ static int              magic_number_in(t_des *des, Mem_8bits *plaintext, e_flag
     */
     if (flags & d)
     {
-        // Mem_8bits *buff = ft_memdup(plaintext, MAGICNUMBER_byteSz);
         Mem_8bits   buff[MAGICNUMBER_byteSz + 1];
         ft_bzero(buff, MAGICNUMBER_byteSz + 1);
         ft_memcpy(buff, plaintext, MAGICNUMBER_byteSz);
 
-        // printf("buff: %s\n", buff);
-        // printf("plaintext: %s\n", plaintext);
         if (ft_strcmp(buff, MAGICNUMBER))
         {
-            // free(buff);
             if (!des->key)
                 ft_ssl_error("bad magic number\n");
             return 0;
         }
         else
         {
-            // Fetch Salt
-            // free(buff);
             des->salt = *(Key_64bits *)(plaintext + MAGICNUMBER_byteSz);
             endianReverse((Mem_8bits *)&des->salt, KEY_byteSz);
         }
@@ -63,11 +57,9 @@ static Mem_8bits        *magic_number_out(t_des *des, Mem_8bits *hash, Long_64bi
     endianReverse((Mem_8bits *)&des->salt, KEY_byteSz);
     ft_memcpy(header, MAGICNUMBER, MAGICNUMBER_byteSz);
     ft_memcpy(header + MAGICNUMBER_byteSz, (void *)&des->salt, KEY_byteSz);
-    // printf("header (len=%ld): %s\n", MAGICHEADER_byteSz, header);
 
     char *header_hash = ft_memjoin(header, MAGICHEADER_byteSz, hash, *hashByteSz);
     *hashByteSz += MAGICHEADER_byteSz;
-    // printf("hash ret (len=%ld): %s\n", *hashByteSz, ret);
 
     free(hash);
     return (Mem_8bits *)header_hash;
@@ -91,8 +83,6 @@ static void             set_keys_for_decryption(t_des *des)
         tmp = des->subkeys[i];
         des->subkeys[i] = des->subkeys[15 - i];
         des->subkeys[15 - i] = tmp;
-        // printf("des->subkeys[%d]: %lx\n", i, des->subkeys[i]);
-        // printf("des->subkeys[%d]: %lx\n", 15 - i, des->subkeys[15 - i]);
     }
 }
 
@@ -137,20 +127,15 @@ static void             key_transformation(t_des *des)
         46, 42, 50, 36, 29, 32
     };
 
-    // printf("\nkey_transformation: %lx\n", key);
-
     // Permutation : 64-bits -> 56-bits (Remove each 8th-bit of each bytes)
     endianReverse((Mem_8bits *)&key, KEY_byteSz);
     key = bits_permutations(key, pc1, 56);
     endianReverse((Mem_8bits *)&key, KEY_byteSz);
     key >>= 8;
-    
-    // printf("Permute key to 56-bits: %lx\n", key);
 
+    // Split key in half: lpart / rpart
     Word_32bits rpart = key & keymask;
     Word_32bits lpart = key >> 28;
-
-    // printf("Split lpart / rpart : %x / %x\n", lpart, rpart);
 
     for (int i = 0; i < 16; i++)
     {
@@ -164,14 +149,8 @@ static void             key_transformation(t_des *des)
         endianReverse((Mem_8bits *)&key, KEY_byteSz);
         
         key = bits_permutations(key, pc2, 48);
-
-        // endianReverse((Mem_8bits *)&key, KEY_byteSz);
-        // key >>= 16;
-        // printf("Key %d: %lx\n", i, key);
         des->subkeys[i] = key;
- 
    }
-    // exit(0);
 }
 
 static void             init_vars(t_des *des, Mem_8bits *plaintext, e_flags flags)
@@ -238,12 +217,6 @@ static void             init_vars(t_des *des, Mem_8bits *plaintext, e_flags flag
         33, 1, 41, 9,  49, 17, 57, 25
     };
     ft_memcpy(des->fpt, fpt, 64);
-
-    // Verbose here ?
-    // printf("\ncipher->password: %s\n", des->password);
-    // printf("cipher->key: %lx\n", des->key);
-    // printf("cipher->salt: %lx\n", des->salt);
-    // printf("cipher->vector: %lx\n", des->vector);
 }
 
 static Word_32bits      feistel_func(Word_32bits halfblock, Long_64bits subkey)
@@ -320,21 +293,11 @@ static Word_32bits      feistel_func(Word_32bits halfblock, Long_64bits subkey)
     char        s0;
     char        s1;
 
-    // printf("halfblock: %lx\n", halfblock);
-
-    exp_halfblock = bits_permutations(halfblock, exp_d, 48);
-
-    // printf("exp_halfblock: %lx\n", exp_halfblock);
-    
+    exp_halfblock = bits_permutations(halfblock, exp_d, 48);    
     exp_halfblock ^= subkey;
-    // endianReverse((Mem_8bits *)&exp_halfblock, 8);
-    // exp_halfblock >> 16;
     exp_halfblock = _bits_permutations(exp_halfblock, bitorder, 48);
-    // printf("exp_halfblock xor: %lx\n", exp_halfblock);
-    // printLong(exp_halfblock);
 
     for (int i = 0; i < 8; i++)
-    // for (int i = 7; i >= 0; i--)
     {
         box = exp_halfblock & 0b111111;
         box = (box >> 5) | ((box >> 3) & 0b10) | ((box >> 1) & 0b100) | ((box << 1) & 0b1000) | ((box << 3) & 0b10000) | ((box << 5) & 0b100000);
@@ -342,56 +305,32 @@ static Word_32bits      feistel_func(Word_32bits halfblock, Long_64bits subkey)
         s1 = (box & 0b011110) >> 1;
         outblock |= (S[i][s0][s1] << (i * 4));
         exp_halfblock >>= 6;
-        // printf("box %x col %d row %d\toutblock: %lx\n", box, s1, s0, outblock);
     }
 
-    // for (int i = 0; i < 8; i++)
     outblock = ((outblock >> 4) & 0x0f0f0f0f) | ((outblock << 4) & 0xf0f0f0f0);
-
-    // printf("outblock: %lx\n", outblock);
-    // printWord(outblock);
-
     outblock = _bits_permutations(outblock, bitorder, 32);
-    // printf("outblock: %lx\n", outblock);
-    // printWord(outblock);
-
     outblock = _bits_permutations(outblock, finalperm, 32);
-    // printf("outblock: %lx\n", outblock);
-
     outblock = _bits_permutations(outblock, bitorder, 32);
-    // printf("outblock: %lx\n", outblock);
     return outblock;
 }
 
 static Long_64bits      feistel_algorithm(t_des *des, Long_64bits plaintext)
 {
     plaintext = bits_permutations(plaintext, des->ipt, 64);
-    // printf("After ipt permutation hex: %lx\nAfter ipt permutation bin:\n", plaintext);
-    // printLong(plaintext);
-    // exit(0);
 
     Word_32bits lpart = plaintext & (((Long_64bits)1 << 32) - 1);
     Word_32bits rpart = plaintext >> 32;
 
-    // printWord(lpart);
-    // printWord(rpart);
-    // printf("lpart rpart: %x %x\n", lpart, rpart);
-
     for (int i = 0; i < 16; i++)
     {
         lpart ^= feistel_func(rpart, des->subkeys[i]);
-
         rpart ^= lpart;
         lpart ^= rpart;
         rpart ^= lpart;
-
-        // printf("lpart rpart %d: %x %x\tkey %lx\n", i, lpart, rpart, des->subkeys[i]);
     }
 
     plaintext = (Long_64bits)lpart << 32 | rpart;
     plaintext = bits_permutations(plaintext, des->fpt, 64);
-    // printf("After fpt permutation: %lx\n", plaintext);
-    // printf("After fpt permutation: %s\n", (char *)&plaintext);
 
     return plaintext;
 }
@@ -404,33 +343,19 @@ static Mem_8bits        *des_decryption(t_des *des, Mem_8bits *pt, Long_64bits p
     Long_64bits bloc;
     int         outbyteSz;
 
-    // printMemHex(pt, ptByteSz, "Plaintext hex");
-    // fprintf(stderr, "\n- DES DECRYPTION -\nptByteSz: %ld\tptBlocSz: %d\n", ptByteSz, ptBlocSz);
     for (int i = ptBlocSz - 1; i >= 0; i--)
     {
         bloc = *plaintext;
-        // printf("\nstr plaintext: >%s<\n", (Mem_8bits *)plaintext);
-
-        // printf("hex   bloc: %lx\n", bloc);
 
         ciphertext[i] = feistel_algorithm(des, bloc);
-        // printf("ciphertext[%d]: %lx\n", i, ciphertext[i]);
 
         if (des->mode == DESCBC)
-        {
-            // printf("XOR\nbloc  %lx\nvector %lx\n", bloc, i ? *plaintext : des->vector);
             ciphertext[i] = ciphertext[i] ^ (i ? *(plaintext - 1) : des->vector);
-            // printf("hex bloc %d: %lx (CBC xor)\n", i, ciphertext[i]);
-        }
         plaintext--;
     }
     outbyteSz = ptBlocSz * LONG64_byteSz;
-    // fprintf(stderr, "des_unpadding %d: %lx\n", outbyteSz, ciphertext[ptBlocSz - 1]);
-    des_unpadding(ciphertext + ptBlocSz - 1, &outbyteSz);
-    // fprintf(stderr, "des_unpadding %d: %lx\n", outbyteSz, ciphertext[outbyteSz / 8]);
 
-    // for (int i = 0; i < ptBlocSz; i++)
-    //     printf("ciphertext %d: %lx\n", i, ciphertext[i]);
+    des_unpadding(ciphertext + ptBlocSz - 1, &outbyteSz);
 
     if (hashByteSz)
         *hashByteSz = outbyteSz;
@@ -448,52 +373,20 @@ static Mem_8bits        *des_encryption(t_des *des, Mem_8bits *pt, Long_64bits p
     if (flags & nopad && ptByteSz % 8)
         ft_ssl_error("Data not multiple of block length (8 bytes).\n");
 
-    // fprintf(stderr, "\n- DES ENCRYPTION -\nptByteSz: %ld\tptBlocSz: %d\n", ptByteSz, ptBlocSz);
     for (int i = 0; i < ptBlocSz; i++)
     {
         bloc = *plaintext;
-        // printf("str plaintext: >%s<\n", (Mem_8bits *)plaintext);
 
         // Padding with number of missing bytes
         if (i == ptBlocSz - 1)
             bloc = des_padding((Mem_8bits *)&bloc, ptByteSz % LONG64_byteSz);
-            // bloc = des_padding((Mem_8bits *)&bloc,\
-            //     (ptByteSz % LONG64_byteSz == 0) ?\
-            //     LONG64_byteSz :\
-            //     ptByteSz % LONG64_byteSz);
-
-        // printf("\nhex vector: %lx\n", i ? ciphertext[i - 1] : des->vector);
-        // printf("hex   bloc: %lx\n", bloc);
-
-        // printf("bin vector: ");
-        // printLong(i ? ciphertext[i - 1] : des->vector);
-        // printf("bin   bloc: ");
-        // printLong(bloc);
 
         if (des->mode == DESCBC)
-        {
-            // printf("des->vector & 0xFF: %d\n", des->vector & 0xFF);
-            // printf("bloc & 0xFF: %d\n", bloc & 0xFF);
-            // printf("XOR\nbloc  %lx\nvector %lx\n", bloc, i ? ciphertext[i - 1] : des->vector);
             bloc ^= i ? ciphertext[i - 1] : des->vector;
-            // printf("hex   bloc: %lx (CBC xor)\n", bloc);
-        }
-        //     printf("bin   bloc: ");
-        //     printLong(bloc);
-        //     printf(" (CBC xor)\n");
 
         ciphertext[i] = feistel_algorithm(des, bloc);
-
-        // dprintf(2, "ciphertext: %lx\n\n", ciphertext[i]);
         plaintext++;
     }
-
-    // for (int i = 0; i < ptBlocSz; i++)
-    //     dprintf(stderr, "ciphertext %d: %lx\n", i, ciphertext[i]);
-
-    // Restore right endianness order
-    // for (int i = 0; i < ptBlocSz; i++)
-    //     endianReverse((Mem_8bits *)(ciphertext + i), LONG64_byteSz);
 
     if (hashByteSz)
         *hashByteSz = ptBlocSz * LONG64_byteSz;

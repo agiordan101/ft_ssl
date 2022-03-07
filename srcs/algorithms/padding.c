@@ -10,12 +10,10 @@ Mem_8bits   *padXbits(Mem_8bits **mem, int byteSz, int newSz)
 
     if (byteSz < newSz)
     {
-        // printf("addr: %p\n", *mem);
         pad = ft_memnew(newSz);
         ft_memcpy(pad, *mem, byteSz);
         free(*mem);
         *mem = pad;
-        // printf("addr: %p\n", *mem);
     }
     else if (newSz < byteSz)
         ft_bzero(*mem + newSz, byteSz - newSz);
@@ -27,9 +25,6 @@ void        md_padding(Mem_8bits **data, Long_64bits *byteSz, char reverseByteSz
     Long_64bits extend_byteSz =\
         *byteSz - (*byteSz % CHUNK_byteSz) + // Find byteSz of the filled chunks.
         CHUNK_byteSz * (*byteSz % CHUNK_byteSz >= CHUNK_byteSz - LONG64_byteSz ? 2 : 1); // Add 1 chunk (witch is partially written), and add another one if we cannot cpy byteSz_mem at the end (overwritting is not possible)
-
-    // printf("byteSz: %ld\n", *byteSz);
-    // printf("extend_byteSz: %ld\n", extend_byteSz);
 
     // Extend data until a multiple of chunk size (64 bytes / 512 bits)
     padXbits(data, *byteSz, extend_byteSz);
@@ -50,7 +45,6 @@ void        md_padding(Mem_8bits **data, Long_64bits *byteSz, char reverseByteSz
     // Overwrite the last 8 bytes of last chunk with input message bits size
     ft_memcpy(*data + extend_byteSz - LONG64_byteSz, byteSz_mem, LONG64_byteSz);
 
-    // printMemHex(*data, extend_byteSz, "md padding");
     *byteSz = extend_byteSz;
 }
 
@@ -64,12 +58,9 @@ Long_64bits des_padding(Mem_8bits *bloc, Long_64bits blocByteSz)
     Mem_8bits   newbloc[LONG64_byteSz];
     int         missing_bytes = 8 - blocByteSz;
 
-    // fprintf(stderr, "bloc (byteSz=%d): %lx\n", blocByteSz, bloc);
     ft_memcpy(newbloc, bloc, blocByteSz);
     for (int i = blocByteSz; i < LONG64_byteSz; i++)
         newbloc[i] = missing_bytes;
-    // fprintf(stderr, "missing_bytes: %d\n", missing_bytes);
-    // fprintf(stderr, "newbloc: %lx\n", *((Long_64bits *)newbloc));
     return *((Long_64bits *)newbloc);
 }
 
@@ -78,7 +69,6 @@ void        des_unpadding(Long_64bits *lastbloc, int *ptByteSz)
     Mem_8bits   validpadd = 1;
     Mem_8bits   lastbyte = (*lastbloc >> 56) & 0xff;
 
-    // fprintf(stderr, "\nlastbloc: %lx\tlastbyte: %x\tptByteSz: %d\n", *lastbloc, lastbyte, *ptByteSz);
     if (lastbyte <= 0x08) // Padding found
     {
         // Search all padding bytes

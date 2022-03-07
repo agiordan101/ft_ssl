@@ -18,13 +18,10 @@ static void fermat_test_solver(Long_64bits n, Long_64bits *d, int *s)
     *d = n - 1;
     for (*s = 0; !(*d & 1); (*s)++)
         *d >>= 1;
-
-    // printf("fermat_test_solver | %ld - 1 = 2^%d * %ld\n", n, *s, *d);
 }
 
 static int  miller_rabin_witness_test(Long_64bits n, Long_64bits a, Long_64bits d, int s)
 {
-    // printf("miller_rabin_witness n=%ld\ta=%ld\ts=%d\n", n, a, s);
     Long_64bits x = modular_exp(a, d, n);
 
     if (x == 1 || x == n - 1)
@@ -50,8 +47,6 @@ static Long_64bits  miller_rabin_witness_generator(Long_64bits n, Long_64bits *r
     {
         witness = ulrandom_range(2, n - 1);   // 2 <= a < n - 1
 
-        // printf("n = %lu / witness: %lu\n", n, witness);
-        // Check in memory if a is already seen
         i_tmp = 0;
         while (i_tmp < save_sz &&\
             i_tmp < ISPRIMEMEMSZ &&\
@@ -101,7 +96,6 @@ int         miller_rabin_primality_test(Long_64bits n, float p, int verbose)
         witness = miller_rabin_witness_generator(n, witness_save, save_sz);
         witness_save[save_sz++ % ISPRIMEMEMSZ] = witness;
 
-        // printf("n = %lu / witness: %lu\n", n, witness);
         // Test of the witness
         if (miller_rabin_witness_test(n, witness, d, s))
             return 0;

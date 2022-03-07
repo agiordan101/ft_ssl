@@ -29,13 +29,11 @@ static void         clean_base64(Mem_8bits *msg, Long_64bits *len)
 {
     int         newlen = 0;
 
-    // printf("clean msg (len=%d): >%s<\n", *len, msg);
     for (int i = 0; i < *len; i++)
         if (base64_to_bin(msg[i]) != -1)
             msg[newlen++] = msg[i];
 
     ft_bzero(msg + newlen, *len - newlen);
-    // printf("msg clean (len=%d): >%s<\n", newlen, msg);
     *len = newlen;
 }
 
@@ -46,18 +44,12 @@ static inline int   get_len_encoded(int len)
 
 static inline int   get_len_decoded(Mem_8bits *msg, int len)
 {
-    // printf("msg: >%s<\nlast byte: >%c<\n", msg, msg[len - 1]);
     if (msg[len - 1] == '=')
     {
-        // printf("msg: >%s<\nlast byte: >%c<\n", msg, msg[len - 2]);
         if (msg[--len - 1] == '=')
-        {
-            // printf("last last byte = '='\n");
             return (int)(--len / 4) * 3 + 1;
-        }
         return (int)(len / 4) * 3 + 2;
     }
-    // printf("No '=' found\n");
     return (int)(len / 4) * 3;
 }
 
@@ -78,30 +70,19 @@ static Mem_8bits    *encode(Mem_8bits *plaintext, Long_64bits ptByteSz, Long_64b
     Mem_8bits   *hash = ft_memnew(hashlen);
     Mem_8bits   *hash_tmp = hash;
 
-    // printf("plaintext  (len=%d): >%s<\n", ptByteSz, plaintext);
     Mem_8bits   *pt_tmp = plaintext;
     Mem_8bits   *pt_end = plaintext + ptByteSz;
     while (pt_tmp + 2 < pt_end)
     {
-        // printf("\nBits begin loop:\n");
-        // printBits(pt_tmp, 3);
-
-        // Convert 3 bytes of 8-bits data in 4 bytes of 6-bits data
         split_3to4bytes(*pt_tmp, *(pt_tmp + 1), *(pt_tmp + 2), (Mem_8bits *)bytecode);
 
-        // printf("Bits of bytecode[4] end loop:\n");
-        // for (int i = 0; i < 4; i++)
-        //     printBits((Mem_8bits *)&bytecode[i], 1);
-
-        // Convert each 6-bits to base64 number
         bin_to_base64(bytecode, 4);
-
-        // printf("bytecode[4] end loop: >%s<\n", (char *)bytecode);
 
         ft_memcpy(hash_tmp, (char *)bytecode, 4);
         pt_tmp += 3;
         hash_tmp += 4;
     }
+
     if (pt_tmp < pt_end)
     {
         split_3to4bytes(
@@ -117,7 +98,7 @@ static Mem_8bits    *encode(Mem_8bits *plaintext, Long_64bits ptByteSz, Long_64b
             bytecode[3] = '=';
         ft_memcpy(hash_tmp, (char *)bytecode, 4);
     }
-    // printf("hash end   (len=%d): >%s<\n", hashlen, hash);
+
     if (ctByteSz)
         *ctByteSz = hashlen;
     return hash;
@@ -125,12 +106,8 @@ static Mem_8bits    *encode(Mem_8bits *plaintext, Long_64bits ptByteSz, Long_64b
 
 static Mem_8bits    *decode(Mem_8bits *ciphertext, Long_64bits ctByteSz, Long_64bits *ptByteSz)
 {
-    // printf("ciphertext encode (len=%d): >%s<\n", ctByteSz, ciphertext);
     clean_base64(ciphertext, &ctByteSz);
-    // printf("ciphertext to decode (len=%d):\n>%s<\n", ctByteSz, ciphertext);
-
-    int hashlen = get_len_decoded(ciphertext, ctByteSz);
-    // printf("hashlen =%d\n", hashlen);
+    int         hashlen = get_len_decoded(ciphertext, ctByteSz);
     Mem_8bits   bytecode[4];
     Mem_8bits   *hash = ft_memnew(hashlen);
     Mem_8bits   *hash_tmp = hash;
@@ -141,21 +118,16 @@ static Mem_8bits    *decode(Mem_8bits *ciphertext, Long_64bits ctByteSz, Long_64
         for (int i = 0; i < 4; i++)
             bytecode[i] = (pt_tmp[i] == '=') ? 0b0 : base64_to_bin(pt_tmp[i]);
 
-        // Create split4to3 func !
-        // printBits(bytecode, 4);
         hash_tmp[0] = bytecode[0] << 2 | bytecode[1] >> 4;
         if (*(pt_tmp + 2) != '=')
             hash_tmp[1] = bytecode[1] << 4 | bytecode[2] >> 2;
         if (*(pt_tmp + 3) != '=')
             hash_tmp[2] = bytecode[2] << 6 | bytecode[3];
-        // printBits(hash_tmp, 3);
-        // printf("hash_tmp: %p\n", hash_tmp);
-        // printf("pt_tmp / pt_end: %p / %p\n", pt_tmp, pt_end);
         hash_tmp += 3;
     }
+
     if (ptByteSz)
         *ptByteSz = hashlen;
-    // printf("hash end   (len=%d):\n>%s<\n", hashlen, hash);
     return hash;
 }
 

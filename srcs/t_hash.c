@@ -58,17 +58,6 @@ inline void t_hash_decode_inputs(t_hash *hash)
 
 inline void t_hash_hashing(t_hash *hash)
 {
-    // EXECONES_COMMANDS commands doesn't need t_hash / any data input. Only one t_hash for printing
-    // if (ssl.command.command & EXECONES_COMMANDS)
-    // {
-    //     if (hash)
-    //     {
-    //         t_hash_free(hash->next);
-    //         hash->next = NULL;
-    //     }
-    //     else
-    //         hash = add_thash_front();
-    // }
     if (ssl.command.command & EXECONES_COMMANDS && !hash)
         hash = add_thash_front();
 

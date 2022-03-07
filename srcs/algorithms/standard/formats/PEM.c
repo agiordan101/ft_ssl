@@ -59,7 +59,6 @@ Mem_8bits           *rsa_PEM_keys_parsing(t_rsa *rsa, Mem_8bits *file_content, i
             der_contentSz -= RSA_PRIVATE_KEY_BANDS_byteSz;
         }
     }
-
     Mem_8bits *der_content = base64(file_content, der_contentSz, (Long_64bits *)fileSz, d);
     rsa_DER_keys_parsing(rsa, der_content, *fileSz, keyflags);
     return der_content;
