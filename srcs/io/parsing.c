@@ -143,7 +143,10 @@ void            command_handler(t_command *command, char *cmd, e_command mask)
     int                 cmd_i = -1;
 
     if (!ft_strcmp(cmd, "help"))
+    {
+        free(cmd);
         print_commands();
+    }
 
     if (!ft_strcmp(cmd, "des"))
         cmd_i = 4;
@@ -154,12 +157,7 @@ void            command_handler(t_command *command, char *cmd, e_command mask)
                 !ft_strcmp(cmd, cmd_names[cmd_i]))
                 break ;
         if (cmd_i == N_COMMANDS)
-        {
-            ft_putstderr("ft_ssl: Error: '");
-            ft_putstderr(cmd);
-            ft_putstderr("' is an invalid command.\n");
-            print_global_usage();
-        }
+            invalid_command(cmd);
     }
     command->command = commands[cmd_i];
     command->command_wrapper = cmd_wrappers[cmd_i];

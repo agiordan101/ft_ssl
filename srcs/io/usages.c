@@ -185,8 +185,12 @@ void    print_commands()
     freexit(EXIT_SUCCESS);
 }
 
-void    print_global_usage()
+void    invalid_command(char *cmd)
 {
+    ft_putstderr("./ft_ssl: '");
+    ft_putstderr(cmd);
+    ft_putstderr("' is an invalid command.\n");
     ft_putstderr("Type './ft_ssl help' for commands list.\n");
+    free(cmd);
     freexit(EXIT_SUCCESS);
 }

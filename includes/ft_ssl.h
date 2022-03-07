@@ -149,7 +149,7 @@ t_hash      *add_thash_front();
 
 void        output(t_hash *hash);
 
-void        print_global_usage();
+void        invalid_command(char *cmd);
 void        print_commands();
 void        print_command_usage(e_command cmd);
 void        freexit(int failure);
