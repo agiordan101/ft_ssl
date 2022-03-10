@@ -138,7 +138,7 @@ static void     print_genrsa_usage()
 
 static void     print_rsa_usage()
 {
-    ft_putstderr("Usage: ./ft_ssl rsa [files] [flags]\n");
+    ft_putstderr("Usage: ./ft_ssl rsa keyfile [flags]\n");
     ft_putstderr("RSA keys visualization.\n\n");
     ft_putstderr("Valid flags are:\n");
     print_command_flags(RSA_flags);
@@ -146,7 +146,7 @@ static void     print_rsa_usage()
 
 static void     print_rsautl_usage()
 {
-    ft_putstderr("Usage: ./ft_ssl rsautl [files] [flags]\n");
+    ft_putstderr("Usage: ./ft_ssl rsautl file [flags]\n");
     ft_putstderr("RSA cryptosystem utilisation.\n\n");
     ft_putstderr("Valid flags are:\n");
     print_command_flags(RSAUTL_flags);

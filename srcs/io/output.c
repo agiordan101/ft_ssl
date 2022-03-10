@@ -43,8 +43,9 @@ void    hash_8bits_output(t_hash *p)
 void    hash_output(t_hash *hash)
 {
     // 64-bytes blocs output is only for base64 format without -A flag
-    if (~ssl.flags & A &&\
-        ((ssl.enc_o_cmd.command & BASE64) || (ssl.enc_o_cmd.command == 0 && ssl.command.command & BASE64)))
+    if (~ssl.flags & A && ssl.flags & e &&\
+        ((ssl.enc_o_cmd.command & BASE64) ||\
+        (ssl.command.command & BASE64 && ssl.enc_o_cmd.command == 0)))
         hash_64bytesbloc_output(hash);
     else if (ssl.enc_o_cmd.command & MD || (ssl.enc_o_cmd.command == 0 && ssl.command.command & MD))
         hash_32bits_output(hash);

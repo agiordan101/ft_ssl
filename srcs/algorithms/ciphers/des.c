@@ -172,7 +172,7 @@ static void             init_vars(t_des *des, Mem_8bits *plaintext, e_flags flag
         des->salt = generate_key();
 
     // A key is generated with pbkdf2 if it's not provided
-    if (!des->key)
+    if (!des->key && ~flags & k)
     {
         // A password is asked if it's not provided
         if (!des->password)

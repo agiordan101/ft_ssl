@@ -249,20 +249,24 @@ void    	        _ft_printHex(Long_64bits n, int totalMemSz, char hexbase[], int
 {
     unsigned char   *mem = (unsigned char *)&n;
 
-    for (int i = totalMemSz - 1; i >= 0; i--)
-    {
-        if (!leading_zero && (mem[i] / 16))
-            leading_zero = 1;
-        if (leading_zero)
-            if (write(ssl.fd_out, hexbase + (mem[i] / 16), 1) == -1)
-                write_failed("write() failed in ft_printHex()", ssl.fd_out);
+    if (n)
+        for (int i = totalMemSz - 1; i >= 0; i--)
+        {
+            if (!leading_zero && (mem[i] / 16))
+                leading_zero = 1;
+            if (leading_zero)
+                if (write(ssl.fd_out, hexbase + (mem[i] / 16), 1) == -1)
+                    write_failed("write() failed in ft_printHex()", ssl.fd_out);
 
-        if (!leading_zero && (mem[i] % 16))
-            leading_zero = 1;
-        if (leading_zero)
-            if (write(ssl.fd_out, hexbase + (mem[i] % 16), 1) == -1)
-                write_failed("write() failed in ft_printHex()", ssl.fd_out);
-    }
+            if (!leading_zero && (mem[i] % 16))
+                leading_zero = 1;
+            if (leading_zero)
+                if (write(ssl.fd_out, hexbase + (mem[i] % 16), 1) == -1)
+                    write_failed("write() failed in ft_printHex()", ssl.fd_out);
+        }
+    else
+        if (write(ssl.fd_out, hexbase, 1) == -1)
+            write_failed("write() failed in ft_printHex()", ssl.fd_out);
 }
 
 inline void	        ft_printHex(Long_64bits n)

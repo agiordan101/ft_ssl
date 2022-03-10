@@ -96,7 +96,7 @@ static Key_64bits   parse_keys_des(char *av_next)
     while (av_next[str_zero_count] == '0') str_zero_count++;
 
     // Count missing half-byte left to remove them (Same as padding zero bytes to length, right)
-    while (!(key & (0xf000000000000000 >> (hex_zero_count * 4)))) hex_zero_count++;
+    while (hex_zero_count < 16 && !(key & (0xf000000000000000 >> (hex_zero_count * 4)))) hex_zero_count++;
 
     // No padding if the right number of zero bytes left is here
     if (hex_zero_count > str_zero_count)
