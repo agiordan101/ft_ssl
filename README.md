@@ -6,7 +6,7 @@ Recode a part of **openssl** library, and additionnal features, **from scratch**
 `usage: ./ft_ssl command [files] [flags]`
 
 A lot of example can be found in *unitests* folder.  
-To launch all these unitests scripts, type:  
+To launch all these unitests scripts *(Only works on linux/ubuntu, NOT MAC OS)*, type :  
     `make test`
 
 **No C libraries used.**  

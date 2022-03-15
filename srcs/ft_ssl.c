@@ -84,7 +84,7 @@ static void    t_ssl_init(t_ssl *ssl)
     srand(time(NULL));
     ft_bzero(ssl, sizeof(t_ssl));
     ssl->fd_out = 1;
-    ssl->ulrandom_path = ft_strdup("/dev/urandom");
+    ssl->ulrandom_path = ft_strdup("/dev/urandom\0\0");
     ssl->ulrandom_fd = -2;      // Arbitrary value, no random file is open
 }
 

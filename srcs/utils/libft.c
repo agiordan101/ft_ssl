@@ -88,23 +88,31 @@ char	*ft_ulltoa(Long_64bits n)
 	return str;
 }
 
-inline int	ft_strlen(char *p)
-{
-    unsigned long long *str = (unsigned long long *)p;
-	int	count = 0;
+// inline int	ft_strlen(char *p)
+// {
+//     unsigned long long *str = (unsigned long long *)p;
+// 	int	count = 0;
 
-    if (str)
-        while (1)
-            if ((++count && !(*str & 0x00000000000000FF)) ||\
-                (++count && !(*str & 0x000000000000FF00)) ||\
-                (++count && !(*str & 0x0000000000FF0000)) ||\
-                (++count && !(*str & 0x00000000FF000000)) ||\
-                (++count && !(*str & 0x000000FF00000000)) ||\
-                (++count && !(*str & 0x0000FF0000000000)) ||\
-                (++count && !(*str & 0x00FF000000000000)) ||\
-                (++count && !(*str++ & 0xFF00000000000000)))
-                return (count - 1);
-    return 0;
+//     if (str)
+//         while (1)
+//             if ((++count && !(*str & 0x00000000000000FF)) ||\
+//                 (++count && !(*str & 0x000000000000FF00)) ||\
+//                 (++count && !(*str & 0x0000000000FF0000)) ||\
+//                 (++count && !(*str & 0x00000000FF000000)) ||\
+//                 (++count && !(*str & 0x000000FF00000000)) ||\
+//                 (++count && !(*str & 0x0000FF0000000000)) ||\
+//                 (++count && !(*str & 0x00FF000000000000)) ||\
+//                 (++count && !(*str++ & 0xFF00000000000000)))
+//                 return (count - 1);
+//     return 0;
+// }
+
+inline int   ft_strlen(char *str)
+{
+	char	*save = str;
+	while (*str++)
+		;
+	return (str - save - 1);
 }
 
 inline char *ft_strdup(char *src)

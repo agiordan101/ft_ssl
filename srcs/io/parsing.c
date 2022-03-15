@@ -234,11 +234,12 @@ static void     param_handler(e_flags flag, char *av_next, int *i)
             ((t_rsa *)ssl.command.command_data)->outform = form;
     }
     else if (flag & inkey)
-        file_handler(
+        if (file_handler(
             av_next,\
             (char **)&((t_rsa *)ssl.command.command_data)->keyfile_data,\
-            &((t_rsa *)ssl.command.command_data)->keyfile_byteSz
-        );
+            &((t_rsa *)ssl.command.command_data)->keyfile_byteSz)
+        )
+            open_failed("-inkey file is invalid.\n", av_next);
     (*i)++;
 }
 

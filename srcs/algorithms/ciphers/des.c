@@ -369,13 +369,21 @@ static Mem_8bits        *des_encryption(t_des *des, Mem_8bits *pt, Long_64bits p
     Long_64bits ciphertext[ptBlocSz];
     Long_64bits *plaintext = (Long_64bits *)pt;
     Long_64bits bloc;
+    int         ptByteSzLeft;
 
     if (flags & nopad && ptByteSz % 8)
         ft_ssl_error("Data not multiple of block length (8 bytes).\n");
 
     for (int i = 0; i < ptBlocSz; i++)
     {
-        bloc = *plaintext;
+        fprintf(stderr, "i=%d/%d\tptByteSz=%d\tptByteSz % 8=%d\tbyteSz=%d\n", i, ptBlocSz, ptByteSz, ptByteSz % 8, ft_strlen(plaintext));
+        ptByteSzLeft = ft_strlen(plaintext);
+        // bloc = *plaintext;
+        ft_bzero(&bloc, LONG64_byteSz);
+        ft_memcpy(&bloc, plaintext, ptByteSzLeft < LONG64_byteSz ? ptByteSzLeft : LONG64_byteSz);
+
+        // printLong(*plaintext);
+        // printMemHex(plaintext, LONG64_byteSz, NULL);
 
         // Padding with number of missing bytes
         if (i == ptBlocSz - 1)

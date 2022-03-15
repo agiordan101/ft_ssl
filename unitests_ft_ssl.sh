@@ -1,6 +1,6 @@
 cd unitests
 
-echo "\nUnitests ft_ssl ->\n"
+echo "\nUnitests ft_ssl (Only works on linux/ubuntu, NOT MAC OS)\n"
 sh unitests_md5.sh ../$1
 echo "\n\n"
 sh unitests_sha256.sh ../$1
