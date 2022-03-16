@@ -39,7 +39,6 @@ Mem_8bits           *rsa(t_rsa *rsa_data, Mem_8bits *key, Long_64bits keyByteSz,
     rsa_data->keyfile_byteSz = keyByteSz;
 
     rsa_parse_key(rsa_data, flags);
-
     if (flags & pubin)
     {
         if (flags & check)

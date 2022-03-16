@@ -18,6 +18,7 @@ static Long_64bits DER_tag_integer_parsing(Mem_8bits *mem, t_dertag *tag)
         return 0;
     }
 
+    // Read 64 bit integer
     Mem_8bits   content[LONG64_byteSz];
     ft_bzero(content, LONG64_byteSz);
     ft_memcpy(content, mem + tag->header_length, tag->content_length);
@@ -44,9 +45,9 @@ static void        DER_tag_parsing(Mem_8bits *mem, t_dertag *tag)
         tag->length_octets_number = 1;
 
     for (
-        int i = 0, hexexp = 1 << ((tag->length_octets_number - 1) * 8);\
+        int i = 0, hexexp = 1 << ((tag->length_octets_number - 1) * LONG64_byteSz);\
         i < tag->length_octets_number;\
-        i++, hexexp >>= 8
+        i++, hexexp >>= LONG64_byteSz
     )
         tag->content_length += mem[i] * hexexp;                 // Sum content length (Concat binary values in big endian)
 

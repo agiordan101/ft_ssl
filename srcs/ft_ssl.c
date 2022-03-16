@@ -53,6 +53,13 @@ static void    t_command_free(t_command *cmd)
     {
         if (cmd->command & DES && ((t_des *)cmd->command_data)->password)
             free(((t_des *)cmd->command_data)->password);
+        if (cmd->command & RSAUTL)
+        {
+            if (((t_rsa *)ssl.command.command_data)->keyfile_data)
+                free(((t_rsa *)ssl.command.command_data)->keyfile_data);
+            if (((t_rsa *)ssl.command.command_data)->der_content)
+                free(((t_rsa *)ssl.command.command_data)->der_content);
+        }
         free(cmd->command_data);
     }
 }

@@ -446,6 +446,19 @@ typedef struct  s_rsa_private_key
     Long_64bits crt_dmq1;        // Chinese remainder theorem pre-computed exponent: d mod (q-1)
     Long_64bits crt_iqmp;        // Chinese remainder theorem pre-computed exponent: (inverse of q) mod p
 }               t_rsa_private_key;
+typedef struct  s_rsa_private_key_bigint
+{
+    Mem_8bits   *version;           // Two primes: 0 / Multi primes: 1
+    Mem_8bits   *modulus;           // n = p * q
+    Mem_8bits   *enc_exp;           // Public exponent e (Default as 1 << 15 + 1 for faster modular exponentiation (Only 2 bits))
+    Mem_8bits   *dec_exp;           // Private exponent d (Modular multiplicative inverse of rsa encryption exponent and Euler fonction)
+    Mem_8bits   *p;                 // prime1
+    Mem_8bits   *q;                 // prime2
+    Mem_8bits   *crt_dmp1;        // Chinese remainder theorem pre-computed exponent: d mod (p-1)
+    Mem_8bits   *crt_dmq1;        // Chinese remainder theorem pre-computed exponent: d mod (q-1)
+    Mem_8bits   *crt_iqmp;        // Chinese remainder theorem pre-computed exponent: (inverse of q) mod p
+}               t_rsa_private_key_bigint;
+# define        RSA_PRIVATE_KEY_INTEGERS_COUNT  (sizeof(t_rsa_private_key) / LONG64_byteSz)
 
 //  RFC 3447: ASN.1 type RSAPublicKey structure
 typedef struct  s_rsa_public_key
@@ -453,20 +466,26 @@ typedef struct  s_rsa_public_key
     Long_64bits modulus;    // n = p * q
     Long_64bits enc_exp;    // Public exponent e (Default as 1 << 15 + 1 for faster modular exponentiation (Only 2 bits))
 }               t_rsa_public_key;
-# define        RSA_PUBLIC_KEY_INTEGERS_COUNT   (sizeof(t_rsa_public_key) / 8)
+typedef struct  s_rsa_public_key_bigint
+{
+    Mem_8bits   *modulus;    // n = p * q
+    Mem_8bits   *enc_exp;    // Public exponent e (Default as 1 << 15 + 1 for faster modular exponentiation (Only 2 bits))
+}               t_rsa_public_key_bigint;
+# define        RSA_PUBLIC_KEY_INTEGERS_COUNT   (sizeof(t_rsa_public_key) / LONG64_byteSz)
 
 typedef struct  s_rsa
 {
-    Mem_8bits           *keyfile_data;
-    int                 keyfile_byteSz;
-    Mem_8bits           *der_content;
-    int                 der_content_byteSz;
-    e_rsa_form          inform;
-    e_rsa_form          outform;
-    t_rsa_private_key   privkey;
-    t_rsa_public_key    pubkey;
+    Mem_8bits               *keyfile_data;      // Keyfile content
+    int                     keyfile_byteSz;
+    Mem_8bits               *der_content;       // Mem malloc of der key
+    int                     der_content_byteSz;
+    e_rsa_form              inform;
+    e_rsa_form              outform;
+    t_rsa_private_key       privkey;
+    t_rsa_public_key        pubkey;
+    t_rsa_private_key_bigint privkey_bigint;
+    t_rsa_public_key_bigint pubkey_bigint;
 }               t_rsa;
-# define        RSA_PRIVATE_KEY_INTEGERS_COUNT  (sizeof(t_rsa_private_key) / 8)
 
 Mem_8bits   *genrsa(t_rsa *rsa_data, Long_64bits *oByteSz, e_flags flags);
 Mem_8bits   *rsa(t_rsa *rsa_data, Mem_8bits *key, Long_64bits keyByteSz, Long_64bits *oByteSz, e_flags flags);
@@ -509,9 +528,9 @@ typedef enum    der_tag
 
 typedef struct  s_dertag
 {
-    Mem_8bits   tag_number;
-    int         length_octets_number;
-    int         header_length;
+    Mem_8bits   tag_number;             // Tag type
+    int         length_octets_number;   // Count of length number
+    int         header_length;          // Main header length
     int         content_length;
     int         total_length;
 }               t_dertag;

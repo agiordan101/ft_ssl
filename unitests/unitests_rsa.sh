@@ -86,8 +86,8 @@ diff ft_ssl_out openssl_out
 
 echo "\nTest 4: Compare ft_ssl and openssl (PEM_privkey to PEM_pubkey with 2 ft_ssl rsa: DES encryption/decryption and DER format between) ->"
 # Fourth test (DES encryption / decryption of RSA keys)
-./ft_ssl rsa -i PEM_privkey -outform DER -pubout -encout des-ecb -passout pwdpwd |\
-./ft_ssl rsa -inform DER -pubin -decin des-ecb -passin pwdpwd -o ft_ssl_out
+./ft_ssl rsa -i PEM_privkey -outform DER -pubout -encout base64 |\
+./ft_ssl rsa -inform DER -pubin -decin base64 -o ft_ssl_out
 openssl rsa -in PEM_privkey -pubout -out openssl_out
 diff ft_ssl_out openssl_out
 

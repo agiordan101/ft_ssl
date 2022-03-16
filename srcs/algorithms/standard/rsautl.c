@@ -2,9 +2,6 @@
 
 Mem_8bits           *rsautl(t_rsa *rsa_data, Long_64bits input, Long_64bits *oByteSz, e_flags flags)
 {
-    /*
-        Nobody chain rsa encryption. Prefer encryption with AES/DES and AES/DES key encrypted with RSA
-    */
     Long_64bits output;
     int         _hashByteSz;
 
@@ -35,6 +32,12 @@ Mem_8bits           *rsautl(t_rsa *rsa_data, Long_64bits input, Long_64bits *oBy
 
 Mem_8bits   *cmd_wrapper_rsautl(void *cmd_data, Mem_8bits **input, Long_64bits iByteSz, Long_64bits *oByteSz, e_flags flags)
 {
+    /*
+        Nobody chain rsa encryption. Prefer encryption with AES/DES and AES/DES key encrypted with RSA
+    */
+    Long_64bits m;
+    ft_bzero(&m, LONG64_byteSz);
+    ft_memcpy(&m, *input, iByteSz < LONG64_byteSz ? iByteSz : LONG64_byteSz);
     (void)iByteSz;
-    return rsautl((t_rsa *)cmd_data, *((Long_64bits *)*input), oByteSz, flags);
+    return rsautl((t_rsa *)cmd_data, m, oByteSz, flags);
 }
