@@ -153,6 +153,8 @@ void        invalid_command(char *cmd);
 void        print_commands();
 void        print_command_usage(e_command cmd);
 void        freexit(int failure);
+void        ssl_free();
+
 
 void        ft_ssl_error(char *errormsg);
 void        unrecognized_flag(char *flag);
@@ -458,6 +460,18 @@ typedef struct  s_rsa_private_key_bigint
     Mem_8bits   *crt_dmq1;        // Chinese remainder theorem pre-computed exponent: d mod (q-1)
     Mem_8bits   *crt_iqmp;        // Chinese remainder theorem pre-computed exponent: (inverse of q) mod p
 }               t_rsa_private_key_bigint;
+typedef struct  s_rsa_private_key_bigint_byteSz
+{
+    int         version_byteSz;
+    int         modulus_byteSz;
+    int         enc_exp_byteSz;
+    int         dec_exp_byteSz;
+    int         p_byteSz;
+    int         q_byteSz;
+    int         crt_dmp1_byteSz;
+    int         crt_dmq1_byteSz;
+    int         crt_iqmp_byteSz;
+}               t_rsa_private_key_bigint_byteSz;
 # define        RSA_PRIVATE_KEY_INTEGERS_COUNT  (sizeof(t_rsa_private_key) / LONG64_byteSz)
 
 //  RFC 3447: ASN.1 type RSAPublicKey structure
@@ -483,8 +497,9 @@ typedef struct  s_rsa
     e_rsa_form              outform;
     t_rsa_private_key       privkey;
     t_rsa_public_key        pubkey;
-    t_rsa_private_key_bigint privkey_bigint;
-    t_rsa_public_key_bigint pubkey_bigint;
+    t_rsa_private_key_bigint        privkey_bigint;
+    t_rsa_public_key_bigint         pubkey_bigint;
+    t_rsa_private_key_bigint_byteSz privkey_bigint_byteSz;
 }               t_rsa;
 
 Mem_8bits   *genrsa(t_rsa *rsa_data, Long_64bits *oByteSz, e_flags flags);
@@ -503,6 +518,7 @@ Long_64bits rsa_decryption(t_rsa_private_key *privkey, Long_64bits ciphertext);
 int         rsa_consistency_pubkey(t_rsa_public_key *pubkey);
 int         rsa_consistency_privkey(t_rsa_private_key *privkey);
 
+Mem_8bits   *DER_generate_public_key_bigint(Mem_8bits *modulus, int modulus_byteSz, Mem_8bits *enc_exp, int enc_exp_byteSz, int *hashByteSz);
 Mem_8bits   *rsa_PEM_keys_parsing(t_rsa *rsa, Mem_8bits *file_content, int *fileSz, e_flags keyflags);
 Mem_8bits   *rsa_DER_keys_parsing(t_rsa *rsa, Mem_8bits *file_content, int fileSz, e_flags keyflag);
 

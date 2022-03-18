@@ -47,45 +47,6 @@ char        *ask_password(char *cmd_name, e_flags flags)
     return password;
 }
 
-static void    t_command_free(t_command *cmd)
-{
-    if (cmd->command_data)
-    {
-        if (cmd->command & DES && ((t_des *)cmd->command_data)->password)
-            free(((t_des *)cmd->command_data)->password);
-        if (cmd->command & RSAUTL)
-        {
-            if (((t_rsa *)ssl.command.command_data)->keyfile_data)
-                free(((t_rsa *)ssl.command.command_data)->keyfile_data);
-            if (((t_rsa *)ssl.command.command_data)->der_content)
-                free(((t_rsa *)ssl.command.command_data)->der_content);
-        }
-        free(cmd->command_data);
-    }
-}
-
-static void    ssl_free()
-{
-    t_command_free(&ssl.dec_i_cmd);
-    t_command_free(&ssl.command);
-    t_command_free(&ssl.enc_o_cmd);
-
-    t_hash_list_free(ssl.hash);
-
-    free(ssl.ulrandom_path);
-    if (ssl.ulrandom_fd > 0)
-        close(ssl.ulrandom_fd);
-
-    if (ssl.flags & o)
-        close(ssl.fd_out);
-}
-
-void          freexit(int exit_state)
-{
-    ssl_free();
-    exit(exit_state);
-}
-
 static void    t_ssl_init(t_ssl *ssl)
 {
     srand(time(NULL));

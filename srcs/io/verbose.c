@@ -71,10 +71,10 @@ void    printMemHex(void *p, int size, char *msg)
         fprintf(stderr, "\nPrint mem HEX (len=%d) >%s<\n", size, mem);
     for (int i = 0; i < size; i++)
     {
-        if (mem[i] < 0x10)
-            fprintf(stderr, "0%x", mem[i]);
-        else
-            fprintf(stderr, "%x", mem[i]);
+        // if (mem[i] < 0x10)
+        //     fprintf(stderr, "0%x", mem[i]);
+        // else
+        fprintf(stderr, "%x", mem[i]);
         if ((i + 1) % 4 == 0)
             fprintf(stderr, " ");
     }

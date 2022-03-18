@@ -22,8 +22,8 @@ void                rsa_keys_generation(t_rsa *rsa)
 
     if (!rsa->privkey.p)
         rsa->privkey.p = prime_generator(1UL<<10, 1UL<<32, 1);
-    if (!rsa->privkey.q)
-        rsa->privkey.q = prime_generator(1UL<<10, 1UL<<31, 1);
+    while (!rsa->privkey.q || ulmult_overflow(rsa->privkey.p, rsa->privkey.q))
+        rsa->privkey.q = prime_generator(1UL<<10, 1UL<<32, 1);
 
     rsa->privkey.modulus = rsa->privkey.p * rsa->privkey.q;
 

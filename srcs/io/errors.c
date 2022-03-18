@@ -152,7 +152,6 @@ void    rsa_keys_integer_size_error(int byteSz)
     ft_putstderr(": Cannot read ");
     ft_putnbrfd(STDERR, byteSz * 8);
     ft_putstderr(" bits integers (64 bits maximum)\n");
-    freexit(EXIT_SUCCESS);
 }
 
 void    rsa_parsing_keys_error(e_flags privpubin, e_flags inform, char *errormsg, int value)

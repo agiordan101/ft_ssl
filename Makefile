@@ -1,8 +1,7 @@
 NAME		=	ft_ssl
 
 CC			=	gcc
-# CFLAGS		+=	-O3
-CFLAGS		+=	-O3 -g3 -fsanitize=address
+CFLAGS		+=	-O3
 
 INC_PATH	=	./includes/
 INCLUDES	=	$(NAME).h
@@ -16,6 +15,7 @@ SRC			=	$(NAME).c \
 				io/errors.c \
 				io/output.c \
 				utils/libft.c \
+				utils/free.c \
 				calculations/maths.c \
 				calculations/bitwise.c \
 				algorithms/padding.c \
@@ -74,7 +74,6 @@ fclean: clean
 
 test: all
 	@sh unitests_ft_ssl.sh Makefile || echo "Unitests script 'unitests_ft_ssl.sh' not found"
-	# @sh unitests_ft_ssl.sh ft_ssl || echo "Unitests script 'unitests_ft_ssl.sh' not found"
 
 re: fclean all  
 

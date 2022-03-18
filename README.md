@@ -69,6 +69,7 @@ Standard commands
 
 * rsa  
     `./ft_ssl genrsa | ./ft_ssl rsa -text -check`
+    `openssl genrsa | ./ft_ssl rsa -pubout | openssl rsa -pubin -text`
 
 * rsautl  
     `echo -n "1234" | ./ft_ssl rsautl -inkey PEM_pubkey -pubin -q | ./ft_ssl rsautl -inkey PEM_privkey -d`

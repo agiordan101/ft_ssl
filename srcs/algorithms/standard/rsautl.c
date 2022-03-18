@@ -13,14 +13,12 @@ Mem_8bits           *rsautl(t_rsa *rsa_data, Long_64bits input, Long_64bits *oBy
     {
         if (!rsa_consistency_pubkey(&rsa_data->pubkey))
             ft_ssl_error("encryption: RSA Public-Key provided is not valid.\n");
-
         output = rsa_encryption(&rsa_data->pubkey, input);
     }
     else
     {
         if (!rsa_consistency_privkey(&rsa_data->privkey))
             ft_ssl_error("decryption: RSA Private-Key provided is not valid.\n");
-
         output = rsa_decryption(&rsa_data->privkey, input);
     }
 
@@ -38,6 +36,5 @@ Mem_8bits   *cmd_wrapper_rsautl(void *cmd_data, Mem_8bits **input, Long_64bits i
     Long_64bits m;
     ft_bzero(&m, LONG64_byteSz);
     ft_memcpy(&m, *input, iByteSz < LONG64_byteSz ? iByteSz : LONG64_byteSz);
-    (void)iByteSz;
     return rsautl((t_rsa *)cmd_data, m, oByteSz, flags);
 }

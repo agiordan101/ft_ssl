@@ -62,7 +62,13 @@ Mem_8bits           *rsa(t_rsa *rsa_data, Mem_8bits *key, Long_64bits keyByteSz,
             rsa_data->pubkey.enc_exp = rsa_data->privkey.enc_exp;
             rsa_data->pubkey.modulus = rsa_data->privkey.modulus;
             free(rsa_data->der_content);
-            rsa_data->der_content = DER_generate_public_key(&rsa_data->pubkey, &rsa_data->der_content_byteSz);
+            rsa_data->der_content = rsa_data->pubkey.modulus ?\
+                DER_generate_public_key(&rsa_data->pubkey, &rsa_data->der_content_byteSz) :\
+                DER_generate_public_key_bigint(
+                    rsa_data->privkey_bigint.modulus, rsa_data->privkey_bigint_byteSz.modulus_byteSz,\
+                    rsa_data->privkey_bigint.enc_exp, rsa_data->privkey_bigint_byteSz.enc_exp_byteSz,\
+                    &rsa_data->der_content_byteSz
+                );
         }
         if (flags & modulus)
         {
