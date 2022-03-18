@@ -376,14 +376,9 @@ static Mem_8bits        *des_encryption(t_des *des, Mem_8bits *pt, Long_64bits p
 
     for (int i = 0; i < ptBlocSz; i++)
     {
-        // fprintf(stderr, "i=%d/%d\tptByteSz=%ld\tptByteSz %% 8=%ld\tbyteSz=%d\n", i, ptBlocSz, ptByteSz, ptByteSz % 8, ft_strlen((Mem_8bits *)plaintext));
         ptByteSzLeft = ft_strlen((Mem_8bits *)plaintext);
-        // bloc = *plaintext;
         ft_bzero(&bloc, LONG64_byteSz);
         ft_memcpy(&bloc, plaintext, ptByteSzLeft < LONG64_byteSz ? ptByteSzLeft : LONG64_byteSz);
-
-        // printLong(*plaintext);
-        // printMemHex(plaintext, LONG64_byteSz, NULL);
 
         // Padding with number of missing bytes
         if (i == ptBlocSz - 1)

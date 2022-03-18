@@ -111,8 +111,6 @@ inline Mem_8bits   *rsa_DER_keys_parsing(t_rsa *rsa, Mem_8bits *file_content, in
         ft_memcpy(&rsa->privkey, integers, sizeof(t_rsa_private_key));
         ft_memcpy(&rsa->privkey_bigint, bigints, sizeof(t_rsa_private_key_bigint));
         ft_memcpy(&rsa->privkey_bigint_byteSz, bigints_byteSz, sizeof(t_rsa_private_key_bigint_byteSz));
-        // for (int i = 0; i < RSA_PRIVATE_KEY_INTEGERS_COUNT; i++)
-        //     fprintf(stderr, "bigints_byteSz[%d]=%d\n", i, bigints_byteSz[i]);
     }
     return file_content;
 }
@@ -123,16 +121,9 @@ inline Mem_8bits   *rsa_DER_keys_parsing(t_rsa *rsa, Mem_8bits *file_content, in
 
 Mem_8bits          *DER_generate_public_key_bigint(Mem_8bits *modulus, int modulus_byteSz, Mem_8bits *enc_exp, int enc_exp_byteSz, int *hashByteSz)
 {
-    // printMemHex(modulus, modulus_byteSz, NULL);
-    // printMemHex(enc_exp, enc_exp_byteSz, NULL);
-
     modulus_byteSz++;       // Add leading zero
-    // int modulus_length_byteSz = modulus_byteSz / 0x80 + 1;       // Byte-length count
-    // int modulus_header_byteSz = modulus_length_byteSz + 1;         // Byte-length count + tag number
     int modulus_header_byteSz = modulus_byteSz / 0x80 + 2;         // Byte-length count + tag number + 00 byte (leading zero)
 
-    // int enc_exp_length_byteSz = enc_exp_byteSz / 0x80 + 1;
-    // int enc_exp_header_byteSz = enc_exp_length_byteSz + 1;
     int enc_exp_header_byteSz = enc_exp_byteSz / 0x80 + 2;
 
     int ints_sequence_length = enc_exp_header_byteSz + enc_exp_byteSz + modulus_header_byteSz + modulus_byteSz;                 // Add their header length
@@ -145,19 +136,6 @@ Mem_8bits          *DER_generate_public_key_bigint(Mem_8bits *modulus, int modul
     int key_sequence_header_byteSz = key_sequence_length / 0x80 + 2;
 
     *hashByteSz = key_sequence_header_byteSz + key_sequence_length;                                      // +2 to add first header length
-
-    // fprintf(stderr, "*hashByteSz: %x\n", *hashByteSz);
-    // fprintf(stderr, "key_sequence_header_byteSz: %x\n", key_sequence_header_byteSz);
-    // fprintf(stderr, "key_sequence_length: %x\n", key_sequence_length);
-    // fprintf(stderr, "DER_OID_SEQUENCE_bytes_byteSz: %lx\n", DER_OID_SEQUENCE_bytes_byteSz);
-    // fprintf(stderr, "bit_string_header_byteSz: %x\n", bit_string_header_byteSz);
-    // fprintf(stderr, "bit_string_length: %x\n", bit_string_length);
-    // fprintf(stderr, "ints_sequence_header_byteSz: %x\n", ints_sequence_header_byteSz);
-    // fprintf(stderr, "ints_sequence_length: %x\n", ints_sequence_length);
-    // fprintf(stderr, "modulus_header_byteSz: %x\n", modulus_header_byteSz);
-    // fprintf(stderr, "modulus_byteSz: %x\n", modulus_byteSz);
-    // fprintf(stderr, "enc_exp_header_byteSz: %x\n", enc_exp_header_byteSz);
-    // fprintf(stderr, "enc_exp_byteSz: %x\n", enc_exp_byteSz);
 
     Mem_8bits DER_pubkey[*hashByteSz];
     ft_bzero(DER_pubkey, *hashByteSz);
@@ -201,8 +179,6 @@ Mem_8bits          *DER_generate_public_key_bigint(Mem_8bits *modulus, int modul
         DER_pubkey[der_i++] = ints_sequence_length % 0x100;
     }
 
-    // printBits(DER_pubkey, *hashByteSz);
-
     // Write modulus
     DER_pubkey[der_i++] = der_integer;
     if (modulus_byteSz < 0x80)
@@ -219,25 +195,11 @@ Mem_8bits          *DER_generate_public_key_bigint(Mem_8bits *modulus, int modul
     ft_memcpy(DER_pubkey + der_i, modulus, modulus_byteSz);
     der_i += modulus_byteSz - 1;        //Leading zero already add to der_i
 
-    // printBits(DER_pubkey, *hashByteSz);
-    // fprintf(stderr, "der_i: %x\n", der_i);
-
     // Write public exponent
     DER_pubkey[der_i++] = der_integer;
     DER_pubkey[der_i++] = enc_exp_byteSz;
     ft_memcpy(DER_pubkey + der_i, enc_exp, enc_exp_byteSz);
-    // if (enc_exp_byteSz < 0x80)
-    // {
-    // }
-    // else
-    // {
-    //     DER_pubkey[der_i++] = 0x80 | (enc_exp_byteSz / 0x100 + 1);
-    //     DER_pubkey[der_i++] = enc_exp_byteSz;
-    //     ft_memcpy(DER_pubkey + der_i, enc_exp, enc_exp_byteSz);
-    // }
 
-    // printBits(DER_pubkey, *hashByteSz);
-    // printMemHex(DER_pubkey, *hashByteSz, NULL);
     return ft_memdup(DER_pubkey, *hashByteSz);
 }
 

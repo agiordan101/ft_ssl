@@ -2,6 +2,7 @@ NAME		=	ft_ssl
 
 CC			=	gcc
 CFLAGS		+=	-O3
+# CFLAGS		+=	-O3 -g3 -fsanitize=address
 
 INC_PATH	=	./includes/
 INCLUDES	=	$(NAME).h
